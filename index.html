@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s 심화 과정 - 학습 관리</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">K8s 심화 과정</h1>
+            <nav class="nav">
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link active">홈</a></li>
+                    <li><a href="#environment" class="nav-link">실습환경</a></li>
+                    <li><a href="#basics" class="nav-link">기초이론</a></li>
+                    <li><a href="#security" class="nav-link">인증/보안</a></li>
+                    <li><a href="#operator" class="nav-link">Operator</a></li>
+                    <li><a href="#labs" class="nav-link">실습</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="home" class="section active">
+            <div class="container">
+                <h2>환영합니다</h2>
+                <p>Kubernetes 심화 과정 학습 관리 사이트입니다.</p>
+                <div class="info-box">
+                    <p>상단 메뉴를 통해 학습 내용을 확인하세요.</p>
+                    <p>학습 자료와 실습 가이드는 Markdown 파일로 관리됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="environment" class="section">
+            <div class="container">
+                <h2>실습 환경 구성</h2>
+                <div class="resource-tabs">
+                    <button class="tab-btn active" data-md="10-lab-environment">환경구성</button>
+                    <button class="tab-btn" data-md="11-lab-addon-install">Add-on 설치</button>
+                </div>
+                <div id="environment-content" class="markdown-body"></div>
+            </div>
+        </section>
+
+        <section id="basics" class="section">
+            <div class="container">
+                <h2>기초 이론</h2>
+                <div class="resource-tabs">
+                    <button class="tab-btn active" data-md="01-kubectl">kubectl</button>
+                    <button class="tab-btn" data-md="02-k8s-resources">리소스맵</button>
+                    <button class="tab-btn" data-md="03-k8s-components">컴포넌트</button>
+                    <button class="tab-btn" data-md="08-pet-vs-cattle">Pet/Cattle</button>
+                    <button class="tab-btn" data-md="09-statefulset-pet">StatefulSet</button>
+                    <button class="tab-btn" data-md="12-headless-service">Headless</button>
+                    <button class="tab-btn" data-md="04-addon-concept">Add-on</button>
+                    <button class="tab-btn" data-md="07-helm">Helm</button>
+                    <button class="tab-btn" data-md="42-crd-guide">CRD</button>
+                </div>
+                <div id="basics-content" class="markdown-body"></div>
+            </div>
+        </section>
+
+        <section id="security" class="section">
+            <div class="container">
+                <h2>인증 및 보안</h2>
+                <div class="resource-tabs">
+                    <button class="tab-btn active" data-md="14-symmetric-asymmetric-key">암호기초</button>
+                    <button class="tab-btn" data-md="15-ca-and-root-ca">CA</button>
+                    <button class="tab-btn" data-md="16-pki-and-x509">PKI</button>
+                    <button class="tab-btn" data-md="17-csr-and-certificate-request">CSR</button>
+                    <button class="tab-btn" data-md="18-certificate-trust-communication">신뢰통신</button>
+                    <button class="tab-btn" data-md="19-ssl-operation-procedure">SSL</button>
+                    <button class="tab-btn" data-md="20-authentication-and-authorization">인증/인가</button>
+                    <button class="tab-btn" data-md="21-api-server-plugins">API 플러그인</button>
+                    <button class="tab-btn" data-md="22-human-and-machine-user">Human/Machine</button>
+                    <button class="tab-btn" data-md="23-kubernetes-root-ca">K8s RootCA</button>
+                    <button class="tab-btn" data-md="24-certificate-locations">인증서위치</button>
+                    <button class="tab-btn" data-md="25-kubeadm-init-certificates">kubeadm</button>
+                    <button class="tab-btn" data-md="26-certificate-expiration-check">인증서만료</button>
+                    <button class="tab-btn" data-md="30-mutual-tls-authentication">mTLS</button>
+                    <button class="tab-btn" data-md="32-http-basic-authentication">Basic Auth</button>
+                    <button class="tab-btn" data-md="33-webhook-token-auth">Webhook</button>
+                    <button class="tab-btn" data-md="36-openid-connect-concept">OIDC</button>
+                    <button class="tab-btn" data-md="37-oauth2-concept">OAuth2</button>
+                    <button class="tab-btn" data-md="38-keycloak-iam">Keycloak</button>
+                    <button class="tab-btn" data-md="35-multi-cluster-access-lab">멀티클러스터</button>
+                </div>
+                <div id="security-content" class="markdown-body"></div>
+            </div>
+        </section>
+
+        <section id="operator" class="section">
+            <div class="container">
+                <h2>Operator</h2>
+                <div class="resource-tabs">
+                    <button class="tab-btn active" data-md="43-operator-development">Operator 개발</button>
+                    <button class="tab-btn" data-md="44-operator-and-cr-relationship">Operator 와 CR</button>
+                    <button class="tab-btn" data-md="45-prometheus-grafana-operator-install">Prometheus/Grafana</button>
+                </div>
+                <div id="operator-content" class="markdown-body"></div>
+            </div>
+        </section>
+
+        <section id="labs" class="section">
+            <div class="container">
+                <h2>실습 가이드</h2>
+                <div class="resource-tabs">
+                    <button class="tab-btn active" data-md="20-metric-server-yaml">Metric Server</button>
+                    <button class="tab-btn" data-md="21-kubernetes-dashboard-yaml">Dashboard</button>
+                    <button class="tab-btn" data-md="22-metallb-yaml">MetalLB</button>
+                    <button class="tab-btn" data-md="23-ingress-nginx-yaml">Ingress-NGINX</button>
+                    <button class="tab-btn" data-md="24-nfs-provisioner-yaml">NFS Provisioner</button>
+                    <button class="tab-btn" data-md="31-client-cert-auth-lab">Client Cert</button>
+                    <button class="tab-btn" data-md="40-kubectl-plugin">kubectl plugin</button>
+                    <button class="tab-btn" data-md="41-krew-guide">Krew</button>
+                </div>
+                <div id="labs-content" class="markdown-body"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 K8s 심화 과정</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
