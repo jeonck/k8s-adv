@@ -69,26 +69,42 @@
             <div class="container">
                 <h2>인증 및 보안</h2>
                 <div class="resource-tabs">
-                    <button class="tab-btn active" data-md="14-symmetric-asymmetric-key">암호기초</button>
-                    <button class="tab-btn" data-md="15-ca-and-root-ca">CA</button>
-                    <button class="tab-btn" data-md="16-pki-and-x509">PKI</button>
-                    <button class="tab-btn" data-md="17-csr-and-certificate-request">CSR</button>
-                    <button class="tab-btn" data-md="18-certificate-trust-communication">신뢰통신</button>
-                    <button class="tab-btn" data-md="19-ssl-operation-procedure">SSL</button>
-                    <button class="tab-btn" data-md="20-authentication-and-authorization">인증/인가</button>
-                    <button class="tab-btn" data-md="21-api-server-plugins">API 플러그인</button>
-                    <button class="tab-btn" data-md="22-human-and-machine-user">Human/Machine</button>
-                    <button class="tab-btn" data-md="23-kubernetes-root-ca">K8s RootCA</button>
-                    <button class="tab-btn" data-md="24-certificate-locations">인증서위치</button>
-                    <button class="tab-btn" data-md="25-kubeadm-init-certificates">kubeadm</button>
-                    <button class="tab-btn" data-md="26-certificate-expiration-check">인증서만료</button>
-                    <button class="tab-btn" data-md="30-mutual-tls-authentication">mTLS</button>
-                    <button class="tab-btn" data-md="32-http-basic-authentication">Basic Auth</button>
-                    <button class="tab-btn" data-md="33-webhook-token-auth">Webhook</button>
-                    <button class="tab-btn" data-md="36-openid-connect-concept">OIDC</button>
-                    <button class="tab-btn" data-md="37-oauth2-concept">OAuth2</button>
-                    <button class="tab-btn" data-md="38-keycloak-iam">Keycloak</button>
-                    <button class="tab-btn" data-md="35-multi-cluster-access-lab">멀티클러스터</button>
+                    <!-- 기초 이론 -->
+                    <button class="tab-btn active" data-md="13-crypto-basic-keys">암호기초</button>
+                    <button class="tab-btn" data-md="14-ca-and-root-ca">CA 원리</button>
+                    <button class="tab-btn" data-md="15-pki-and-x509">PKI/X.509</button>
+                    <button class="tab-btn" data-md="16-csr-and-workflow">CSR 워크플로우</button>
+                    <button class="tab-btn" data-md="17-ssl-handshake-process">SSL 핸드셰이크</button>
+                    <button class="tab-btn" data-md="18-cert-trust-chain">신뢰 체인</button>
+                    
+                    <!-- K8s 구조 -->
+                    <button class="tab-btn" data-md="19-k8s-security-overview">K8s 보안구조</button>
+                    <button class="tab-btn" data-md="20-api-server-auth-plugins">인증 플러그인</button>
+                    <button class="tab-btn" data-md="21-user-vs-serviceaccount">User/SA 계정</button>
+                    
+                    <!-- 인증서 실무 -->
+                    <button class="tab-btn" data-md="22-k8s-root-ca-internal">K8s Root CA</button>
+                    <button class="tab-btn" data-md="23-k8s-cert-file-locations">인증서 위치</button>
+                    <button class="tab-btn" data-md="24-kubeadm-cert-management">kubeadm 관리</button>
+                    <button class="tab-btn" data-md="25-static-pod-auth-config">Static Pod 설정</button>
+                    <button class="tab-btn" data-md="26-inspect-cert-info-1">인증서 확인(1)</button>
+                    <button class="tab-btn" data-md="27-inspect-cert-info-2">인증서 확인(2)</button>
+                    <button class="tab-btn" data-md="28-cert-expiration-and-renew">만료 및 갱신</button>
+                    
+                    <!-- 인증 실습 -->
+                    <button class="tab-btn" data-md="29-client-cert-auth-concept">Cert 인증원리</button>
+                    <button class="tab-btn" data-md="30-mtls-communication">mTLS 통신</button>
+                    <button class="tab-btn" data-md="31-lab-client-cert-auth">인증서 실습</button>
+                    <button class="tab-btn" data-md="32-http-basic-auth-deprecated">Basic Auth</button>
+                    <button class="tab-btn" data-md="33-webhook-token-auth-concept">Webhook 원리</button>
+                    <button class="tab-btn" data-md="34-lab-webhook-auth-setup">Webhook 실습</button>
+                    
+                    <!-- 고급 IAM -->
+                    <button class="tab-btn" data-md="35-lab-multi-cluster-config">멀티클러스터</button>
+                    <button class="tab-btn" data-md="36-oauth2-fundamentals">OAuth2 기초</button>
+                    <button class="tab-btn" data-md="37-oidc-on-kubernetes">OIDC 통합</button>
+                    <button class="tab-btn" data-md="38-keycloak-setup-guide">Keycloak 설치</button>
+                    <button class="tab-btn" data-md="39-lab-k8s-keycloak-oidc">Keycloak 실습</button>
                 </div>
                 <div id="security-content" class="markdown-body"></div>
             </div>
@@ -115,8 +131,7 @@
                     <button class="tab-btn" data-md="22-metallb-yaml">MetalLB</button>
                     <button class="tab-btn" data-md="23-ingress-nginx-yaml">Ingress-NGINX</button>
                     <button class="tab-btn" data-md="24-nfs-provisioner-yaml">NFS Provisioner</button>
-                    <button class="tab-btn" data-md="31-client-cert-auth-lab">Client Cert</button>
-                    <button class="tab-btn" data-md="40-kubectl-plugin">kubectl plugin</button>
+                    <button class="tab-btn" data-md="40-kubectl-plugin-guide">kubectl plugin</button>
                     <button class="tab-btn" data-md="41-krew-guide">Krew</button>
                 </div>
                 <div id="labs-content" class="markdown-body"></div>
