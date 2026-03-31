@@ -208,121 +208,51 @@ TLS (Transport Layer Security):
 
 ### TLS 1.2 핸드셰이크 (전통적 방식)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              TLS 1.2 핸드셰이크                             │
-└─────────────────────────────────────────────────────────────┘
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant C as 클라이언트
+    participant S as 서버
 
-클라이언트                              서버
-   │                                      │
-   │  1. ClientHello                      │
-   │  - TLS 버전 (1.2)                    │
-   │  - Client Random (32 바이트)         │
-   │  - Session ID                        │
-   │  - Cipher Suites (목록)              │
-   │  - Compression Methods               │
-   │  - Extensions (SNI, ALPN, etc.)      │
-   │─────────────────────────────────────▶│
-   │                                      │
-   │  2. ServerHello                      │
-   │  - TLS 버전 (선택)                   │
-   │  - Server Random (32 바이트)         │
-   │  - Session ID                        │
-   │  - Cipher Suite (선택)               │
-   │  - Compression Method                │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  3. Certificate                      │
-   │  - 서버 인증서                       │
-   │  - CA 체인                           │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  4. ServerKeyExchange (선택)         │
-   │  - 키 교환 추가 정보                 │
-   │  - DHE/ECDHE 파라미터                │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  5. ServerHelloDone                  │
-   │  - "내 준비 끝"                      │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  6. ClientKeyExchange                │
-   │  - Premaster Secret                  │
-   │  - 서버 공개키로 암호화              │
-   │─────────────────────────────────────▶│
-   │                                      │
-   │  7. ChangeCipherSpec                 │
-   │  - "이제부터 암호화!"                │
-   │─────────────────────────────────────▶│
-   │                                      │
-   │  8. Finished (암호화)                │
-   │  - 핸드셰이크 해시                   │
-   │  - Session Key 로 암호화             │
-   │─────────────────────────────────────▶│
-   │                                      │
-   │  9. ChangeCipherSpec                 │
-   │  - "나도 암호화!"                    │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  10. Finished (암호화)               │
-   │  - 핸드셰이크 해시                   │
-   │  - Session Key 로 암호화             │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  ✓ 핸드셰이크 완료                   │
-   │  Application Data (암호화 통신)      │
-   │◀════════════════════════════════════▶│
-   └──────────────────────────────────────┘
+    Note over C,S: TCP 연결 완료 (SYN, SYN-ACK, ACK)
 
-총 10 단계, 2 RTT (Round Trip Time)
-```
+    C->>S: ClientHello (TLS 1.2, Random, Cipher Suites)
+    S->>C: ServerHello (TLS 1.2, Random, Selected Cipher)
+    S->>C: Certificate (서버 인증서 & CA 체인)
+    S->>C: ServerKeyExchange (DHE/ECDHE 파라미터)
+    S->>C: ServerHelloDone
+
+    C->>S: ClientKeyExchange (암호화된 Premaster Secret)
+    C->>S: ChangeCipherSpec (이제부터 암호화!)
+    C->>S: Finished (핸드셰이크 검증)
+
+    S->>C: ChangeCipherSpec (나도 암호화!)
+    S->>C: Finished (핸드셰이크 검증)
+
+    Note over C,S: 핸드셰이크 완료 (2 RTT)
+    C<->>S: Application Data (암호화 통신 시작)
+</div>
 
 ### TLS 1.3 핸드셰이크 (최신, 단순화)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              TLS 1.3 핸드셰이크                             │
-└─────────────────────────────────────────────────────────────┘
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant C as 클라이언트
+    participant S as 서버
 
-클라이언트                              서버
-   │                                      │
-   │  1. ClientHello                      │
-   │  - TLS 1.3                           │
-   │  - Client Random                     │
-   │  - Cipher Suites                     │
-   │  - Key Share (클라이언트 공개키)     │
-   │─────────────────────────────────────▶│
-   │                                      │
-   │  2. ServerHello                      │
-   │  - TLS 1.3                           │
-   │  - Server Random                     │
-   │  - Cipher Suite (선택)               │
-   │  - Key Share (서버 공개키)           │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  3. Certificate                      │
-   │  - 서버 인증서                       │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  4. CertificateVerify                │
-   │  - 인증서 서명 검증                  │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  5. Finished (암호화)                │
-   │  - 핸드셰이크 해시                   │
-   │◀─────────────────────────────────────│
-   │                                      │
-   │  6. Finished (암호화)                │
-   │  - 핸드셰이크 해시                   │
-   │─────────────────────────────────────▶│
-   │                                      │
-   │  ✓ 핸드셰이크 완료                   │
-   │  Application Data (암호화 통신)      │
-   │◀════════════════════════════════════▶│
-   └──────────────────────────────────────┘
+    Note over C,S: TCP 연결 완료
 
-총 6 단계, 1 RTT (더 빠름!)
-```
+    C->>S: ClientHello (TLS 1.3, Random, Key Share)
+    S->>C: ServerHello (Selected Cipher, Key Share)
+    S->>C: Certificate & CertificateVerify
+    S->>C: Finished
+    
+    C->>S: Finished
+
+    Note over C,S: 핸드셰이크 완료 (1 RTT!)
+    C<->>S: Application Data (암호화 통신 시작)
+</div>
 
 ### TLS 1.3 vs 1.2 비교
 

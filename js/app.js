@@ -1,3 +1,6 @@
+// Mermaid 초기화 설정
+mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
 // Markdown 파일 로드 함수
 async function loadMarkdown(filePath, elementId) {
     try {
@@ -7,7 +10,14 @@ async function loadMarkdown(filePath, elementId) {
         }
         const markdown = await response.text();
         const html = marked.parse(markdown);
-        document.getElementById(elementId).innerHTML = html;
+        const contentElement = document.getElementById(elementId);
+        contentElement.innerHTML = html;
+        
+        // Mermaid 다이어그램 렌더링
+        await mermaid.run({
+            querySelector: '.mermaid'
+        });
+        
     } catch (error) {
         console.error('Error loading markdown:', error);
         document.getElementById(elementId).innerHTML = 
