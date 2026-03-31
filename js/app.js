@@ -17,14 +17,14 @@ async function loadMarkdown(filePath, elementId) {
 
 // 탭 전환 함수
 function setupTabs(containerId, contentId, basePath) {
-    const container = document.querySelector(`#${containerId} .resource-tabs`);
-    if (!container) return;
+    const section = document.getElementById(containerId);
+    if (!section) return;
 
-    const buttons = container.querySelectorAll('.tab-btn');
+    const buttons = section.querySelectorAll('.tab-btn');
     
     buttons.forEach(btn => {
         btn.addEventListener('click', function() {
-            // Remove active class from all buttons in this container
+            // Remove active class from all buttons in this section
             buttons.forEach(b => b.classList.remove('active'));
             // Add active class to clicked button
             this.classList.add('active');
@@ -35,10 +35,10 @@ function setupTabs(containerId, contentId, basePath) {
         });
     });
 
-    // Load first tab content by default
-    const firstBtn = buttons[0];
-    if (firstBtn) {
-        const mdFile = firstBtn.getAttribute('data-md');
+    // Load first tab content by default if no active tab exists
+    const activeBtn = section.querySelector('.tab-btn.active') || buttons[0];
+    if (activeBtn) {
+        const mdFile = activeBtn.getAttribute('data-md');
         loadMarkdown(`${basePath}${mdFile}.md`, contentId);
     }
 }

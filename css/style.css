@@ -161,18 +161,42 @@ body {
     text-align: center;
     padding: 1rem 0;
 }
+/* Resource Tabs & Grouping */
+.tab-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
 
-/* Resource Tabs */
+.tab-group {
+    background: #fff;
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #e0e6ed;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.group-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a43a3;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #326ce5;
+    padding-bottom: 0.5rem;
+    width: fit-content;
+}
+
 .resource-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
 }
 
 .resource-tabs .tab-btn {
+...
     padding: 0.5rem 1rem;
     border: 1px solid #326ce5;
     background: white;
