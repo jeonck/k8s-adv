@@ -20,22 +20,22 @@
 
 ## 2. 관리 철학의 변화
 
-<div class="mermaid">
+```mermaid
 graph LR
     Pet[Pet 시대<br/>유일무이한 서버] -- "철학의 변화" --> Cattle[Cattle 시대<br/>교체 가능한 리소스]
-    
+
     subgraph Pet_Style
     P1[수동 패치]
     P2[고유 IP 고수]
     P3[장기 생존]
     end
-    
+
     subgraph Cattle_Style
     C1[자동 배포]
     C2[일시적 IP/이름]
     C3[언제든 소멸 가능]
     end
-</div>
+```
 
 ---
 

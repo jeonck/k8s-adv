@@ -23,7 +23,7 @@ kubectl plugin은 `kubectl`의 하위 명령어로 작동하는 독립적인 실
 
 사용자가 터미널에서 입력하는 명령어와 실제 파일명의 관계를 시각화하면 다음과 같습니다.
 
-<div class="mermaid">
+```mermaid
 graph LR
     Input["Terminal: kubectl ns"] -- "Search $PATH" --> File["File: kubectl-ns"]
     Input2["Terminal: kubectl oidc-login"] -- "Search $PATH" --> File2["File: kubectl-oidc-login"]
@@ -32,7 +32,7 @@ graph LR
     File -- "Execute" --> Result["Namespace switching logic"]
     File2 -- "Execute" --> Result2["Login flow logic"]
     end
-</div>
+```
 
 ---
 

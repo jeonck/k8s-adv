@@ -8,7 +8,7 @@ NFS 서버를 사용하여 Kubernetes에서 동적 볼륨 프로비저닝(Dynami
 
 NFS 프로비저너를 구성하는 주요 컴포넌트 간의 상호작용입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     subgraph K8S_Cluster[Kubernetes Cluster]
         PVC[PersistentVolumeClaim] -- "1. 요청" --> SC[StorageClass: nfs-client]
@@ -22,7 +22,7 @@ graph TD
     end
 
     RBAC[RBAC: SA / ClusterRole] --> DEP
-</div>
+```
 
 ### 주요 리소스 역할
 
@@ -39,7 +39,7 @@ graph TD
 
 사용자가 PVC를 생성했을 때 내부에서 일어나는 과정입니다.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant U as 사용자
     participant P as NFS Provisioner
@@ -52,7 +52,7 @@ sequenceDiagram
     P->>A: 4. 생성된 경로정보를 담은 PV 생성
     A->>A: 5. PVC와 PV 바인딩 (Bound)
     U->>A: 6. Pod에서 PVC 마운트하여 사용
-</div>
+```
 
 ---
 

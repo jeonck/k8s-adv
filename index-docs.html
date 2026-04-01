@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Documentation Index</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            transition: border-color 0.3s;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .file-card {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .file-card a {
+            color: #0366d6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .file-card a:hover {
+            text-decoration: underline;
+        }
+        .file-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-right: 8px;
+        }
+        .category {
+            margin-top: 40px;
+        }
+        .category h2 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .stats-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📘 Kubernetes Documentation</h1>
+        <p class="subtitle">Complete guide with Mermaid diagrams</p>
+        
+        <div class="stats">
+            <div class="stats-number">52</div>
+            <div>Documents with rendered Mermaid diagrams</div>
+        </div>
+        
+        <input type="text" class="search-box" id="search" placeholder="🔍 Search documents...">
+        
+        <div class="category">
+            <h2>📚 All Documents</h2>
+            <div class="file-grid" id="fileList">
+                <div class="file-card">
+                    <span class="file-number">01</span>
+                    <a href="docs/01-kubectl.html">kubectl 이란?</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">02</span>
+                    <a href="docs/02-k8s-resources.html">Kubernetes 리소스 맵</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">03</span>
+                    <a href="docs/03-k8s-components.html">K8s 클러스터 구성 컴포넌트</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">04</span>
+                    <a href="docs/04-addon-concept.html">K8s Add-on 개념</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">05</span>
+                    <a href="docs/05-addon-problems.html">Add-on 컴포넌트 문제점</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">06</span>
+                    <a href="docs/06-csi-philosophy.html">CSI 철학</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">07</span>
+                    <a href="docs/07-helm.html">Helm 패키지 관리자</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">08</span>
+                    <a href="docs/08-pet-vs-cattle.html">Pet vs Cattle</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">09</span>
+                    <a href="docs/09-statefulset-pet.html">StatefulSet - Pet 특성</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">10</span>
+                    <a href="docs/10-statefulset-vs-replicaset.html">StatefulSet vs ReplicaSet</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">10</span>
+                    <a href="docs/10-lab-environment.html">실습 환경 구성</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">11</span>
+                    <a href="docs/11-lab-addon-install.html">Add-on 설치 실습</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">11</span>
+                    <a href="docs/11-package-manager-background.html">패키지 관리자 배경</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">12</span>
+                    <a href="docs/12-headless-service.html">Headless Service</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">13</span>
+                    <a href="docs/13-crypto-basic-keys.html">대칭키와 비대칭키</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">14</span>
+                    <a href="docs/14-ca-and-root-ca.html">CA 와 Root CA</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">15</span>
+                    <a href="docs/15-pki-and-x509.html">PKI 와 X.509</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">16</span>
+                    <a href="docs/16-csr-and-workflow.html">CSR 및 발급 절차</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">17</span>
+                    <a href="docs/17-ssl-handshake-process.html">SSL/TLS 핸드셰이크</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">18</span>
+                    <a href="docs/18-cert-trust-chain.html">인증서 신뢰 체인</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">19</span>
+                    <a href="docs/19-k8s-security-overview.html">K8s 보안 개요</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">20</span>
+                    <a href="docs/20-api-server-auth-plugins.html">API Server 인증 플러그인</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">20</span>
+                    <a href="docs/20-metric-server-yaml.html">Metric Server YAML</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">21</span>
+                    <a href="docs/21-user-vs-serviceaccount.html">User vs ServiceAccount</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">21</span>
+                    <a href="docs/21-kubernetes-dashboard-yaml.html">Dashboard YAML</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">22</span>
+                    <a href="docs/22-k8s-root-ca-internal.html">K8s Root CA 내부</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">22</span>
+                    <a href="docs/22-metallb-yaml.html">MetalLB YAML</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">23</span>
+                    <a href="docs/23-ingress-nginx-yaml.html">Ingress NGINX YAML</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">23</span>
+                    <a href="docs/23-k8s-cert-file-locations.html">인증서 파일 위치</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">24</span>
+                    <a href="docs/24-kubeadm-cert-management.html">kubeadm 인증서 관리</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">24</span>
+                    <a href="docs/24-nfs-provisioner-yaml.html">NFS Provisioner YAML</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">25</span>
+                    <a href="docs/25-static-pod-auth-config.html">Static Pod 인증 설정</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">26</span>
+                    <a href="docs/26-inspect-cert-info-1.html">인증서 정보 확인 1</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">27</span>
+                    <a href="docs/27-inspect-cert-info-2.html">인증서 정보 확인 2</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">28</span>
+                    <a href="docs/28-cert-expiration-and-renew.html">인증서 갱신</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">29</span>
+                    <a href="docs/29-client-cert-auth-concept.html">클라이언트 인증서 인증</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">30</span>
+                    <a href="docs/30-mtls-communication.html">mTLS 통신</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">31</span>
+                    <a href="docs/31-lab-client-cert-auth.html">클라이언트 인증서 실습</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">32</span>
+                    <a href="docs/32-http-basic-auth-deprecated.html">HTTP Basic Auth</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">33</span>
+                    <a href="docs/33-webhook-token-auth-concept.html">Webhook 토큰 인증</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">34</span>
+                    <a href="docs/34-lab-webhook-auth-setup.html">Webhook 인증 실습</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">35</span>
+                    <a href="docs/35-lab-multi-cluster-config.html">멀티 클러스터 설정</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">36</span>
+                    <a href="docs/36-oauth2-fundamentals.html">OAuth 2.0 기초</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">37</span>
+                    <a href="docs/37-oidc-on-kubernetes.html">Kubernetes OIDC</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">38</span>
+                    <a href="docs/38-keycloak-setup-guide.html">Keycloak 설정</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">39</span>
+                    <a href="docs/39-lab-k8s-keycloak-oidc.html">Keycloak OIDC 실습</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">40</span>
+                    <a href="docs/40-kubectl-plugin-guide.html">kubectl 플러그인</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">41</span>
+                    <a href="docs/41-krew-guide.html">Krew 가이드</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">42</span>
+                    <a href="docs/42-crd-guide.html">CRD 가이드</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">43</span>
+                    <a href="docs/43-operator-development.html">Operator 개발</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">44</span>
+                    <a href="docs/44-operator-and-cr-relationship.html">Operator 와 CR 관계</a>
+                </div>
+                <div class="file-card">
+                    <span class="file-number">45</span>
+                    <a href="docs/45-prometheus-grafana-operator-install.html">Prometheus Operator</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Search functionality
+        document.getElementById('search').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.file-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(term) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

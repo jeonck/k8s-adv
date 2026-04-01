@@ -973,7 +973,7 @@ failurePolicy: Fail
 
 MetalLB를 구성하는 주요 컴포넌트와 사용자 정의 리소스(CRD) 간의 관계입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     NS[Namespace: metallb-system] --> CRD[CRDs: IPAddressPool, L2Advertisement, etc.]
     
@@ -994,7 +994,7 @@ graph TD
     POOL & ADV --> CRD
     CRD -.-> CTRL
     CRD -.-> SPK
-</div>
+```
 
 | 구성 요소 | 주요 역할 | 비고 |
 |-----------|----------|------|

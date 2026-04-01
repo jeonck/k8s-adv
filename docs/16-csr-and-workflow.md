@@ -24,7 +24,7 @@ CSR(Certificate Signing Request)은 인증서 발급을 위해 인증 기관(CA)
 
 ### 단계별 흐름
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant U as 사용자 (User)
     participant CA as 인증 기관 (CA)
@@ -35,7 +35,7 @@ sequenceDiagram
     Note over CA: Step 4: 정보 검증 및 승인
     Note over CA: Step 5: CA 개인키로 서명하여 인증서 생성
     CA->>U: Step 6: 발급된 인증서(certificate.crt) 전달
-</div>
+```
 
 ### 상세 생성 단계 (OpenSSL 예시)
 

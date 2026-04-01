@@ -19,7 +19,7 @@ Kubernetes 보안의 핵심 개념인 인증(Authentication)과 인가(Authoriza
 
 Kubernetes API 서버로 들어오는 모든 요청은 다음의 3단계를 거칩니다.
 
-<div class="mermaid">
+```mermaid
 flowchart TD
     Request[사용자 요청] --> AuthN{1. 인증 Authentication}
     AuthN -- 성공 --> AuthZ{2. 인가 Authorization}
@@ -30,7 +30,7 @@ flowchart TD
     
     Admit -- 승인 --> ETCD[(etcd 저장/수행)]
     Admit -- 거부 --> Deny3[403 Forbidden]
-</div>
+```
 
 ---
 

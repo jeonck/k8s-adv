@@ -895,7 +895,7 @@ webhooks:
 
 Ingress-NGINX를 구성하는 주요 리소스들과 그 관계입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     NS[Namespace: ingress-nginx] --> RBAC[RBAC: SA / Roles / Bindings]
     NS --> IC[IngressClass: nginx]
@@ -913,7 +913,7 @@ graph TD
     DEP --> SVC_ADM[Service: ClusterIP / Port 443]
     SVC_ADM --> WH
     end
-</div>
+```
 
 | 구성 요소 | 주요 역할 |
 |-----------|----------|

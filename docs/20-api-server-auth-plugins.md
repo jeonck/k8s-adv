@@ -8,7 +8,7 @@ Kubernetes API Server 가 요청을 처리하는 3 단계 플러그인 (Authenti
 
 Kubernetes API 서버로 들어오는 모든 HTTP 요청은 다음의 엄격한 보안 단계를 순차적으로 거칩니다.
 
-<div class="mermaid">
+```mermaid
 flowchart TD
     Request[HTTP Request / kubectl 요청] --> AuthN[1. Authentication 인증]
     AuthN -- "401 Unauthorized" --> Deny1[요청 거부]
@@ -19,7 +19,7 @@ flowchart TD
     
     Admission -- "403 Forbidden" --> Deny3[요청 거부]
     Admission -- "최종 승인" --> ETCD[(4. etcd 연산 및 결과 반환)]
-</div>
+```
 
 ---
 

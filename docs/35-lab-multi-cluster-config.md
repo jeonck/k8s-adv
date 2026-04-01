@@ -21,7 +21,7 @@
 
 `kubeconfig` 파일은 여러 개의 **Cluster**, **User**, **Context** 정보를 담고 있으며, Context를 전환함으로써 대상 클러스터를 바꿀 수 있습니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     KC[~/.kube/config]
     KC --> C1[Cluster: local-k8s]
@@ -36,7 +36,7 @@ graph TD
     CTX1 --> U1
     CTX2 --> C2
     CTX2 --> U2
-</div>
+```
 
 ---
 

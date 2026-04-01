@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>22-metallb-yaml.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>22-metallb-yaml.md</code> | 
+        <a href="22-metallb-yaml.md">View Markdown</a>
+    </div>
+    
+    <h1>MetalLB YAML 분석</h1>
+<p></p>
+<p>MetalLB 설치 및 설정에 사용되는 YAML 파일을 분석합니다.</p>
+<p></p>
+<h2>전체 구성</h2>
+<p></p>
+<p><pre><code>MetalLB 구성 리소스:<br>1. 사용자 정의 리소스 (CRD)<br>   - IPAddressPool<br>   - L2Advertisement<br>   - BGPPeer, BGPAdvertisement<br>   - BFDProfile, Community<br>   - ServiceL2Status<br><br>2. RBAC 리소스<br>   - ServiceAccount (x2)<br>   - Role (x2)<br>   - ClusterRole (x2)<br>   - RoleBinding (x2)<br>   - ClusterRoleBinding (x2)<br><br>3. 애플리케이션 리소스<br>   - ConfigMap<br>   - Secret<br>   - Service<br>   - Deployment (Controller)<br>   - DaemonSet (Speaker)<br><br>4. Webhook<br>   - ValidatingWebhookConfiguration</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>1. 사용자 정의 리소스 설정</h2>
+<p></p>
+<h3>1-1. IPAddressPool</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: metallb.io/v1beta1<br>kind: IPAddressPool<br>metadata:<br>  name: ip-pool<br>  namespace: metallb-system<br>spec:<br>  addresses:<br>  - 172.31.1.200-172.31.1.250</code></pre></p>
+<p></p>
+<h4>설명</h4>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>addresses</code> | 172.31.1.200-172.31.1.250 | 할당할 IP 주소 범위 |</p>
+<p></p>
+<h4>역할</h4>
+<ul><li>LoadBalancer Service 에 할당할 IP 주소 풀 정의</li>
+<li>총 51 개 IP 사용 가능 (200~250)</li>
+<p></ul></p>
+<h4>IP 주소 지정 방식</h4>
+<p></p>
+<p><pre><code class="language-yaml"># CIDR 표기법도 사용 가능<br>addresses:<br>- 192.168.1.0/24      # 256 개 IP<br>- 10.0.0.1-10.0.0.10  # 명시적 범위</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>1-2. L2Advertisement</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: metallb.io/v1beta1<br>kind: L2Advertisement<br>metadata:<br>  name: l2-advertisement<br>  namespace: metallb-system<br>spec:<br>  ipAddressPools:<br>  - ip-pool<br>  interfaces:<br>  - eth0</code></pre></p>
+<p></p>
+<h4>설명</h4>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>ipAddressPools</code> | ip-pool | 광고할 IP 풀 |</p>
+<p>| <code>interfaces</code> | eth0 | 광고할 네트워크 인터페이스 |</p>
+<p></p>
+<h4>역할</h4>
+<ul><li>L2 (레이어 2) 모드를 통한 IP 광고 설정</li>
+<li>ARP 프로토콜을 사용하여 IP 주소 알림</li>
+<li>특정 인터페이스 (eth0) 에서만 광고</li>
+<p></ul></p>
+<h4>L2 vs BGP</h4>
+<p></p>
+<p><pre><code>L2 모드:<br>- ARP 사용 (단순함)<br>- 단일 노드에서 IP 소유<br>- 빠른 페일오버<br>- 라우터 설정 불필요<br><br>BGP 모드:<br>- BGP 프로토콜 사용 (복잡함)<br>- ECMP 지원 (로드밸런싱)<br>- 네트워크 장비와 연동<br>- BGP 피어 설정 필요</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>2. Namespace</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Namespace<br>metadata:<br>  labels:<br>    pod-security.kubernetes.io/audit: privileged<br>    pod-security.kubernetes.io/enforce: privileged<br>    pod-security.kubernetes.io/warn: privileged<br>  name: metallb-system</code></pre></p>
+<p></p>
+<h3>Pod Security Standards</h3>
+<p></p>
+<p>| 레이블 | 값 | 설명 |</p>
+<p>|--------|-----|------|</p>
+<p>| <code>audit</code> | privileged | 감사 로그만 기록 |</p>
+<p>| <code>enforce</code> | privileged | 특권 모드 허용 |</p>
+<p>| <code>warn</code> | privileged | 경고만 표시 |</p>
+<p></p>
+<h3>역할</h3>
+<ul><li>MetalLB 전용 네임스페이스</li>
+<li>특권 컨테이너 실행 필요 (네트워크 조작)</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>3. CustomResourceDefinitions (CRD)</h2>
+<p></p>
+<p>MetalLB 는 6 개의 CRD 를 정의합니다.</p>
+<p></p>
+<h3>3-1. BFDProfile</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: apiextensions.k8s.io/v1<br>kind: CustomResourceDefinition<br>metadata:<br>  name: bfdprofiles.metallb.io<br>spec:<br>  group: metallb.io<br>  names:<br>    kind: BFDProfile<br>    plural: bfdprofiles<br>  scope: Namespaced</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>BFD (Bidirectional Forwarding Detection) 세션 설정</li>
+<li>네트워크 장애 빠른 감지</li>
+<p></ul></p>
+<h4>주요 설정</h4>
+<p></p>
+<p><pre><code class="language-yaml">spec:<br>  detectMultiplier: 3        # 장애 감지 승수<br>  transmitInterval: 300      # 전송 간격 (ms)<br>  receiveInterval: 300       # 수신 간격 (ms)<br>  passiveMode: false         # 패시브 모드</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>3-2. BGPAdvertisement</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: CustomResourceDefinition<br>metadata:<br>  name: bgpadvertisements.metallb.io</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>BGP 를 통한 IP 경로 광고 설정</li>
+<li>BGP 커뮤니티, 로컬 선호도 등 설정</li>
+<p></ul></p>
+<h4>주요 설정</h4>
+<p></p>
+<p><pre><code class="language-yaml">spec:<br>  aggregationLength: 32      # IPv4 집계 길이<br>  communities:               # BGP 커뮤니티<br>  - "65000:100"<br>  localPref: 100             # 로컬 선호도</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>3-3. BGPPeer</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: CustomResourceDefinition<br>metadata:<br>  name: bgppeers.metallb.io</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>BGP 피어 (라우터) 설정</li>
+<li>v1beta1 과 v1beta2 버전 지원</li>
+<p></ul></p>
+<h4>주요 설정 (v1beta2)</h4>
+<p></p>
+<p><pre><code class="language-yaml">spec:<br>  myASN: 65000               # 로컬 AS 번호<br>  peerASN: 65001             # 피어 AS 번호<br>  peerAddress: 192.168.1.1   # 피어 주소<br>  peerPort: 179              # BGP 포트<br>  bfdProfile: bfd-profile    # BFD 프로파일 참조<br>  ebgpMultiHop: false        # 멀티홝 여부</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>3-4. Community</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: CustomResourceDefinition<br>metadata:<br>  name: communities.metallb.io</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>BGP 커뮤니티 별명 정의</li>
+<li>재사용 가능한 커뮤니티 이름 매핑</li>
+<p></ul></p>
+<h4>사용 예시</h4>
+<p></p>
+<p><pre><code class="language-yaml">spec:<br>  communities:<br>  - name: customer-a<br>    value: "65000:100"<br>  - name: customer-b<br>    value: "65000:200"</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>3-5. IPAddressPool</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: CustomResourceDefinition<br>metadata:<br>  name: ipaddresspools.metallb.io</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>IP 주소 풀 정의</li>
+<li>자동 할당, 우선순위, 네임스페이스 선택기 설정</li>
+<p></ul></p>
+<h4>주요 설정</h4>
+<p></p>
+<p><pre><code class="language-yaml">spec:<br>  addresses:<br>  - 192.168.1.0/24<br>  autoAssign: true           # 자동 할당<br>  avoidBuggyIPs: true        # .0, .255 제외<br>  serviceAllocation:         # 서비스 할당 규칙<br>    priority: 10<br>    namespaces:<br>    - production</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>3-6. L2Advertisement</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: CustomResourceDefinition<br>metadata:<br>  name: l2advertisements.metallb.io</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>L2 모드 IP 광고 설정</li>
+<li>인터페이스, 노드 선택기 지정</li>
+<p></ul></p>
+<h4>주요 설정</h4>
+<p></p>
+<p><pre><code class="language-yaml">spec:<br>  ipAddressPools:<br>  - pool-1<br>  interfaces:<br>  - eth0<br>  - eth1<br>  nodeSelectors:             # 특정 노드만<br>  - matchLabels:<br>      node-type: lb</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>3-7. ServiceL2Status</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: CustomResourceDefinition<br>metadata:<br>  name: servicel2statuses.metallb.io</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>L2 모드 서비스 상태 모니터링</li>
+<li>실제 트래픽을 받는 노드 및 인터페이스 표시</li>
+<p></ul></p>
+<h4>상태 정보</h4>
+<p></p>
+<p><pre><code class="language-yaml">status:<br>  node: k8s-w1                      # 트래픽 받는 노드<br>  serviceName: my-service           # 서비스 이름<br>  serviceNamespace: default         # 네임스페이스<br>  interfaces:                       # 인터페이스 목록<br>  - name: eth0</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>4. RBAC 리소스</h2>
+<p></p>
+<h3>4-1. ServiceAccount</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  labels:<br>    app: metallb<br>  name: controller<br>  namespace: metallb-system<br>---<br>apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  labels:<br>    app: metallb<br>  name: speaker<br>  namespace: metallb-system</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li><strong>controller</strong>: MetalLB 컨트롤러 Pod 신원</li>
+<li><strong>speaker</strong>: MetalLB 스피커 Pod 신원 (각 노드에서 실행)</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>4-2. Role (컨트롤러)</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: Role<br>metadata:<br>  name: controller<br>  namespace: metallb-system<br>rules:<br>- apiGroups: [""]<br>  resources: ["secrets"]<br>  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]<br>- apiGroups: ["metallb.io"]<br>  resources: ["bgppeers", "bfdprofiles", "ipaddresspools", <br>              "bgpadvertisements", "l2advertisements", "communities"]<br>  verbs: ["get", "list", "watch"]</code></pre></p>
+<p></p>
+<h4>권한</h4>
+<ul><li>시크릿 관리 (memberlist 용)</li>
+<li>MetalLB CRD 읽기</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>4-3. Role (Speaker)</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: Role<br>metadata:<br>  name: pod-lister<br>  namespace: metallb-system<br>rules:<br>- apiGroups: [""]<br>  resources: ["pods", "secrets", "configmaps"]<br>  verbs: ["list", "get", "watch"]<br>- apiGroups: ["metallb.io"]<br>  resources: ["bfdprofiles", "bgppeers", "l2advertisements", <br>              "bgpadvertisements", "ipaddresspools", "communities"]<br>  verbs: ["get", "list", "watch"]</code></pre></p>
+<p></p>
+<h4>권한</h4>
+<ul><li>Pod, 시크릿, ConfigMap 조회</li>
+<li>MetalLB CRD 읽기</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>4-4. ClusterRole (컨트롤러)</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: ClusterRole<br>metadata:<br>  name: metallb-system:controller<br>rules:<br>- apiGroups: [""]<br>  resources: ["services", "namespaces", "nodes"]<br>  verbs: ["get", "list", "watch"]<br>- apiGroups: [""]<br>  resources: ["services/status"]<br>  verbs: ["update"]<br>- apiGroups: [""]<br>  resources: ["events"]<br>  verbs: ["create", "patch"]<br>- apiGroups: ["admissionregistration.k8s.io"]<br>  resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]<br>  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]<br>- apiGroups: ["apiextensions.k8s.io"]<br>  resources: ["customresourcedefinitions"]<br>  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]</code></pre></p>
+<p></p>
+<h4>권한</h4>
+<ul><li>클러스터 전체 서비스/네임스페이스/노드 조회</li>
+<li>서비스 상태 업데이트 (LoadBalancer IP 할당)</li>
+<li>이벤트 생성</li>
+<li>Webhook 설정 관리</li>
+<li>CRD 관리</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>4-5. ClusterRole (Speaker)</h3>
+<p></p>
+<p><pre><code class="language-yaml">kind: ClusterRole<br>metadata:<br>  name: metallb-system:speaker<br>rules:<br>- apiGroups: ["metallb.io"]<br>  resources: ["servicel2statuses", "servicel2statuses/status"]<br>  verbs: ["*"]<br>- apiGroups: [""]<br>  resources: ["services", "endpoints", "nodes", "namespaces"]<br>  verbs: ["get", "list", "watch"]<br>- apiGroups: ["discovery.k8s.io"]<br>  resources: ["endpointslices"]<br>  verbs: ["get", "list", "watch"]<br>- apiGroups: [""]<br>  resources: ["events"]<br>  verbs: ["create", "patch"]</code></pre></p>
+<p></p>
+<h4>권한</h4>
+<ul><li>ServiceL2Status 전체 권한</li>
+<li>서비스, 엔드포인트, 노드 조회</li>
+<li>엔드포인트슬라이스 조회</li>
+<li>이벤트 생성</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>4-6. RoleBinding &amp; ClusterRoleBinding</h3>
+<p></p>
+<p><pre><code class="language-yaml"># RoleBinding - 컨트롤러<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: RoleBinding<br>metadata:<br>  name: controller<br>  namespace: metallb-system<br>roleRef:<br>  kind: Role<br>  name: controller<br>subjects:<br>- kind: ServiceAccount<br>  name: controller<br>  namespace: metallb-system<br><br># RoleBinding - Speaker<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: RoleBinding<br>metadata:<br>  name: pod-lister<br>  namespace: metallb-system<br>roleRef:<br>  kind: Role<br>  name: pod-lister<br>subjects:<br>- kind: ServiceAccount<br>  name: speaker<br>  namespace: metallb-system<br><br># ClusterRoleBinding - 컨트롤러<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: metallb-system:controller<br>roleRef:<br>  kind: ClusterRole<br>  name: metallb-system:controller<br>subjects:<br>- kind: ServiceAccount<br>  name: controller<br>  namespace: metallb-system<br><br># ClusterRoleBinding - Speaker<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: metallb-system:speaker<br>roleRef:<br>  kind: ClusterRole<br>  name: metallb-system:speaker<br>subjects:<br>- kind: ServiceAccount<br>  name: speaker<br>  namespace: metallb-system</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>5. ConfigMap &amp; Secret</h2>
+<p></p>
+<h3>5-1. ConfigMap - 제외 인터페이스</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: ConfigMap<br>metadata:<br>  name: metallb-excludel2<br>  namespace: metallb-system<br>data:<br>  excludel2.yaml: |<br>    announcedInterfacesToExclude: <br>      ["^docker.*", "^cbr.*", "^dummy.*", "^virbr.*", "^lxcbr.*", <br>       "^veth.*", "^lo$", "^cali.*", "^tunl.*", "^flannel.*", <br>       "^kube-ipvs.*", "^cni.*", "^nodelocaldns.*"]</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>L2 광고에서 제외할 네트워크 인터페이스 패턴 정의</li>
+<li>가상 인터페이스, 컨테이너 네트워크 제외</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>5-2. Secret - Webhook 인증서</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Secret<br>metadata:<br>  name: metallb-webhook-cert<br>  namespace: metallb-system</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>Webhook 서버 TLS 인증서 저장</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>5-3. Secret - Memberlist</h3>
+<p></p>
+<p><pre><code class="language-yaml"># 컨트롤러 간 통신을 위한 시크릿 (자동 생성)<br>apiVersion: v1<br>kind: Secret<br>metadata:<br>  name: memberlist<br>  namespace: metallb-system</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>컨트롤러 간 클러스터 통신 암호화</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>6. Service</h2>
+<p></p>
+<h3>6-1. Webhook Service</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Service<br>metadata:<br>  name: metallb-webhook-service<br>  namespace: metallb-system<br>spec:<br>  ports:<br>  - port: 443<br>    targetPort: 9443<br>  selector:<br>    component: controller</code></pre></p>
+<p></p>
+<h4>역할</h4>
+<ul><li>Webhook 검증 엔드포인트 제공</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>7. Deployment - Controller</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: apps/v1<br>kind: Deployment<br>metadata:<br>  labels:<br>    app: metallb<br>    component: controller<br>  name: controller<br>  namespace: metallb-system<br>spec:<br>  revisionHistoryLimit: 3<br>  selector:<br>    matchLabels:<br>      app: metallb<br>      component: controller<br>  template:<br>    metadata:<br>      annotations:<br>        prometheus.io/port: "7472"<br>        prometheus.io/scrape: "true"<br>      labels:<br>        app: metallb<br>        component: controller<br>    spec:<br>      containers:<br>      - args:<br>        - --port=7472<br>        - --log-level=info<br>        - --tls-min-version=VersionTLS12<br>        env:<br>        - name: METALLB_ML_SECRET_NAME<br>          value: memberlist<br>        - name: METALLB_DEPLOYMENT<br>          value: controller<br>        image: quay.io/metallb/controller:v0.14.8<br>        livenessProbe:<br>          httpGet:<br>            path: /metrics<br>            port: monitoring<br>          initialDelaySeconds: 10<br>          periodSeconds: 10<br>        name: controller<br>        ports:<br>        - containerPort: 7472<br>          name: monitoring<br>        - containerPort: 9443<br>          name: webhook-server<br>        readinessProbe:<br>          httpGet:<br>            path: /metrics<br>            port: monitoring<br>          initialDelaySeconds: 10<br>          periodSeconds: 10<br>        securityContext:<br>          allowPrivilegeEscalation: false<br>          capabilities:<br>            drop: ["all"]<br>          readOnlyRootFilesystem: true<br>        volumeMounts:<br>        - mountPath: /tmp/k8s-webhook-server/serving-certs<br>          name: cert<br>          readOnly: true<br>      securityContext:<br>        fsGroup: 65534<br>        runAsNonRoot: true<br>        runAsUser: 65534<br>      serviceAccountName: controller<br>      terminationGracePeriodSeconds: 0<br>      volumes:<br>      - name: cert<br>        secret:<br>          secretName: metallb-webhook-cert</code></pre></p>
+<p></p>
+<h3>컨테이너 설정</h3>
+<p></p>
+<p>| 설정 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>image</code> | quay.io/metallb/controller:v0.14.8 | 컨트롤러 이미지 |</p>
+<p>| <code>--port</code> | 7472 | 메트릭스 포트 |</p>
+<p>| <code>--log-level</code> | info | 로그 레벨 |</p>
+<p>| <code>--tls-min-version</code> | VersionTLS12 | 최소 TLS 버전 |</p>
+<p></p>
+<h3>프로브</h3>
+<p></p>
+<p><pre><code class="language-yaml">livenessProbe:<br>  httpGet:<br>    path: /metrics<br>    port: monitoring<br>  initialDelaySeconds: 10<br>  periodSeconds: 10<br><br>readinessProbe:<br>  httpGet:<br>    path: /metrics<br>    port: monitoring<br>  initialDelaySeconds: 10<br>  periodSeconds: 10</code></pre></p>
+<p></p>
+<h3>보안 컨텍스트</h3>
+<p></p>
+<p><pre><code class="language-yaml">securityContext:<br>  allowPrivilegeEscalation: false    # 권한 상승 불가<br>  capabilities:<br>    drop: ["all"]                    # 모든 capability 제거<br>  readOnlyRootFilesystem: true       # 읽기 전용 파일시스템<br>  runAsNonRoot: true                 # 루트 사용자 불가<br>  runAsUser: 65534                   # nobody 사용자</code></pre></p>
+<p></p>
+<h3>환경 변수</h3>
+<p></p>
+<p><pre><code class="language-yaml">env:<br>- name: METALLB_ML_SECRET_NAME     # Memberlist 시크릿 이름<br>  value: memberlist<br>- name: METALLB_DEPLOYMENT         # 디플로이먼트 이름<br>  value: controller</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>LoadBalancer Service 모니터링</li>
+<li>IP 주소 할당</li>
+<li>CRD 관리</li>
+<li>Webhook 검증</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>8. DaemonSet - Speaker</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: apps/v1<br>kind: DaemonSet<br>metadata:<br>  labels:<br>    app: metallb<br>    component: speaker<br>  name: speaker<br>  namespace: metallb-system<br>spec:<br>  selector:<br>    matchLabels:<br>      app: metallb<br>      component: speaker<br>  template:<br>    metadata:<br>      annotations:<br>        prometheus.io/port: "7472"<br>        prometheus.io/scrape: "true"<br>      labels:<br>        app: metallb<br>        component: speaker<br>    spec:<br>      containers:<br>      - args:<br>        - --port=7472<br>        - --log-level=info<br>        env:<br>        - name: METALLB_NODE_NAME<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: spec.nodeName<br>        - name: METALLB_POD_NAME<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: metadata.name<br>        - name: METALLB_HOST<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: status.hostIP<br>        - name: METALLB_ML_BIND_ADDR<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: status.podIP<br>        - name: METALLB_ML_LABELS<br>          value: app=metallb,component=speaker<br>        - name: METALLB_ML_SECRET_KEY_PATH<br>          value: /etc/ml_secret_key<br>        image: quay.io/metallb/speaker:v0.14.8<br>        livenessProbe:<br>          httpGet:<br>            path: /metrics<br>            port: monitoring<br>          initialDelaySeconds: 10<br>          periodSeconds: 10<br>        name: speaker<br>        ports:<br>        - containerPort: 7472<br>          name: monitoring<br>        - containerPort: 7946<br>          name: memberlist-tcp<br>        - containerPort: 7946<br>          name: memberlist-udp<br>          protocol: UDP<br>        securityContext:<br>          allowPrivilegeEscalation: false<br>          capabilities:<br>            add:<br>            - NET_RAW                    # RAW 소켓 필요 (ARP/BGP)<br>            drop:<br>            - ALL<br>          readOnlyRootFilesystem: true<br>        volumeMounts:<br>        - mountPath: /etc/ml_secret_key<br>          name: memberlist<br>          readOnly: true<br>        - mountPath: /etc/metallb<br>          name: metallb-excludel2<br>          readOnly: true<br>      hostNetwork: true                  # 호스트 네트워크 사용<br>      serviceAccountName: speaker<br>      terminationGracePeriodSeconds: 2<br>      tolerations:<br>      - effect: NoSchedule<br>        key: node-role.kubernetes.io/master<br>        operator: Exists<br>      - effect: NoSchedule<br>        key: node-role.kubernetes.io/control-plane<br>        operator: Exists<br>      volumes:<br>      - name: memberlist<br>        secret:<br>          secretName: memberlist<br>      - configMap:<br>          name: metallb-excludel2<br>        name: metallb-excludel2</code></pre></p>
+<p></p>
+<h3>중요 설정</h3>
+<p></p>
+<p>| 설정 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>hostNetwork</code> | true | 호스트 네트워크 직접 사용 |</p>
+<p>| <code>terminationGracePeriodSeconds</code> | 2 | 빠른 종료 (2 초) |</p>
+<p>| <code>capabilities.add</code> | NET_RAW | RAW 소켓 권한 (ARP/BGP) |</p>
+<p></p>
+<h3>환경 변수 (Pod 정보)</h3>
+<p></p>
+<p><pre><code class="language-yaml">env:<br>- METALLB_NODE_NAME        # 노드 이름<br>- METALLB_POD_NAME         # Pod 이름<br>- METALLB_HOST             # 호스트 IP<br>- METALLB_ML_BIND_ADDR     # Memberlist 바인딩 주소<br>- METALLB_ML_LABELS        # Memberlist 라벨<br>- METALLB_ML_SECRET_KEY_PATH  # Memberlist 키 경로</code></pre></p>
+<p></p>
+<h3>Tolerations</h3>
+<p></p>
+<p><pre><code class="language-yaml">tolerations:<br>- key: node-role.kubernetes.io/master        # 마스터 노드 허용<br>  effect: NoSchedule<br>- key: node-role.kubernetes.io/control-plane # 컨트롤러 플레인 허용<br>  effect: NoSchedule</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>각 노드에서 실행 (DaemonSet)</li>
+<li>L2 모드: ARP 광고</li>
+<li>BGP 모드: BGP 세션 유지</li>
+<li>서비스 상태 업데이트</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>9. ValidatingWebhookConfiguration</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: admissionregistration.k8s.io/v1<br>kind: ValidatingWebhookConfiguration<br>metadata:<br>  name: metallb-webhook-configuration<br>webhooks:<br>- name: bgppeersvalidationwebhook.metallb.io<br>  clientConfig:<br>    service:<br>      name: metallb-webhook-service<br>      namespace: metallb-system<br>      path: /validate-metallb-io-v1beta2-bgppeer<br>  rules:<br>  - apiGroups: ["metallb.io"]<br>    apiVersions: ["v1beta2"]<br>    operations: ["CREATE", "UPDATE"]<br>    resources: ["bgppeers"]<br>  failurePolicy: Fail<br>  admissionReviewVersions: ["v1"]<br>  <br>- name: bfdprofilevalidationwebhook.metallb.io<br>  rules:<br>  - operations: ["CREATE", "DELETE"]<br>    resources: ["bfdprofiles"]<br>    <br>- name: bgpadvertisementvalidationwebhook.metallb.io<br>  rules:<br>  - operations: ["CREATE", "UPDATE"]<br>    resources: ["bgpadvertisements"]<br>    <br>- name: communityvalidationwebhook.metallb.io<br>  rules:<br>  - operations: ["CREATE", "UPDATE"]<br>    resources: ["communities"]<br>    <br>- name: ipaddresspoolvalidationwebhook.metallb.io<br>  rules:<br>  - operations: ["CREATE", "UPDATE"]<br>    resources: ["ipaddresspools"]<br>    <br>- name: l2advertisementvalidationwebhook.metallb.io<br>  rules:<br>  - operations: ["CREATE", "UPDATE"]<br>    resources: ["l2advertisements"]</code></pre></p>
+<p></p>
+<h3>Webhook 검증 대상</h3>
+<p></p>
+<p>| Webhook | 리소스 | 작업 |</p>
+<p>|---------|--------|------|</p>
+<p>| bgppeersvalidation | BGPPeer | CREATE, UPDATE |</p>
+<p>| bfdprofilevalidation | BFDProfile | CREATE, DELETE |</p>
+<p>| bgpadvertisementvalidation | BGPAdvertisement | CREATE, UPDATE |</p>
+<p>| communityvalidation | Community | CREATE, UPDATE |</p>
+<p>| ipaddresspoolvalidation | IPAddressPool | CREATE, UPDATE |</p>
+<p>| l2advertisementvalidation | L2Advertisement | CREATE, UPDATE |</p>
+<p></p>
+<h3>FailurePolicy</h3>
+<p></p>
+<p><pre><code class="language-yaml">failurePolicy: Fail</code></pre></p>
+<ul><li>Webhook 오류 시 요청 거부</li>
+<li>안전한 설정 강제</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>리소스 관계도</h2>
+<p></p>
+<p>MetalLB를 구성하는 주요 컴포넌트와 사용자 정의 리소스(CRD) 간의 관계입니다.</p>
+<p></p>
+<p><div class="mermaid">graph TD
+    NS[Namespace: metallb-system] --> CRD[CRDs: IPAddressPool, L2Advertisement, etc.]
+    
+    subgraph Control_Plane
+    CTRL[Controller: Deployment] -- "IP 할당 관리" --> CRD
+    end
+    
+    subgraph Data_Plane
+    SPK[Speaker: DaemonSet] -- "ARP/BGP 광고" --> Net((Physical Network))
+    SPK -- "상태 감시" --> CRD
+    end
+    
+    subgraph User_Config
+    POOL[IPAddressPool: 172.31.1.200-250]
+    ADV[L2Advertisement]
+    end
+    
+    POOL & ADV --> CRD
+    CRD -.-> CTRL
+    CRD -.-> SPK</div></p>
+<p></p>
+<p>| 구성 요소 | 주요 역할 | 비고 |</p>
+<p>|-----------|----------|------|</p>
+<p>| <strong>Controller</strong> | 클러스터 내 Service(LoadBalancer)를 감시하고 IP를 할당/회수함 | Deployment로 실행 |</p>
+<p>| <strong>Speaker</strong> | 할당된 IP를 외부 네트워크에 알림 (ARP 또는 BGP 프로토콜 사용) | 모든 노드에 DaemonSet으로 실행 |</p>
+<p>| <strong>IPAddressPool</strong> | 외부로 노출할 수 있는 가용 IP 범위를 정의하는 설정 리소스 | 사용자 정의 CRD |</p>
+<p>| <strong>L2Advertisement</strong> | 어떤 인터페이스를 통해 L2 방식으로 광고할지 설정 | 사용자 정의 CRD |</p>
+<p></p><br><hr>
+<p></p>
+<h2>설치 확인</h2>
+<p></p>
+<p><pre><code class="language-bash"># MetalLB 설치<br>kubectl apply -f metallb-native.yaml<br><br># IP Pool 및 광고 설정<br>kubectl apply -f metallb-ippool.yaml<br>kubectl apply -f metallb-l2advertisement.yaml<br><br># Pod 상태 확인<br>kubectl get pods -n metallb-system<br># NAME                         READY   STATUS    RESTARTS   AGE<br># controller-xxxxxxxxxx-xxxx   1/1     Running   0          1m<br># speaker-xxxxx                1/1     Running   0          1m<br><br># CRD 확인<br>kubectl get crd | grep metallb<br># bgppeers.metallb.io<br># ipaddresspools.metallb.io<br># l2advertisements.metallb.io<br># ...<br><br># IP Pool 확인<br>kubectl get ipaddresspool -n metallb-system<br># NAME      AUTO ASSIGN   AVOID BUGGY IPS   ADDRESSES<br># ip-pool   true          false             172.31.1.200-172.31.1.250<br><br># L2 광고 확인<br>kubectl get l2advertisement -n metallb-system<br># NAME              IP ADDRESS POOLS   INTERFACES<br># l2-advertisement  ["ip-pool"]        ["eth0"]</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>요약</h2>
+<p></p>
+<p>| 카테고리 | 리소스 | 개수 |</p>
+<p>|----------|--------|------|</p>
+<p>| <strong>CRD</strong> | BFDProfile, BGPPeer, BGPAdvertisement, Community, IPAddressPool, L2Advertisement, ServiceL2Status | 7 |</p>
+<p>| <strong>Namespace</strong> | metallb-system | 1 |</p>
+<p>| <strong>ServiceAccount</strong> | controller, speaker | 2 |</p>
+<p>| <strong>Role</strong> | controller, pod-lister | 2 |</p>
+<p>| <strong>ClusterRole</strong> | controller, speaker | 2 |</p>
+<p>| <strong>RoleBinding</strong> | controller, pod-lister | 2 |</p>
+<p>| <strong>ClusterRoleBinding</strong> | controller, speaker | 2 |</p>
+<p>| <strong>ConfigMap</strong> | metallb-excludel2 | 1 |</p>
+<p>| <strong>Secret</strong> | webhook-cert, memberlist | 2 |</p>
+<p>| <strong>Service</strong> | webhook-service | 1 |</p>
+<p>| <strong>Deployment</strong> | controller | 1 |</p>
+<p>| <strong>DaemonSet</strong> | speaker | 1 |</p>
+<p>| <strong>ValidatingWebhook</strong> | 6 개 검증기 | 1 |</p>
+<p>| <strong>사용자 리소스</strong> | IPAddressPool, L2Advertisement | 2 |</p>
+<p>| <strong>총계</strong> | | <strong>27</strong> |</p>
+<p></p><br><strong>MetalLB 는 베어메탈 Kubernetes 클러스터에 LoadBalancer 기능을 제공하는 네트워킹 컴포넌트입니다.</strong>
+<p></p>
+</body>
+</html>

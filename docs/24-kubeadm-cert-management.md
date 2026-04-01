@@ -46,7 +46,7 @@
 ### 3. 기타 컴포넌트 인증서
 그 외 컨트롤 플레인 컴포넌트 및 에코시스템을 위한 인증서들이 차례로 생성됩니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     CA[Root CA 생성<br/>ca.crt / ca.key] --> AS[API Server 인증서]
     CA --> CM[Controller Manager 인증서]
@@ -56,7 +56,7 @@ graph TD
     subgraph ETCD[etcd 전용 영역]
     ECA[etcd CA 생성] --> ES[etcd Server 인증서]
     end
-</div>
+```
 
 ---
 

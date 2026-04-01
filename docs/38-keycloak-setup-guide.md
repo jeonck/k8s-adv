@@ -23,7 +23,7 @@ Keycloak은 직접 로그인 로직을 개발할 필요 없이, **"인증과 인
 
 Keycloak은 여러 서비스의 중앙에서 인증 허브 역할을 수행합니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     User[사용자]
     KC[Keycloak IAM]
@@ -41,7 +41,7 @@ graph TD
     User -- "4. Token 제출" --> App3
     
     App1 & App2 & App3 -- "5. Token 유효성 검증" --> KC
-</div>
+```
 
 ---
 

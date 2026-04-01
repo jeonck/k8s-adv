@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21-kubernetes-dashboard-yaml.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>21-kubernetes-dashboard-yaml.md</code> | 
+        <a href="21-kubernetes-dashboard-yaml.md">View Markdown</a>
+    </div>
+    
+    <h1>Kubernetes Dashboard YAML 분석</h1>
+<p></p>
+<p>Kubernetes Dashboard 설치에 사용되는 YAML 파일을 분석합니다.</p>
+<p></p>
+<h2>전체 구성</h2>
+<p></p>
+<p><pre><code>Dashboard 구성 리소스:<br>1. Namespace                 - 전용 네임스페이스<br>2. ServiceAccount            - Pod 의 신원<br>3. Service (x2)              - 네트워크 엔드포인트<br>4. Secret (x3)               - 인증서 및 CSRF 토큰<br>5. ConfigMap                 - 설정 저장<br>6. Role                      - 네임스페이스 권한<br>7. ClusterRole               - 클러스터 권한<br>8. RoleBinding               - 네임스페이스 권한 바인딩<br>9. ClusterRoleBinding (x2)   - 클러스터 권한 바인딩<br>10. Deployment (x2)          - Pod 배포</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>1. Namespace</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Namespace<br>metadata:<br>  name: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>설명</h3>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>name</code> | kubernetes-dashboard | Dashboard 전용 네임스페이스 |</p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Dashboard 관련 리소스를 격리</li>
+<li>시스템 네임스페이스 (kube-system) 와 분리</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>2. ServiceAccount</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard<br>  namespace: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>설명</h3>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>name</code> | kubernetes-dashboard | ServiceAccount 이름 |</p>
+<p>| <code>namespace</code> | kubernetes-dashboard | Dashboard 네임스페이스 |</p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Dashboard Pod 가 Kubernetes API 와 통신할 때 사용하는 신원</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>3. Service - Dashboard</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: Service<br>apiVersion: v1<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard<br>  namespace: kubernetes-dashboard<br>spec:<br>  ports:<br>    - port: 443<br>      targetPort: 8443<br>      nodePort: 30000<br>  selector:<br>    k8s-app: kubernetes-dashboard<br>  type: NodePort</code></pre></p>
+<p></p>
+<h3>설명</h3>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>port</code> | 443 | 서비스 포트 (HTTPS) |</p>
+<p>| <code>targetPort</code> | 8443 | 컨테이너 포트 |</p>
+<p>| <code>nodePort</code> | 30000 | 노드에서 노출되는 포트 |</p>
+<p>| <code>type</code> | NodePort | 노드 포트를 통한 외부 접근 |</p>
+<p></p>
+<h3>접속 URL</h3>
+<p></p>
+<p><pre><code>https://<노드 IP>:30000</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>4. Secret (x3)</h2>
+<p></p>
+<h3>4-1. 인증서 저장소</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Secret<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard-certs<br>  namespace: kubernetes-dashboard<br>type: Opaque</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Dashboard HTTPS 인증서 저장</li>
+<p></ul></p>
+<h3>4-2. CSRF 토큰</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Secret<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard-csrf<br>  namespace: kubernetes-dashboard<br>type: Opaque<br>data:<br>  csrf: ""</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Cross-Site Request Forgery 공격 방지 토큰</li>
+<p></ul></p>
+<h3>4-3. 키 보관소</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Secret<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard-key-holder<br>  namespace: kubernetes-dashboard<br>type: Opaque</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>암호화 키 보관</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>5. ConfigMap</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: ConfigMap<br>apiVersion: v1<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard-settings<br>  namespace: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Dashboard 설정 저장</li>
+<li>사용자 설정, 클러스터 정보 등</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>6. Role</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: Role<br>apiVersion: rbac.authorization.k8s.io/v1<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard<br>  namespace: kubernetes-dashboard<br>rules:<br>  # Dashboard 전용 Secret 관리<br>  - apiGroups: [""]<br>    resources: ["secrets"]<br>    resourceNames: ["kubernetes-dashboard-key-holder", <br>                    "kubernetes-dashboard-certs", <br>                    "kubernetes-dashboard-csrf"]<br>    verbs: ["get", "update", "delete"]<br>    <br>  # 설정 ConfigMap 관리<br>  - apiGroups: [""]<br>    resources: ["configmaps"]<br>    resourceNames: ["kubernetes-dashboard-settings"]<br>    verbs: ["get", "update"]<br>    <br>  # 메트릭 서비스 프록시<br>  - apiGroups: [""]<br>    resources: ["services"]<br>    resourceNames: ["heapster", "dashboard-metrics-scraper"]<br>    verbs: ["proxy"]<br>  - apiGroups: [""]<br>    resources: ["services/proxy"]<br>    resourceNames: ["heapster", "http:heapster:", <br>                    "https:heapster:", <br>                    "dashboard-metrics-scraper", <br>                    "http:dashboard-metrics-scraper"]<br>    verbs: ["get"]</code></pre></p>
+<p></p>
+<h3>권한 요약</h3>
+<p></p>
+<p>| 리소스 | 리소스 이름 | 권한 |</p>
+<p>|--------|-------------|------|</p>
+<p>| Secrets | dashboard 관련 3 개 | get, update, delete |</p>
+<p>| ConfigMaps | settings | get, update |</p>
+<p>| Services | heapster, metrics-scraper | proxy |</p>
+<p>| Services/Proxy | heapster, metrics-scraper | get |</p>
+<p></p><br><hr>
+<p></p>
+<h2>7. ClusterRole</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: ClusterRole<br>apiVersion: rbac.authorization.k8s.io/v1<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard<br>rules:<br>  # Metrics Server 에서 메트릭 조회<br>  - apiGroups: ["metrics.k8s.io"]<br>    resources: ["pods", "nodes"]<br>    verbs: ["get", "list", "watch"]</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>클러스터 전체의 메트릭 조회 권한</li>
+<li><code>kubectl top</code> 과 동일한 메트릭 데이터 접근</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>8. RoleBinding</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: RoleBinding<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard<br>  namespace: kubernetes-dashboard<br>roleRef:<br>  apiGroup: rbac.authorization.k8s.io<br>  kind: Role<br>  name: kubernetes-dashboard<br>subjects:<br>  - kind: ServiceAccount<br>    name: kubernetes-dashboard<br>    namespace: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Role 의 권한을 ServiceAccount 에 바인딩</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>9. ClusterRoleBinding (x2)</h2>
+<p></p>
+<h3>9-1. 메트릭 조회 권한</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: kubernetes-dashboard<br>roleRef:<br>  apiGroup: rbac.authorization.k8s.io<br>  kind: ClusterRole<br>  name: kubernetes-dashboard<br>subjects:<br>  - kind: ServiceAccount<br>    name: kubernetes-dashboard<br>    namespace: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>ClusterRole 의 메트릭 조회 권한 바인딩</li>
+<p></ul></p>
+<h3>9-2. 관리자 권한 (중요!)</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: kubernetes-dashboard2<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>roleRef:<br>  apiGroup: rbac.authorization.k8s.io<br>  kind: ClusterRole<br>  name: cluster-admin<br>subjects:<br>- kind: ServiceAccount<br>  name: kubernetes-dashboard<br>  namespace: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>⚠️ 주의사항</h3>
+<p></p>
+<p>| 항목 | 설명 |</p>
+<p>|------|------|</p>
+<p>| <code>roleRef.name</code> | cluster-admin |</p>
+<p>| <strong>권한</strong> | <strong>클러스터 전체 관리자 권한</strong> |</p>
+<p>| <strong>위험도</strong> | <strong>높음</strong> |</p>
+<p></p><br><strong>이 ClusterRoleBinding 은 Dashboard 에 cluster-admin 권한을 부여합니다.</strong>
+<p></p>
+<h3>보안 고려사항</h3>
+<p></p>
+<p><pre><code>⚠️ 위험 요소:<br>1. Dashboard 를 통한 클러스터 완전 제어 가능<br>2. Dashboard 가 침해되면 클러스터 전체 침해<br>3. 외부 노출 시 심각한 보안 문제<br><br>✅ 권장 사항:<br>1. NodePort 대신 Ingress 사용<br>2. 인증/인가 강화<br>3. 네트워크 폴리시 적용<br>4. cluster-admin 대신 최소 권한 원칙 적용</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>10. Deployment - Dashboard</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: Deployment<br>apiVersion: apps/v1<br>metadata:<br>  labels:<br>    k8s-app: kubernetes-dashboard<br>  name: kubernetes-dashboard<br>  namespace: kubernetes-dashboard<br>spec:<br>  replicas: 1<br>  revisionHistoryLimit: 10<br>  selector:<br>    matchLabels:<br>      k8s-app: kubernetes-dashboard<br>  template:<br>    metadata:<br>      labels:<br>        k8s-app: kubernetes-dashboard<br>    spec:<br>      securityContext:<br>        seccompProfile:<br>          type: RuntimeDefault<br>      containers:<br>        - name: kubernetes-dashboard<br>          image: kubernetesui/dashboard:v2.7.0<br>          imagePullPolicy: Always<br>          ports:<br>            - containerPort: 8443<br>              protocol: TCP<br>          args:<br>            - --auto-generate-certificates<br>            - --namespace=kubernetes-dashboard<br>            - --enable-skip-login<br>          volumeMounts:<br>            - name: kubernetes-dashboard-certs<br>              mountPath: /certs<br>            - mountPath: /tmp<br>              name: tmp-volume<br>          livenessProbe:<br>            httpGet:<br>              scheme: HTTPS<br>              path: /<br>              port: 8443<br>            initialDelaySeconds: 30<br>            timeoutSeconds: 30<br>          securityContext:<br>            allowPrivilegeEscalation: false<br>            readOnlyRootFilesystem: true<br>            runAsUser: 1001<br>            runAsGroup: 2001<br>      volumes:<br>        - name: kubernetes-dashboard-certs<br>          secret:<br>            secretName: kubernetes-dashboard-certs<br>        - name: tmp-volume<br>          emptyDir: {}<br>      serviceAccountName: kubernetes-dashboard<br>      nodeSelector:<br>        "kubernetes.io/os": linux<br>      tolerations:<br>        - key: node-role.kubernetes.io/master<br>          effect: NoSchedule</code></pre></p>
+<p></p>
+<h3>컨테이너 인수 (args)</h3>
+<p></p>
+<p>| 인수 | 설명 |</p>
+<p>|------|------|</p>
+<p>| <code>--auto-generate-certificates</code> | 자동 인증서 생성 |</p>
+<p>| <code>--namespace=kubernetes-dashboard</code> | 대상 네임스페이스 |</p>
+<p>| <code>--enable-skip-login</code> | 로그인 건너뛰기 버튼 표시 |</p>
+<p></p>
+<h3>프로브</h3>
+<p></p>
+<p><pre><code class="language-yaml">livenessProbe:<br>  httpGet:<br>    scheme: HTTPS<br>    path: /         # 루트 경로<br>    port: 8443<br>  initialDelaySeconds: 30  # 30 초 후 첫 확인<br>  timeoutSeconds: 30       # 30 초 타임아웃</code></pre></p>
+<p></p>
+<h3>보안 컨텍스트</h3>
+<p></p>
+<p><pre><code class="language-yaml">securityContext:<br>  allowPrivilegeEscalation: false  # 권한 상승 불가<br>  readOnlyRootFilesystem: true     # 루트 파일시스템 읽기 전용<br>  runAsUser: 1001                  # UID 1001<br>  runAsGroup: 2001                 # GID 2001</code></pre></p>
+<p></p>
+<h3>볼륨</h3>
+<p></p>
+<p><pre><code class="language-yaml">volumes:<br>  - name: kubernetes-dashboard-certs<br>    secret:<br>      secretName: kubernetes-dashboard-certs  # 인증서<br>  - name: tmp-volume<br>    emptyDir: {}                              # 임시 디렉토리</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>11. Service - Metrics Scraper</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: Service<br>apiVersion: v1<br>metadata:<br>  labels:<br>    k8s-app: dashboard-metrics-scraper<br>  name: dashboard-metrics-scraper<br>  namespace: kubernetes-dashboard<br>spec:<br>  ports:<br>    - port: 8000<br>      targetPort: 8000<br>  selector:<br>    k8s-app: dashboard-metrics-scraper</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Metrics Scraper 에 대한 내부 서비스 엔드포인트</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>12. Deployment - Metrics Scraper</h2>
+<p></p>
+<p><pre><code class="language-yaml">kind: Deployment<br>apiVersion: apps/v1<br>metadata:<br>  labels:<br>    k8s-app: dashboard-metrics-scraper<br>  name: dashboard-metrics-scraper<br>  namespace: kubernetes-dashboard<br>spec:<br>  replicas: 1<br>  selector:<br>    matchLabels:<br>      k8s-app: dashboard-metrics-scraper<br>  template:<br>    metadata:<br>      labels:<br>        k8s-app: dashboard-metrics-scraper<br>    spec:<br>      containers:<br>        - name: dashboard-metrics-scraper<br>          image: kubernetesui/metrics-scraper:v1.0.8<br>          ports:<br>            - containerPort: 8000<br>              protocol: TCP<br>          livenessProbe:<br>            httpGet:<br>              scheme: HTTP<br>              path: /<br>              port: 8000<br>            initialDelaySeconds: 30<br>            timeoutSeconds: 30<br>          securityContext:<br>            allowPrivilegeEscalation: false<br>            readOnlyRootFilesystem: true<br>            runAsUser: 1001<br>            runAsGroup: 2001<br>      serviceAccountName: kubernetes-dashboard<br>      volumes:<br>        - name: tmp-volume<br>          emptyDir: {}</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Metric Server 에서 메트릭 데이터를 가져와 Dashboard 에 제공</li>
+<li>메트릭 데이터 캐싱 및 가공</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>Dashboard 관리자 사용자 생성</h2>
+<p></p>
+<p><pre><code class="language-yaml"># dashboard-adminuser.yaml<br>apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  name: admin-user<br>  namespace: kubernetes-dashboard<br>---<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: admin-user<br>roleRef:<br>  apiGroup: rbac.authorization.k8s.io<br>  kind: ClusterRole<br>  name: cluster-admin<br>subjects:<br>- kind: ServiceAccount<br>  name: admin-user<br>  namespace: kubernetes-dashboard</code></pre></p>
+<p></p>
+<h3>토큰 발급</h3>
+<p></p>
+<p><pre><code class="language-bash"># 토큰 생성<br>kubectl -n kubernetes-dashboard create token admin-user<br><br># 출력된 토큰을 Dashboard 로그인에 사용</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>리소스 관계도</h2>
+<p></p>
+<p>Kubernetes Dashboard를 구성하는 주요 리소스들의 구조입니다.</p>
+<p></p>
+<p><div class="mermaid">graph TD
+    NS[Namespace: kubernetes-dashboard] --> SA[ServiceAccount]
+    
+    subgraph Authorization
+    SA --> RB1[RoleBinding: dashboard-settings]
+    SA --> RB2[ClusterRoleBinding: metrics-reader]
+    SA --> RB3[ClusterRoleBinding: cluster-admin ⚠️]
+    end
+    
+    subgraph Core_Components
+    DEP1[Deployment: kubernetes-dashboard] --> SVC1[Service: NodePort 30000]
+    DEP2[Deployment: dashboard-metrics-scraper] --> SVC2[Service: Port 8000]
+    end
+    
+    subgraph Config_Secrets
+    S1[Secret: dashboard-certs]
+    S2[Secret: dashboard-csrf]
+    C1[ConfigMap: dashboard-settings]
+    end
+    
+    DEP1 --- S1 & S2 & C1
+    DEP2 -- "Collect" --> MS[Metric Server]</div></p>
+<p></p>
+<p>| 구성 요소 | 주요 역할 |</p>
+<p>|-----------|----------|</p>
+<p>| <strong>Dashboard UI</strong> | 웹 기반의 클러스터 관리 인터페이스 제공 |</p>
+<p>| <strong>Metrics Scraper</strong> | Metric Server로부터 데이터를 가져와 차트용 데이터 가공 |</p>
+<p>| <strong>ServiceAccount</strong> | 대시보드 프로세스가 API 서버에 접근하기 위한 신분증 |</p>
+<p>| <strong>Secrets</strong> | HTTPS 통신을 위한 인증서 및 보안 토큰(CSRF) 저장 |</p>
+<p></p><br><hr>
+<p></p>
+<h2>설치 확인</h2>
+<p></p>
+<p><pre><code class="language-bash"># Dashboard 설치<br>kubectl apply -f kubernetes-dashboard.yaml<br>kubectl apply -f dashboard-adminuser.yaml<br><br># Pod 상태 확인<br>kubectl get pods -n kubernetes-dashboard<br># NAME                                  READY   STATUS    RESTARTS   AGE<br># kubernetes-dashboard-xxxxxxxxx-xxxx   1/1     Running   0          1m<br># dashboard-metrics-scraper-xxxx-xxx    1/1     Running   0          1m<br><br># Service 상태 확인<br>kubectl get svc -n kubernetes-dashboard<br># NAME                        TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE<br># kubernetes-dashboard        NodePort   10.96.xxx.xxx  <none>        443:30000/TCP    1m<br># dashboard-metrics-scraper   ClusterIP  10.96.xxx.xxx  <none>        8000/TCP         1m<br><br># 토큰 발급<br>kubectl -n kubernetes-dashboard create token admin-user<br><br># 접속<br># https://<노드 IP>:30000</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>요약</h2>
+<p></p>
+<p>| 리소스 | 개수 | 용도 |</p>
+<p>|--------|------|------|</p>
+<p>| Namespace | 1 | 전용 네임스페이스 |</p>
+<p>| ServiceAccount | 1 | Pod 신원 |</p>
+<p>| Service | 2 | 네트워크 엔드포인트 |</p>
+<p>| Secret | 3 | 인증서, CSRF, 키 |</p>
+<p>| ConfigMap | 1 | 설정 저장 |</p>
+<p>| Role | 1 | 네임스페이스 권한 |</p>
+<p>| ClusterRole | 1 | 클러스터 권한 |</p>
+<p>| RoleBinding | 1 | 네임스페이스 바인딩 |</p>
+<p>| ClusterRoleBinding | 2 | 클러스터 바인딩 |</p>
+<p>| Deployment | 2 | Pod 배포 |</p>
+<p>| <strong>총계</strong> | <strong>15</strong> | |</p>
+<p></p><br><strong>Kubernetes Dashboard 는 웹 기반 UI 를 제공하며, cluster-admin 권한 부여 시 보안 주의가 필요합니다.</strong>
+<p></p>
+</body>
+</html>

@@ -23,7 +23,7 @@ HTTP 기본 인증은 웹 브라우저나 클라이언트가 서버에 사용자
 
 HTTP 프로토콜의 Challenge-Response 메커니즘을 사용하여 인증을 수행합니다.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as 클라이언트
     participant S as 서버
@@ -34,7 +34,7 @@ sequenceDiagram
     C->>S: 3. 인증 정보 포함 재요청 (Authorization: Basic base64(ID:PW))
     Note over S: Base64 디코딩 후 신원 확인
     S->>C: 4. 200 OK (인증 성공 및 리소스 반환)
-</div>
+```
 
 ---
 

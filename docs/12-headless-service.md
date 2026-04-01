@@ -22,7 +22,7 @@ StatefulSet을 운영할 때 왜 일반 서비스가 아닌 **Headless Service**
 ### 이유 1: 고유한 DNS 주소(Stable Network ID) 제공
 StatefulSet의 각 Pod는 번호가 붙은 고유한 이름을 가집니다. Headless Service와 결합하면 각 Pod는 고정된 DNS 주소를 갖게 됩니다.
 
-<div class="mermaid">
+```mermaid
 graph LR
     H[Headless Service]
     H --- P0[mysql-0.mysql.svc]
@@ -34,7 +34,7 @@ graph LR
     P1 --> IP1[10.244.2.8]
     P2 --> IP2[10.244.3.12]
     end
-</div>
+```
 
 - **장점:** `mysql-0`이 재시작되어 IP가 바뀌더라도, DNS 이름(`mysql-0.mysql`)은 그대로 유지되어 다른 Pod들이 중단 없이 통신할 수 있습니다.
 
@@ -52,7 +52,7 @@ graph LR
 
 ## 3. 동작 원리 요약
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (App)
     participant D as CoreDNS
@@ -64,7 +64,7 @@ sequenceDiagram
     D-->>C: 4. [10.1.1.1, 10.1.1.2, 10.1.1.3] 반환
     C->>C: 5. (선택) 나는 mysql-0(10.1.1.1)로 갈래
     C->>C: 6. 직접 연결 시도
-</div>
+```
 
 ---
 

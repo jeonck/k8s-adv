@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>43-operator-development.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>43-operator-development.md</code> | 
+        <a href="43-operator-development.md">View Markdown</a>
+    </div>
+    
+    <h1>Operator 개발 가이드</h1>
+<p></p>
+<p>Kubernetes Operator를 개발하는 방법과 효율적인 개발을 돕는 다양한 도구들을 소개합니다.</p>
+<p></p><br><hr>
+<p></p>
+<h2>Operator 란?</h2>
+<p></p>
+<p>Operator는 인간 운영자의 지식을 코드로 구현하여 복잡한 애플리케이션을 자동으로 관리하는 소프트웨어 확장입니다.</p>
+<p></p>
+<h3>핵심 개념 비교</h3>
+<p></p>
+<p>| 구분 | 수동 운영 (Manual) | Operator 자동화 |</p>
+<p>|------|--------------------|-----------------|</p>
+<p>| <strong>모니터링</strong> | 사람이 직접 대시보드 확인 | 24시간 자동 감시 및 상태 체크 |</p>
+<p>| <strong>장애 복구</strong> | 수동으로 Pod 재시작 및 데이터 복구 | 장애 감지 시 즉시 자동 복구 수행 |</p>
+<p>| <strong>백업/업그레이드</strong> | 점검 공지 후 수동 작업 | 스케줄에 따른 자동 백업 및 무중단 업그레이드 |</p>
+<p>| <strong>비유</strong> | 119 구조대원 (필요시 출동) | 자율주행 관리 로봇 |</p>
+<p></p><br><hr>
+<p></p>
+<h2>Operator의 3대 구성 요소</h2>
+<p></p>
+<p>Operator는 다음 세 가지가 결합되어 완성됩니다.</p>
+<p></p>
+<p><div class="mermaid">graph LR
+    CRD[1. CRD<br/>사용자 정의 리소스] --- CTL[2. Controller<br/>상태 관리 로직]
+    CTL --- Domain[3. Domain Knowledge<br/>운영 노하우 코드화]
+    
+    subgraph Operator_Entity
+    CRD
+    CTL
+    Domain
+    end</div></p>
+<li><strong>CRD (Custom Resource Definition):</strong> 애플리케이션의 설정을 정의하는 새로운 API 객체 (예: <code>kind: Database</code>)</li>
+<li><strong>Controller:</strong> 리소스를 감시하고 '원하는 상태'가 되도록 조치하는 루프(Reconcile Loop)</li>
+<li><strong>Domain Knowledge:</strong> 특정 앱(MySQL, Kafka 등)을 어떻게 백업하고 어떻게 확장해야 하는지에 대한 전문 지식</li>
+<p></p><br><hr>
+<p></p>
+<h2>왜 도구가 필요한가?</h2>
+<p></p>
+<p>Kubernetes 컨트롤러를 바닥부터 직접 만드는 것은 매우 복잡합니다.</p>
+<p></p>
+<p>| 어려운 점 | 상세 내용 |</p>
+<p>|-----------|----------|</p>
+<p>| <strong>저수준 API</strong> | <code>client-go</code>, Informer, Lister 등 복잡한 라이브러리 이해 필요 |</p>
+<p>| <strong>상태 동기화</strong> | <code>Watch</code> 메커니즘을 이용한 실시간 이벤트 처리 로직 구현 |</p>
+<p>| <strong>Reconcile 루프</strong> | 멱등성(Idempotency)을 보장하는 정교한 제어 로직 설계 |</p>
+<p>| <strong>반복 코드</strong> | 매번 작성해야 하는 방대한 양의 보일러플레이트 코드 |</p>
+<p></p><br><strong>이러한 복잡성을 해결하기 위해 Operator SDK, Kubebuilder와 같은 프레임워크 사용이 권장됩니다.</strong>
+<p></p><br><hr>
+<p></p>
+<h2>주요 개발 프레임워크</h2>
+<ul><li><strong>Operator SDK:</strong> Helm, Ansible, Go를 지원하며 CNCF 프로젝트로 널리 사용됨</li>
+<li><strong>Kubebuilder:</strong> Go 기반의 표준적인 컨트롤러 개발 도구</li>
+<li><strong>KUDO:</strong> 선언적인 YAML 방식으로 오퍼레이터 구축</li>
+<p></ul></p><br><strong>오퍼레이터 개발은 단순한 배포를 넘어 애플리케이션의 생명주기 전체를 자동화하는 여정입니다.</strong>
+<p></p>
+</body>
+</html>

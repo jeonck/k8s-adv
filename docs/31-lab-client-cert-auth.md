@@ -19,13 +19,13 @@
 
 ## 실습 아키텍처
 
-<div class="mermaid">
+```mermaid
 graph LR
     User[honggildong] -- "인증서 제출" --> API[API Server]
     API -- "Root CA로 검증" --> AuthN{인증 성공}
     AuthN -- "RBAC 체크" --> AuthZ{인가 성공}
     AuthZ -- "제한된 리소스 접근" --> NS[honggildong Namespace]
-</div>
+```
 
 ---
 

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12-headless-service.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>12-headless-service.md</code> | 
+        <a href="12-headless-service.md">View Markdown</a>
+    </div>
+    
+    <h1>StatefulSet 에서 Headless Service 가 필요한 이유</h1>
+<p></p>
+<p>StatefulSet을 운영할 때 왜 일반 서비스가 아닌 <strong>Headless Service</strong>가 필수적인지 핵심 이유를 알아봅니다.</p>
+<p></p><br><hr>
+<p></p>
+<h2>1. Headless Service 란?</h2>
+<p></p>
+<p>일반적인 서비스와 달리 <code>clusterIP: None</code> 설정을 통해 가상 IP를 할당받지 않는 서비스입니다.</p>
+<p></p>
+<p>| 특성 | 일반 Service (ClusterIP) | Headless Service |</p>
+<p>|------|-------------------------|------------------|</p>
+<p>| <strong>가상 IP (VIP)</strong> | 할당됨 (예: 10.96.0.10) | <strong>없음 (None)</strong> |</p>
+<p>| <strong>로드밸런싱</strong> | kube-proxy가 여러 Pod로 분산 | 없음 (클라이언트가 직접 선택) |</p>
+<p>| <strong>DNS 응답</strong> | 단일 ClusterIP 반환 | <strong>연결된 모든 Pod의 IP 목록 반환</strong> |</p>
+<p>| <strong>주 용도</strong> | 일반적인 트래픽 분산 | 개별 Pod에 직접 접근 (Stateful) |</p>
+<p></p><br><hr>
+<p></p>
+<h2>2. 왜 StatefulSet에 필수인가?</h2>
+<p></p>
+<h3>이유 1: 고유한 DNS 주소(Stable Network ID) 제공</h3>
+<p>StatefulSet의 각 Pod는 번호가 붙은 고유한 이름을 가집니다. Headless Service와 결합하면 각 Pod는 고정된 DNS 주소를 갖게 됩니다.</p>
+<p></p>
+<p><div class="mermaid">graph LR
+    H[Headless Service]
+    H --- P0[mysql-0.mysql.svc]
+    H --- P1[mysql-1.mysql.svc]
+    H --- P2[mysql-2.svc]
+    
+    subgraph IPs
+    P0 --> IP0[10.244.1.5]
+    P1 --> IP1[10.244.2.8]
+    P2 --> IP2[10.244.3.12]
+    end</div></p>
+<ul><li><strong>장점:</strong> <code>mysql-0</code>이 재시작되어 IP가 바뀌더라도, DNS 이름(<code>mysql-0.mysql</code>)은 그대로 유지되어 다른 Pod들이 중단 없이 통신할 수 있습니다.</li>
+<p></ul></p>
+<h3>이유 2: 마스터/슬레이브 역할 구분 및 직접 통신</h3>
+<p>일반 서비스는 랜덤하게 트래픽을 보내기 때문에 "쓰기 작업을 위해 마스터(<code>mysql-0</code>)에게만 접속"하는 것이 불가능합니다.</p>
+<ul><li><strong>Headless 방식:</strong> 클라이언트가 DNS 조회를 통해 마스터 Pod의 주소를 직접 알아내고 그곳으로만 통신할 수 있습니다.</li>
+<p></ul></p>
+<h3>이유 3: 데이터 복제 토폴로지 구성</h3>
+<p>분산 DB(Kafka, MongoDB, MySQL 등)는 노드 간에 서로를 명확히 알고 데이터를 복제해야 합니다.</p>
+<ul><li><strong>복제 흐름:</strong> "나는 1번이고, 나의 데이터 부모는 0번이다"라는 정의가 가능해집니다.</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>3. 동작 원리 요약</h2>
+<p></p>
+<p><div class="mermaid">sequenceDiagram
+    participant C as Client (App)
+    participant D as CoreDNS
+    participant S as Headless Service
+    
+    C->>D: 1. mysql 서비스 주소 뭐야?
+    D->>S: 2. Endpoints 확인
+    S-->>D: 3. Pod A, B, C의 IP 목록 전달
+    D-->>C: 4. [10.1.1.1, 10.1.1.2, 10.1.1.3] 반환
+    C->>C: 5. (선택) 나는 mysql-0(10.1.1.1)로 갈래
+    C->>C: 6. 직접 연결 시도</div></p>
+<p></p><br><hr>
+<p></p>
+<h2>4. 핵심 정리</h2>
+<li><strong>예측 가능성:</strong> Pod 이름과 DNS 주소를 예측할 수 있게 해줍니다.</li>
+<li><strong>직접 접근:</strong> 로드밸런서라는 장벽 없이 Pod와 1:1로 대화하게 해줍니다.</li>
+<li><strong>안정성:</strong> Pod가 죽었다 살아나도 동일한 이름으로 찾을 수 있게 해줍니다.</li>
+<p></p><br><strong>Headless Service는 StatefulSet이 단순한 컨테이너 묶음을 넘어, '정체성'을 가진 클러스터 시스템으로 동작하게 만드는 핵심 인프라입니다.</strong>
+<p></p>
+</body>
+</html>

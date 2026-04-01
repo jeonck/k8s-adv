@@ -21,7 +21,7 @@ CRD는 Kubernetes의 기본 리소스(Pod, Service 등) 외에, 사용자의 비
 
 ## 2. CRD의 역할과 가치
 
-<div class="mermaid">
+```mermaid
 graph TD
     KAPI[Kubernetes API Server] -- "API 확장" --> CRD[CustomResourceDefinition]
     CRD -- "인스턴스 생성" --> CR[Custom Resource]
@@ -33,7 +33,7 @@ graph TD
     end
     
     CR -.-> User_Benefits
-</div>
+```
 
 1.  **선언적 인프라:** 복잡한 앱 설정을 YAML 파일 하나로 정의하고 관리할 수 있습니다.
 2.  **도구 통합:** 별도의 도구 없이 `kubectl get <my-resource>` 명령어로 상태를 확인할 수 있습니다.

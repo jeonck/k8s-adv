@@ -23,7 +23,7 @@ PKI는 공개키 암호화 기술을 안전하게 사용하기 위한 기반 구
 
 ### PKI 동작 흐름
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant U as 사용자 (User)
     participant CA as 인증 기관 (CA/RA)
@@ -35,7 +35,7 @@ sequenceDiagram
     Note over CA: Step 4: CA 개인키로 인증서 서명
     CA->>U: Step 5: 발급된 인증서 전달
     CA->>R: Step 6: 발급/폐기 정보 업데이트
-</div>
+```
 
 ---
 

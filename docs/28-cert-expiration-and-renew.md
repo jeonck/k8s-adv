@@ -39,13 +39,13 @@ kubeadm certs check-expiration
 
 만료가 임박한 인증서는 `kubeadm` 명령어로 간단히 갱신할 수 있습니다.
 
-<div class="mermaid">
+```mermaid
 flowchart LR
     Check[만료 확인<br/>check-expiration] --> Decision{30일 미만?}
     Decision -- Yes --> Renew[인증서 갱신<br/>certs renew all]
     Renew --> Restart[컴포넌트 재시작<br/>Static Pod 자동 재시작]
     Decision -- No --> Wait[정기 점검 대기]
-</div>
+```
 
 ### 갱신 명령어 예시
 ```bash

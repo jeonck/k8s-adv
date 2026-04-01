@@ -26,7 +26,7 @@ openssl x509 -in /etc/kubernetes/pki/ca.crt -text -noout
 
 ### 주요 필드 분석
 
-<div class="mermaid">
+```mermaid
 graph TD
     CA[Root CA 인증서 정보]
     CA --> Issuer["Issuer: CN = kubernetes-ca (자기 자신)"]
@@ -34,7 +34,7 @@ graph TD
     CA --> Validity["Validity: 약 10년 (장기 보관용)"]
     CA --> Usage["Key Usage: Certificate Sign (인증서 서명용)"]
     CA --> Basic["Basic Constraints: CA:TRUE (인증 기관임)"]
-</div>
+```
 
 ---
 

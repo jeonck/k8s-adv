@@ -1,6 +1,3 @@
-// Mermaid 초기화 설정
-mermaid.initialize({ startOnLoad: false, theme: 'default' });
-
 // Markdown 파일 로드 함수
 async function loadMarkdown(filePath, elementId) {
     try {
@@ -12,27 +9,73 @@ async function loadMarkdown(filePath, elementId) {
         const html = marked.parse(markdown);
         const contentElement = document.getElementById(elementId);
         contentElement.innerHTML = html;
-        
+
         // Mermaid 다이어그램 렌더링
-        if (window.mermaid) {
-            try {
-                await mermaid.run({
-                    querySelector: '.mermaid'
-                });
-            } catch (mermaidError) {
-                console.error('Mermaid rendering failed:', mermaidError);
-            }
-        }
-        
+        await renderMermaidDiagrams(contentElement);
+
     } catch (error) {
         console.error('Error loading markdown:', error);
-        document.getElementById(elementId).innerHTML = 
+        document.getElementById(elementId).innerHTML =
             `<div class="error-box">
                 <h3>콘텐츠 로드 실패</h3>
                 <p>경로: ${filePath}</p>
                 <p>에러: ${error.message}</p>
                 <button onclick="location.reload()">새로고침</button>
             </div>`;
+    }
+}
+
+// Mermaid 다이어그램 렌더링 함수
+async function renderMermaidDiagrams(container) {
+    if (!window.mermaid) {
+        console.warn('Mermaid not loaded');
+        return;
+    }
+
+    // marked 는 mermaid 코드 블록을 <pre><code class="language-mermaid">로 변환
+    const codeElements = container.querySelectorAll('pre code.language-mermaid');
+    
+    if (codeElements.length === 0) {
+        console.log('No mermaid diagrams found');
+        return;
+    }
+
+    console.log(`Found ${codeElements.length} mermaid diagram(s), converting...`);
+
+    try {
+        // 각 code 블록을 mermaid div 로 변환
+        codeElements.forEach((codeEl, index) => {
+            const mermaidCode = codeEl.textContent;
+            const preEl = codeEl.parentElement;
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = mermaidCode;
+            preEl.parentNode.replaceChild(mermaidDiv, preEl);
+        });
+
+        // Mermaid 렌더링
+        await mermaid.run({
+            querySelector: '.mermaid'
+        });
+
+        console.log('Mermaid diagrams rendered successfully');
+    } catch (error) {
+        console.error('Mermaid rendering failed:', error);
+
+        // 에러 발생 시 원본 코드를 표시하여 디버깅 지원
+        const mermaidElements = container.querySelectorAll('.mermaid');
+        mermaidElements.forEach((el) => {
+            if (!el.querySelector('svg')) {
+                const originalCode = el.textContent.trim();
+                el.innerHTML = `
+                    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:4px;padding:15px;margin:10px 0;">
+                        <strong>⚠️ Diagram rendering failed</strong>
+                        <pre style="background:#f8f9fa;padding:10px;border-radius:4px;overflow:auto;text-align:left;">${originalCode}</pre>
+                        <small>Error: ${error.message}</small>
+                    </div>
+                `;
+            }
+        });
     }
 }
 

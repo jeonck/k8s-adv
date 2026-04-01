@@ -19,7 +19,7 @@ Root CA 인증서의 공개키를 이용한 암호화 검증을 실습합니다.
 
 ## 1. 실습 흐름도
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant P as 평문 (hello.txt)
     participant K as Root CA 공개키 (ca.pub)
@@ -33,7 +33,7 @@ sequenceDiagram
     Note over E,SK: 2. 개인키로 복호화
     E->>SK: 암호문 전달
     SK-->>P: 원본 평문 복원
-</div>
+```
 
 ---
 

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11-lab-addon-install.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>11-lab-addon-install.md</code> | 
+        <a href="11-lab-addon-install.md">View Markdown</a>
+    </div>
+    
+    <h1>Add-on 컴포넌트 설치</h1>
+<p></p>
+<p>Kubernetes 클러스터에 필수 Add-on 컴포넌트를 설치합니다.</p>
+<p></p>
+<h2>1. Add-on 구성 파일 확인</h2>
+<p></p>
+<p><pre><code class="language-bash">[root@k8s-cp ~]# tree -L 2 ~/lab/add-on<br>/root/add-on<br>├── 01_metric-server<br>│   └── components.yaml<br>├── 02_dashboard<br>│   ├── dashboard-adminuser.yaml<br>│   └── kubernetes-dashboard.yaml<br>├── 03_metal-LB<br>│   ├── metallb-ippool.yaml<br>│   ├── metallb-l2advertisement.yaml<br>│   └── metallb-native.yaml<br>├── 04_ingress<br>│   └── ingress-nginx.yaml<br>└── 05_nfs-subdir-external-provisioner<br>    └── deploy<br>6 directories, 7 files</code></pre></p>
+<p></p>
+<h2>2. Metric Server 설치</h2>
+<p></p>
+<p>Metric Server 는 클러스터 리소스 사용량 정보를 수집합니다.</p>
+<p></p>
+<p><pre><code class="language-bash"># 설치<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/01_metric-server/components.yaml<br><br># 설치 확인<br>[root@k8s-cp ~]# kubectl get pods -n kube-system | grep metrics-server<br>metrics-server-xxxxxxxxxx-xxxxx   1/1   Running   0   30s<br><br># 노드 리소스 확인<br>[root@k8s-cp ~]# kubectl top nodes<br>NAME     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%<br>k8s-cp   250m         12%    2048Mi          51%<br>k8s-w1   180m         9%     1536Mi          38%<br>k8s-w2   160m         8%     1420Mi          35%</code></pre></p>
+<p></p>
+<h2>3. Kubernetes Dashboard 설치</h2>
+<p></p>
+<p>웹 기반 UI 를 제공합니다.</p>
+<p></p>
+<p><pre><code class="language-bash"># Dashboard 설치<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/02_dashboard/kubernetes-dashboard.yaml<br><br># 관리자 사용자 생성<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/02_dashboard/dashboard-adminuser.yaml<br><br># 토큰 발급<br>[root@k8s-cp ~]# kubectl -n kubernetes-dashboard create token admin-user<br>eyJhbGciOiJSUzI1NiIsImtpZCI6Ii4uLiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50...<br><br># Dashboard 접속<br>[root@k8s-cp ~]# kubectl proxy<br>Starting to serve on 127.0.0.1:8001<br><br># 브라우저에서 접속<br>http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/</code></pre></p>
+<p></p>
+<h2>4. MetalLB 설치</h2>
+<p></p>
+<p>베어메탈 환경에서 LoadBalancer 타입 Service 를 지원합니다.</p>
+<p></p>
+<p><pre><code class="language-bash"># MetalLB 설치<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/03_metal-LB/metallb-native.yaml<br><br># MetalLB 설정 대기<br>[root@k8s-cp ~]# kubectl wait --namespace metallb-system \<br>  --for=condition=ready pod \<br>  --selector=component=controller \<br>  --timeout=120s<br><br># IP Pool 설정 (클러스터 네트워크에 맞게 수정)<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/03_metal-LB/metallb-ippool.yaml<br><br># L2 Advertisement 설정<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/03_metal-LB/metallb-l2advertisement.yaml<br><br># 설치 확인<br>[root@k8s-cp ~]# kubectl get pods -n metallb-system<br>NAME                          READY   STATUS    RESTARTS   AGE<br>controller-xxxxxxxxxx-xxxxx   1/1     Running   0          2m<br>speaker-xxxxx                 1/1     Running   0          2m</code></pre></p>
+<p></p>
+<h2>5. Ingress Controller 설치</h2>
+<p></p>
+<p>외부 트래픽을 클러스터 내부 Service 로 라우팅합니다.</p>
+<p></p>
+<p><pre><code class="language-bash"># Ingress Controller 설치<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/04_ingress/ingress-nginx.yaml<br><br># 설치 확인<br>[root@k8s-cp ~]# kubectl get pods -n ingress-nginx<br>NAME                                        READY   STATUS    RESTARTS   AGE<br>ingress-nginx-controller-xxxxxxxxxx-xxxxx   1/1     Running   0          1m<br>ingress-nginx-defaultbackend-xxxxxxxxxx     1/1     Running   0          1m<br><br># LoadBalancer IP 확인<br>[root@k8s-cp ~]# kubectl get svc -n ingress-nginx<br>NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE<br>ingress-nginx-controller             LoadBalancer   10.96.xxx.xxx   192.168.x.x   80:30xxx/TCP,443:30xxx/TCP   1m</code></pre></p>
+<p></p>
+<h2>6. NFS Subdir External Provisioner 설치</h2>
+<p></p>
+<p>NFS 를 사용한 동적 볼륨 프로비저닝을 제공합니다.</p>
+<p></p>
+<p><pre><code class="language-bash"># NFS Provisioner 설치<br>[root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/05_nfs-subdir-external-provisioner/deploy/<br><br># StorageClass 확인<br>[root@k8s-cp ~]# kubectl get sc<br>NAME                    PROVISIONER                                     RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE<br>nfs-client (default)    k8s-sigs.io/nfs-subdir-external-provisioner     Delete          Immediate           true                   30s<br><br># PVC 테스트<br>[root@k8s-cp ~]# cat <<EOF | kubectl apply -f -<br>apiVersion: v1<br>kind: PersistentVolumeClaim<br>metadata:<br>  name: nfs-test-claim<br>spec:<br>  storageClassName: nfs-client<br>  accessModes:<br>    - ReadWriteMany<br>  resources:<br>    requests:<br>      storage: 1Gi<br>EOF<br><br># PVC 상태 확인<br>[root@k8s-cp ~]# kubectl get pvc<br>NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE<br>nfs-test-claim   Bound    pvc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   1Gi        RWX            nfs-client     10s</code></pre></p>
+<p></p>
+<h2>7. 전체 Add-on 상태 확인</h2>
+<p></p>
+<p><pre><code class="language-bash">[root@k8s-cp ~]# kubectl get pods -A | grep -E 'metric|dashboard|metallb|ingress|nfs'<br><br># 예상 출력 예시<br>kube-system           metrics-server-xxxxxxxxxx-xxxxx       1/1   Running   0   5m<br>kubernetes-dashboard  kubernetes-dashboard-xxxxxxxxxx       1/1   Running   0   4m<br>metallb-system        controller-xxxxxxxxxx-xxxxx           1/1   Running   0   3m<br>metallb-system        speaker-xxxxx                         1/1   Running   0   3m<br>ingress-nginx         ingress-nginx-controller-xxxxxxxxx    1/1   Running   0   2m<br>default               nfs-subdir-external-provisioner-xx    1/1   Running   0   1m</code></pre></p>
+<p></p>
+<h2>실습 정리</h2>
+<p></p>
+<p>| Add-on | 목적 | 네임스페이스 |</p>
+<p>|--------|------|--------------|</p>
+<p>| Metric Server | 리소스 사용량 수집 (kubectl top) | kube-system |</p>
+<p>| Dashboard | 웹 기반 UI | kubernetes-dashboard |</p>
+<p>| MetalLB | LoadBalancer 지원 (베어메탈) | metallb-system |</p>
+<p>| Ingress Controller | HTTP/S 트래픽 라우팅 | ingress-nginx |</p>
+<p>| NFS Provisioner | 동적 NFS 볼륨 공급 | default |</p>
+<p></p>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>23-ingress-nginx-yaml.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>23-ingress-nginx-yaml.md</code> | 
+        <a href="23-ingress-nginx-yaml.md">View Markdown</a>
+    </div>
+    
+    <h1>Ingress-NGINX YAML 분석</h1>
+<p></p>
+<p>Ingress-NGINX 컨트롤러 설치에 사용되는 YAML 파일을 분석합니다.</p>
+<p></p>
+<h2>전체 구성</h2>
+<p></p>
+<p><pre><code>Ingress-NGINX 구성 리소스:<br>1. Namespace                 - 전용 네임스페이스<br>2. ServiceAccount (x2)       - Pod 의 신원<br>3. Role (x2)                 - 네임스페이스 권한<br>4. ClusterRole (x2)          - 클러스터 권한<br>5. RoleBinding (x2)          - 네임스페이스 권한 바인딩<br>6. ClusterRoleBinding (x2)   - 클러스터 권한 바인딩<br>7. ConfigMap                 - 컨트롤러 설정<br>8. Service (x2)              - 네트워크 엔드포인트<br>9. Deployment                - 컨트롤러 배포<br>10. Job (x2)                 - Webhook 인증서 생성/패치<br>11. IngressClass             - Ingress 클래스 정의<br>12. ValidatingWebhook        - Ingress 검증</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>1. Namespace</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Namespace<br>metadata:<br>  labels:<br>    app.kubernetes.io/instance: ingress-nginx<br>    app.kubernetes.io/name: ingress-nginx<br>  name: ingress-nginx</code></pre></p>
+<p></p>
+<h3>설명</h3>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>name</code> | ingress-nginx | Ingress-NGINX 전용 네임스페이스 |</p>
+<p>| <code>labels</code> | app.kubernetes.io/* | Kubernetes 권장 라벨 표준 |</p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Ingress-NGINX 관련 리소스 격리</li>
+<li>시스템 네임스페이스와 분리</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>2. ServiceAccount (x2)</h2>
+<p></p>
+<h3>2-1. 컨트롤러용</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  labels:<br>    app.kubernetes.io/component: controller<br>    app.kubernetes.io/version: 1.11.3<br>  name: ingress-nginx<br>  namespace: ingress-nginx<br>automountServiceAccountToken: true</code></pre></p>
+<p></p>
+<h3>2-2. Webhook 인증서 생성용</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  labels:<br>    app.kubernetes.io/component: admission-webhook<br>    app.kubernetes.io/version: 1.11.3<br>  name: ingress-nginx-admission<br>  namespace: ingress-nginx<br>automountServiceAccountToken: true</code></pre></p>
+<p></p>
+<h3>automountServiceAccountToken</h3>
+<p></p>
+<p><pre><code class="language-yaml">automountServiceAccountToken: true</code></pre></p>
+<ul><li>Pod 에서 ServiceAccount 토큰 자동 마운트</li>
+<li>Kubernetes API 접근에 필요</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>3. Role (x2)</h2>
+<p></p>
+<h3>3-1. 컨트롤러용 Role</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: Role<br>metadata:<br>  name: ingress-nginx<br>  namespace: ingress-nginx<br>rules:<br># 네임스페이스 조회<br>- apiGroups: [""]<br>  resources: ["namespaces"]<br>  verbs: ["get"]<br><br># 기본 리소스 조회<br>- apiGroups: [""]<br>  resources: ["configmaps", "pods", "secrets", "endpoints"]<br>  verbs: ["get", "list", "watch"]<br><br># 서비스 조회<br>- apiGroups: [""]<br>  resources: ["services"]<br>  verbs: ["get", "list", "watch"]<br><br># Ingress 리소스 관리<br>- apiGroups: ["networking.k8s.io"]<br>  resources: ["ingresses"]<br>  verbs: ["get", "list", "watch"]<br><br># Ingress 상태 업데이트<br>- apiGroups: ["networking.k8s.io"]<br>  resources: ["ingresses/status"]<br>  verbs: ["update"]<br><br># IngressClass 조회<br>- apiGroups: ["networking.k8s.io"]<br>  resources: ["ingressclasses"]<br>  verbs: ["get", "list", "watch"]<br><br># 리더 선출 (Leader Election)<br>- apiGroups: ["coordination.k8s.io"]<br>  resourceNames: ["ingress-nginx-leader"]<br>  resources: ["leases"]<br>  verbs: ["get", "update"]<br>- apiGroups: ["coordination.k8s.io"]<br>  resources: ["leases"]<br>  verbs: ["create"]<br><br># 이벤트 생성<br>- apiGroups: [""]<br>  resources: ["events"]<br>  verbs: ["create", "patch"]<br><br># 엔드포인트슬라이스 조회<br>- apiGroups: ["discovery.k8s.io"]<br>  resources: ["endpointslices"]<br>  verbs: ["list", "watch", "get"]</code></pre></p>
+<p></p>
+<h3>권한 요약</h3>
+<p></p>
+<p>| 리소스 | 권한 | 용도 |</p>
+<p>|--------|------|------|</p>
+<p>| namespaces | get | 네임스페이스 정보 조회 |</p>
+<p>| configmaps, pods, secrets, endpoints | get, list, watch | 기본 리소스 조회 |</p>
+<p>| services | get, list, watch | 서비스 조회 |</p>
+<p>| ingresses | get, list, watch | Ingress 리소스 모니터링 |</p>
+<p>| ingresses/status | update | Ingress 상태 업데이트 |</p>
+<p>| ingressclasses | get, list, watch | Ingress 클래스 조회 |</p>
+<p>| leases | get, update, create | 리더 선출 (고가용성) |</p>
+<p>| events | create, patch | 이벤트 기록 |</p>
+<p>| endpointslices | list, watch, get | 엔드포인트 조회 |</p>
+<p></p><br><hr>
+<p></p>
+<h3>3-2. Webhook 용 Role</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: Role<br>metadata:<br>  name: ingress-nginx-admission<br>  namespace: ingress-nginx<br>rules:<br>- apiGroups: [""]<br>  resources: ["secrets"]<br>  verbs: ["get", "create"]</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Webhook 인증서 시크릿 생성 및 조회</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>4. ClusterRole (x2)</h2>
+<p></p>
+<h3>4-1. 컨트롤러용 ClusterRole</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRole<br>metadata:<br>  name: ingress-nginx<br>rules:<br># 클러스터 전체 리소스 조회<br>- apiGroups: [""]<br>  resources: ["configmaps", "endpoints", "nodes", "pods", "secrets", "namespaces"]<br>  verbs: ["list", "watch"]<br><br># 노드 조회<br>- apiGroups: [""]<br>  resources: ["nodes"]<br>  verbs: ["get"]<br><br># 서비스 조회<br>- apiGroups: [""]<br>  resources: ["services"]<br>  verbs: ["get", "list", "watch"]<br><br># Ingress 리소스 관리<br>- apiGroups: ["networking.k8s.io"]<br>  resources: ["ingresses"]<br>  verbs: ["get", "list", "watch"]<br><br># 이벤트 생성<br>- apiGroups: [""]<br>  resources: ["events"]<br>  verbs: ["create", "patch"]<br><br># Ingress 상태 업데이트<br>- apiGroups: ["networking.k8s.io"]<br>  resources: ["ingresses/status"]<br>  verbs: ["update"]<br><br># IngressClass 조회<br>- apiGroups: ["networking.k8s.io"]<br>  resources: ["ingressclasses"]<br>  verbs: ["get", "list", "watch"]<br><br># 엔드포인트슬라이스 조회<br>- apiGroups: ["discovery.k8s.io"]<br>  resources: ["endpointslices"]<br>  verbs: ["list", "watch", "get"]<br><br># 리스 조회<br>- apiGroups: ["coordination.k8s.io"]<br>  resources: ["leases"]<br>  verbs: ["list", "watch"]</code></pre></p>
+<p></p>
+<h3>ClusterRole vs Role 차이</h3>
+<p></p>
+<p>| 범위 | Role | ClusterRole |</p>
+<p>|------|------|-------------|</p>
+<p>| <strong>적용 범위</strong> | 네임스페이스 내 | 클러스터 전체 |</p>
+<p>| <strong>사용 목적</strong> | 네임스페이스 리소스 | 노드, 네임스페이스 등 클러스터 리소스 |</p>
+<p></p><br><hr>
+<p></p>
+<h3>4-2. Webhook 용 ClusterRole</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRole<br>metadata:<br>  name: ingress-nginx-admission<br>rules:<br>- apiGroups: ["admissionregistration.k8s.io"]<br>  resources: ["validatingwebhookconfigurations"]<br>  verbs: ["get", "update"]</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>ValidatingWebhookConfiguration 업데이트</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>5. RoleBinding &amp; ClusterRoleBinding</h2>
+<p></p>
+<h3>5-1. RoleBinding (x2)</h3>
+<p></p>
+<p><pre><code class="language-yaml"># 컨트롤러용<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: RoleBinding<br>metadata:<br>  name: ingress-nginx<br>  namespace: ingress-nginx<br>roleRef:<br>  kind: Role<br>  name: ingress-nginx<br>subjects:<br>- kind: ServiceAccount<br>  name: ingress-nginx<br>  namespace: ingress-nginx<br><br># Webhook 용<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: RoleBinding<br>metadata:<br>  name: ingress-nginx-admission<br>  namespace: ingress-nginx<br>roleRef:<br>  kind: Role<br>  name: ingress-nginx-admission<br>subjects:<br>- kind: ServiceAccount<br>  name: ingress-nginx-admission<br>  namespace: ingress-nginx</code></pre></p>
+<p></p>
+<h3>5-2. ClusterRoleBinding (x2)</h3>
+<p></p>
+<p><pre><code class="language-yaml"># 컨트롤러용<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: ingress-nginx<br>roleRef:<br>  kind: ClusterRole<br>  name: ingress-nginx<br>subjects:<br>- kind: ServiceAccount<br>  name: ingress-nginx<br>  namespace: ingress-nginx<br><br># Webhook 용<br>apiVersion: rbac.authorization.k8s.io/v1<br>kind: ClusterRoleBinding<br>metadata:<br>  name: ingress-nginx-admission<br>roleRef:<br>  kind: ClusterRole<br>  name: ingress-nginx-admission<br>subjects:<br>- kind: ServiceAccount<br>  name: ingress-nginx-admission<br>  namespace: ingress-nginx</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>6. ConfigMap</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: ConfigMap<br>metadata:<br>  name: ingress-nginx-controller<br>  namespace: ingress-nginx<br>data:<br>  allow-snippet-annotations: "false"</code></pre></p>
+<p></p>
+<h3>설정 설명</h3>
+<p></p>
+<p>| 설정 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>allow-snippet-annotations</code> | "false" | 스니펫 주석 허용 안 함 (보안) |</p>
+<p></p>
+<h3>보안 고려사항</h3>
+<p></p>
+<p><pre><code class="language-yaml"># CVE-2021-25742 대응<br># allow-snippet-annotations: "true" 일 경우<br># 악의적인 nginx 설정 주입 가능<br><br># 예시 (악의적 주석):<br># nginx.ingress.kubernetes.io/configuration-snippet: |<br>#   set $secret $http_authorization;<br>#   proxy_set_header X-Secret $secret;</code></pre></p>
+<p></p>
+<h3>기타 주요 설정 옵션</h3>
+<p></p>
+<p><pre><code class="language-yaml">data:<br>  # SSL/TLS 설정<br>  ssl-protocols: "TLSv1.2 TLSv1.3"<br>  ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:..."<br>  <br>  # 타임아웃 설정<br>  proxy-connect-timeout: "10"<br>  proxy-read-timeout: "60"<br>  proxy-send-timeout: "60"<br>  <br>  # 리소스 제한<br>  max-worker-connections: "1024"<br>  <br>  # 로깅 설정<br>  access-log-path: "/var/log/nginx/access.log"<br>  error-log-path: "/var/log/nginx/error.log"<br>  <br>  # 기타<br>  use-forwarded-headers: "true"<br>  compute-full-forwarded-for: "true"</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>7. Service (x2)</h2>
+<p></p>
+<h3>7-1. 컨트롤러 Service (LoadBalancer)</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Service<br>metadata:<br>  name: ingress-nginx-controller<br>  namespace: ingress-nginx<br>spec:<br>  type: LoadBalancer<br>  externalTrafficPolicy: Local<br>  ipFamilies:<br>  - IPv4<br>  ipFamilyPolicy: SingleStack<br>  ports:<br>  - appProtocol: http<br>    name: http<br>    port: 80<br>    protocol: TCP<br>    targetPort: http<br>  - appProtocol: https<br>    name: https<br>    port: 443<br>    protocol: TCP<br>    targetPort: https<br>  selector:<br>    app.kubernetes.io/component: controller<br>    app.kubernetes.io/name: ingress-nginx</code></pre></p>
+<p></p>
+<h3>중요 설정 설명</h3>
+<p></p>
+<h4>externalTrafficPolicy: Local</h4>
+<p></p>
+<p><pre><code class="language-yaml">externalTrafficPolicy: Local</code></pre></p>
+<p></p>
+<p>| 값 | 설명 | 장단점 |</p>
+<p>|----|------|--------|</p>
+<p>| <code>Cluster</code> | 모든 Pod 로 트래픽 분산 | IP 보존 안됨, 균등 분산 |</p>
+<p>| <code>Local</code> | 로컬 Pod 로만 트래픽 | <strong>IP 보존됨</strong>, 불균형 가능 |</p>
+<p></p>
+<p><pre><code>Cluster 모드:<br>Client → Node1 → Pod(Node3)  # 소스 IP 변경<br><br>Local 모드:<br>Client → Node1 → Pod(Node1)  # 소스 IP 보존</code></pre></p>
+<p></p>
+<h4>ipFamilyPolicy</h4>
+<p></p>
+<p><pre><code class="language-yaml">ipFamilies:<br>- IPv4<br>ipFamilyPolicy: SingleStack</code></pre></p>
+<p></p>
+<p>| 정책 | 설명 |</p>
+<p>|------|------|</p>
+<p>| <code>SingleStack</code> | 단일 IP 스택 (IPv4 또는 IPv6) |</p>
+<p>| <code>PreferDualStack</code> | 듀얼스택 선호 |</p>
+<p>| <code>RequireDualStack</code> | 듀얼스택 필수 |</p>
+<p></p>
+<h4>appProtocol</h4>
+<p></p>
+<p><pre><code class="language-yaml">appProtocol: http   # HTTP 프로토콜<br>appProtocol: https  # HTTPS 프로토콜</code></pre></p>
+<ul><li>Kubernetes 1.20+ 에서 사용</li>
+<li>서비스 메쉬 (Istio 등) 와 호환</li>
+<p></ul></p><br><hr>
+<p></p>
+<h3>7-2. Webhook Service (ClusterIP)</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: v1<br>kind: Service<br>metadata:<br>  name: ingress-nginx-controller-admission<br>  namespace: ingress-nginx<br>spec:<br>  type: ClusterIP<br>  ports:<br>  - appProtocol: https<br>    name: https-webhook<br>    port: 443<br>    targetPort: webhook<br>  selector:<br>    app.kubernetes.io/component: controller</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Validating Webhook 엔드포인트 제공</li>
+<li>내부 클러스터 통신용</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>8. Deployment - 컨트롤러</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: apps/v1<br>kind: Deployment<br>metadata:<br>  name: ingress-nginx-controller<br>  namespace: ingress-nginx<br>spec:<br>  minReadySeconds: 0<br>  revisionHistoryLimit: 10<br>  strategy:<br>    rollingUpdate:<br>      maxUnavailable: 1<br>    type: RollingUpdate<br>  template:<br>    spec:<br>      containers:<br>      - args:<br>        - /nginx-ingress-controller<br>        - --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller<br>        - --election-id=ingress-nginx-leader<br>        - --controller-class=k8s.io/ingress-nginx<br>        - --ingress-class=nginx<br>        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller<br>        - --validating-webhook=:8443<br>        - --validating-webhook-certificate=/usr/local/certificates/cert<br>        - --validating-webhook-key=/usr/local/certificates/key<br>        - --enable-metrics=false<br>        env:<br>        - name: POD_NAME<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: metadata.name<br>        - name: POD_NAMESPACE<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: metadata.namespace<br>        - name: LD_PRELOAD<br>          value: /usr/local/lib/libmimalloc.so<br>        image: registry.k8s.io/ingress-nginx/controller:v1.11.3@sha256:d56f135b6462cfc476447cfe564b83a45e8bb7da2774963b00d12161112270b7<br>        imagePullPolicy: IfNotPresent<br>        lifecycle:<br>          preStop:<br>            exec:<br>              command:<br>              - /wait-shutdown<br>        livenessProbe:<br>          failureThreshold: 5<br>          httpGet:<br>            path: /healthz<br>            port: 10254<br>            scheme: HTTP<br>          initialDelaySeconds: 10<br>          periodSeconds: 10<br>        readinessProbe:<br>          failureThreshold: 3<br>          httpGet:<br>            path: /healthz<br>            port: 10254<br>            scheme: HTTP<br>          initialDelaySeconds: 10<br>          periodSeconds: 10<br>        name: controller<br>        ports:<br>        - containerPort: 80<br>          name: http<br>        - containerPort: 443<br>          name: https<br>        - containerPort: 8443<br>          name: webhook<br>        resources:<br>          requests:<br>            cpu: 100m<br>            memory: 90Mi<br>        securityContext:<br>          allowPrivilegeEscalation: false<br>          capabilities:<br>            add:<br>            - NET_BIND_SERVICE<br>            drop:<br>            - ALL<br>          readOnlyRootFilesystem: false<br>          runAsNonRoot: true<br>          runAsUser: 101<br>        volumeMounts:<br>        - mountPath: /usr/local/certificates/<br>          name: webhook-cert<br>          readOnly: true<br>      serviceAccountName: ingress-nginx<br>      terminationGracePeriodSeconds: 300<br>      volumes:<br>      - name: webhook-cert<br>        secret:<br>          secretName: ingress-nginx-admission</code></pre></p>
+<p></p>
+<h3>컨테이너 인수 (args)</h3>
+<p></p>
+<p>| 인수 | 설명 |</p>
+<p>|------|------|</p>
+<p>| <code>/nginx-ingress-controller</code> | 실행 바이너리 |</p>
+<p>| <code>--publish-service</code> | LoadBalancer Service 참조 (외부 IP 광고) |</p>
+<p>| <code>--election-id</code> | 리더 선출용 ID |</p>
+<p>| <code>--controller-class</code> | 컨트롤러 클래스 식별자 |</p>
+<p>| <code>--ingress-class=nginx</code> | 기본 Ingress 클래스 |</p>
+<p>| <code>--configmap</code> | 설정 ConfigMap 참조 |</p>
+<p>| <code>--validating-webhook=:8443</code> | Webhook 포트 |</p>
+<p>| <code>--validating-webhook-certificate</code> | Webhook 인증서 경로 |</p>
+<p>| <code>--validating-webhook-key</code> | Webhook 키 경로 |</p>
+<p>| <code>--enable-metrics=false</code> | 메트릭스 비활성화 |</p>
+<p></p>
+<h3>환경 변수</h3>
+<p></p>
+<p><pre><code class="language-yaml">env:<br>- POD_NAME         # Pod 이름 (필드 참조)<br>- POD_NAMESPACE    # 네임스페이스 (필드 참조)<br>- LD_PRELOAD       # 메모리 할당자 (성능 최적화)</code></pre></p>
+<p></p>
+<h3>Lifecycle Hook</h3>
+<p></p>
+<p><pre><code class="language-yaml">lifecycle:<br>  preStop:<br>    exec:<br>      command:<br>      - /wait-shutdown</code></pre></p>
+<ul><li>Pod 종료 시 연결 드레이닝 대기</li>
+<li>우아한 종료 (Graceful Shutdown)</li>
+<p></ul></p>
+<h3>프로브</h3>
+<p></p>
+<p><pre><code class="language-yaml">livenessProbe:<br>  httpGet:<br>    path: /healthz      # 생존 체크<br>    port: 10254<br>  failureThreshold: 5   # 5 회 실패 시 재시작<br>  periodSeconds: 10<br><br>readinessProbe:<br>  httpGet:<br>    path: /healthz      # 준비 상태 체크<br>    port: 10254<br>  failureThreshold: 3   # 3 회 실패 시 트래픽 제거</code></pre></p>
+<p></p>
+<h3>보안 컨텍스트</h3>
+<p></p>
+<p><pre><code class="language-yaml">securityContext:<br>  allowPrivilegeEscalation: false    # 권한 상승 불가<br>  capabilities:<br>    add:<br>    - NET_BIND_SERVICE               # 1024 미만 포트 바인딩 허용<br>    drop:<br>    - ALL                            # 기타 모든 capability 제거<br>  runAsNonRoot: true                 # 루트 사용자 불가<br>  runAsUser: 101                     # nginx 사용자<br>  seccompProfile:<br>    type: RuntimeDefault             # 기본 seccomp 프로파일</code></pre></p>
+<p></p>
+<h3>리소스 요청</h3>
+<p></p>
+<p><pre><code class="language-yaml">resources:<br>  requests:<br>    cpu: 100m      # 0.1 코어 보장<br>    memory: 90Mi   # 90MB 보장</code></pre></p>
+<p></p>
+<h3>배포 전략</h3>
+<p></p>
+<p><pre><code class="language-yaml">strategy:<br>  rollingUpdate:<br>    maxUnavailable: 1  # 최대 1 개 Pod 만 사용 불가<br>  type: RollingUpdate</code></pre></p>
+<p></p>
+<h3>종료 대기 시간</h3>
+<p></p>
+<p><pre><code class="language-yaml">terminationGracePeriodSeconds: 300  # 5 분</code></pre></p>
+<ul><li>긴 대기 시간: 기존 연결 처리 완료</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>9. Job (x2) - Webhook 인증서 생성</h2>
+<p></p>
+<h3>9-1. 인증서 생성 Job</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: batch/v1<br>kind: Job<br>metadata:<br>  name: ingress-nginx-admission-create<br>  namespace: ingress-nginx<br>spec:<br>  template:<br>    spec:<br>      containers:<br>      - args:<br>        - create<br>        - --host=ingress-nginx-controller-admission,ingress-nginx-controller-admission.$(POD_NAMESPACE).svc<br>        - --namespace=$(POD_NAMESPACE)<br>        - --secret-name=ingress-nginx-admission<br>        env:<br>        - name: POD_NAMESPACE<br>          valueFrom:<br>            fieldRef:<br>              fieldPath: metadata.namespace<br>        image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4<br>        name: create<br>        securityContext:<br>          allowPrivilegeEscalation: false<br>          capabilities:<br>            drop: ["ALL"]<br>          readOnlyRootFilesystem: true<br>          runAsNonRoot: true<br>          runAsUser: 65532<br>      restartPolicy: OnFailure<br>      serviceAccountName: ingress-nginx-admission</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Webhook 인증서 자동 생성</li>
+<li>Self-signed 인증서 생성</li>
+<p></ul></p>
+<h3>생성되는 시크릿</h3>
+<p></p>
+<p><pre><code class="language-yaml"># ingress-nginx-admission 시크릿<br>apiVersion: v1<br>kind: Secret<br>metadata:<br>  name: ingress-nginx-admission<br>data:<br>  ca.crt: <CA 인증서><br>  tls.crt: <서버 인증서><br>  tls.key: <서버 키></code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h3>9-2. Webhook 패치 Job</h3>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: batch/v1<br>kind: Job<br>metadata:<br>  name: ingress-nginx-admission-patch<br>  namespace: ingress-nginx<br>spec:<br>  template:<br>    spec:<br>      containers:<br>      - args:<br>        - patch<br>        - --webhook-name=ingress-nginx-admission<br>        - --namespace=$(POD_NAMESPACE)<br>        - --patch-mutating=false<br>        - --secret-name=ingress-nginx-admission<br>        - --patch-failure-policy=Fail<br>        image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4<br>        name: patch<br>      restartPolicy: OnFailure<br>      serviceAccountName: ingress-nginx-admission</code></pre></p>
+<p></p>
+<h3>역할</h3>
+<ul><li>ValidatingWebhookConfiguration 업데이트</li>
+<li>생성된 인증서로 CA 번들 패치</li>
+<p></ul></p>
+<h3>패치 내용</h3>
+<p></p>
+<p><pre><code class="language-yaml"># WebhookConfiguration 의 CABundle 업데이트<br>apiVersion: admissionregistration.k8s.io/v1<br>kind: ValidatingWebhookConfiguration<br>metadata:<br>  name: ingress-nginx-admission<br>webhooks:<br>- clientConfig:<br>    caBundle: <생성된 CA 인증서></code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>10. IngressClass</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: networking.k8s.io/v1<br>kind: IngressClass<br>metadata:<br>  name: nginx<br>spec:<br>  controller: k8s.io/ingress-nginx</code></pre></p>
+<p></p>
+<h3>설명</h3>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>name</code> | nginx | Ingress 클래스 이름 |</p>
+<p>| <code>controller</code> | k8s.io/ingress-nginx | 컨트롤러 식별자 |</p>
+<p></p>
+<h3>역할</h3>
+<ul><li>Ingress 리소스와 컨트롤러 연결</li>
+<li>여러 Ingress 컨트롤러 공존 가능</li>
+<p></ul></p>
+<h3>사용 예시</h3>
+<p></p>
+<p><pre><code class="language-yaml"># Ingress 리소스에서 참조<br>apiVersion: networking.k8s.io/v1<br>kind: Ingress<br>metadata:<br>  name: my-app<br>  annotations:<br>    kubernetes.io/ingress.class: nginx<br>spec:<br>  ingressClassName: nginx  # ← 이 클래스 사용<br>  rules:<br>  - host: myapp.example.com<br>    http:<br>      paths:<br>      - path: /<br>        pathType: Prefix<br>        backend:<br>          service:<br>            name: my-app<br>            port: 80</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>11. ValidatingWebhookConfiguration</h2>
+<p></p>
+<p><pre><code class="language-yaml">apiVersion: admissionregistration.k8s.io/v1<br>kind: ValidatingWebhookConfiguration<br>metadata:<br>  name: ingress-nginx-admission<br>webhooks:<br>- admissionReviewVersions:<br>  - v1<br>  clientConfig:<br>    service:<br>      name: ingress-nginx-controller-admission<br>      namespace: ingress-nginx<br>      path: /networking/v1/ingresses<br>      port: 443<br>  failurePolicy: Fail<br>  matchPolicy: Equivalent<br>  name: validate.nginx.ingress.kubernetes.io<br>  rules:<br>  - apiGroups: ["networking.k8s.io"]<br>    apiVersions: ["v1"]<br>    operations: ["CREATE", "UPDATE"]<br>    resources: ["ingresses"]<br>  sideEffects: None</code></pre></p>
+<p></p>
+<h3>설정 설명</h3>
+<p></p>
+<p>| 필드 | 값 | 설명 |</p>
+<p>|------|-----|------|</p>
+<p>| <code>admissionReviewVersions</code> | v1 | AdmissionReview 버전 |</p>
+<p>| <code>failurePolicy</code> | Fail | 검증 실패 시 요청 거부 |</p>
+<p>| <code>matchPolicy</code> | Equivalent | 동등한 리소스도 매칭 |</p>
+<p>| <code>sideEffects</code> | None | 사이드 이펙트 없음 |</p>
+<p></p>
+<h3>검증 항목</h3>
+<ul><li>Ingress 규칙 유효성 검사</li>
+<li>주석 (annotation) 검증</li>
+<li>경로 충돌 검사</li>
+<li>TLS 설정 검증</li>
+<p></ul></p><br><hr>
+<p></p>
+<h2>리소스 관계도</h2>
+<p></p>
+<p>Ingress-NGINX를 구성하는 주요 리소스들과 그 관계입니다.</p>
+<p></p>
+<p><div class="mermaid">graph TD
+    NS[Namespace: ingress-nginx] --> RBAC[RBAC: SA / Roles / Bindings]
+    NS --> IC[IngressClass: nginx]
+    
+    subgraph Controller_Logic
+    RBAC --> DEP[Deployment: ingress-nginx-controller]
+    DEP --> SVC_LB[Service: LoadBalancer / Port 80, 443]
+    DEP --> CM[ConfigMap: ingress-nginx-controller]
+    end
+    
+    subgraph Admission_Webhook
+    J1[Job: admission-create] --> S_ADM[Secret: ingress-nginx-admission]
+    J2[Job: admission-patch] --> S_ADM
+    S_ADM --> WH[ValidatingWebhookConfiguration]
+    DEP --> SVC_ADM[Service: ClusterIP / Port 443]
+    SVC_ADM --> WH
+    end</div></p>
+<p></p>
+<p>| 구성 요소 | 주요 역할 |</p>
+<p>|-----------|----------|</p>
+<p>| <strong>Controller</strong> | Ingress 리소스를 감시하고 NGINX 설정을 자동으로 생성/갱신 |</p>
+<p>| <strong>IngressClass</strong> | 클러스터 내 여러 Ingress 컨트롤러 중 nginx를 지정하기 위한 식별자 |</p>
+<p>| <strong>Admission Webhook</strong> | Ingress 리소스 생성/수정 시 문법적 오류가 없는지 사전 검증 |</p>
+<p>| <strong>RBAC</strong> | 컨트롤러가 클러스터 내 리소스(Ingress, Secret 등)를 읽을 수 있는 권한 부여 |</p>
+<p></p><br><hr>
+<p></p>
+<h2>설치 확인</h2>
+<p></p>
+<p><pre><code class="language-bash"># Ingress-NGINX 설치<br>kubectl apply -f ingress-nginx.yaml<br><br># Pod 상태 확인<br>kubectl get pods -n ingress-nginx<br># NAME                                        READY   STATUS    RESTARTS   AGE<br># ingress-nginx-controller-xxxxxxxxxx-xxxxx   1/1     Running   0          2m<br># ingress-nginx-admission-create-xxxxx        0/1     Completed 0          2m<br># ingress-nginx-admission-patch-xxxxx         0/1     Completed 0          2m<br><br># Service 확인<br>kubectl get svc -n ingress-nginx<br># NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)<br># ingress-nginx-controller             LoadBalancer   10.96.xxx.xxx  192.168.x.x   80:3xxxx/TCP,443:3xxxx/TCP<br># ingress-nginx-controller-admission   ClusterIP      10.96.xxx.xxx  <none>        443/TCP<br><br># IngressClass 확인<br>kubectl get ingressclass<br># NAME    CONTROLLER                       AGE<br># nginx   k8s.io/ingress-nginx             2m<br><br># 테스트 Ingress 생성<br>cat <<EOF | kubectl apply -f -<br>apiVersion: networking.k8s.io/v1<br>kind: Ingress<br>metadata:<br>  name: test-ingress<br>  annotations:<br>    kubernetes.io/ingress.class: nginx<br>spec:<br>  rules:<br>  - host: test.example.com<br>    http:<br>      paths:<br>      - path: /<br>        pathType: Prefix<br>        backend:<br>          service:<br>            name: test-service<br>            port: 80<br>EOF<br><br># Ingress 확인<br>kubectl get ingress<br># NAME            CLASS   HOSTS             ADDRESS        PORTS   AGE<br># test-ingress    nginx   test.example.com  192.168.x.x    80      1m</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>요약</h2>
+<p></p>
+<p>| 카테고리 | 리소스 | 개수 |</p>
+<p>|----------|--------|------|</p>
+<p>| <strong>Namespace</strong> | ingress-nginx | 1 |</p>
+<p>| <strong>ServiceAccount</strong> | controller, admission | 2 |</p>
+<p>| <strong>Role</strong> | controller, admission | 2 |</p>
+<p>| <strong>ClusterRole</strong> | controller, admission | 2 |</p>
+<p>| <strong>RoleBinding</strong> | controller, admission | 2 |</p>
+<p>| <strong>ClusterRoleBinding</strong> | controller, admission | 2 |</p>
+<p>| <strong>ConfigMap</strong> | controller 설정 | 1 |</p>
+<p>| <strong>Service</strong> | controller, admission | 2 |</p>
+<p>| <strong>Deployment</strong> | controller | 1 |</p>
+<p>| <strong>Job</strong> | create, patch | 2 |</p>
+<p>| <strong>IngressClass</strong> | nginx | 1 |</p>
+<p>| <strong>ValidatingWebhook</strong> | admission | 1 |</p>
+<p>| <strong>총계</strong> | | <strong>17</strong> |</p>
+<p></p><br><strong>Ingress-NGINX 는 Kubernetes Ingress 리소스를 구현하는 가장 널리 사용되는 컨트롤러입니다.</strong>
+<p></p>
+</body>
+</html>

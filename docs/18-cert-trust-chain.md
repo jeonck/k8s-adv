@@ -6,7 +6,7 @@
 
 ## TLS/SSL 통신의 전체 흐름
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     autonumber
     participant C as 클라이언트 (브라우저)
@@ -25,7 +25,7 @@ sequenceDiagram
     Note over C,S: 6. Finished (암호화 통신 준비 완료)
     
     C<->>S: 7. 대칭키 암호화 통신 (고속 데이터 전송)
-</div>
+```
 
 ---
 
@@ -79,7 +79,7 @@ sequenceDiagram
 
 우리가 서버 인증서를 믿을 수 있는 이유는 **'신뢰의 사슬(Chain of Trust)'** 때문입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     Root[Root CA - 브라우저 내장/신뢰] -- 서명 --> Sub[Intermediate CA - 중간 기관]
     Sub -- 서명 --> Server[Server Certificate - 웹사이트]
@@ -87,7 +87,7 @@ graph TD
     Server -- "검증(Sub 공개키)" --> Sub
     Sub -- "검증(Root 공개키)" --> Root
     Root -- "내장된 공개키로 최종 확인" --> Result[신뢰 성공]
-</div>
+```
 
 ---
 

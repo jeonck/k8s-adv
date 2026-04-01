@@ -2,25 +2,54 @@
 
 Kubernetes 심화 과정 학습 내용을 관리하는 사이트입니다.
 
+## 📢 Mermaid 다이어그램 보기
+
+**Markdown 파일의 Mermaid 다이어그램을 렌더링된 상태로 보려면 HTML 파일을 사용하세요.**
+
+### HTML 파일 열기 (권장)
+
+```bash
+# 메인 인덱스 페이지 열기
+open index-docs.html
+
+# 또는 특정 문서 열기
+open docs/13-crypto-basic-keys.html
+```
+
+브라우저에서 Mermaid 다이어그램이 렌더링된 상태로 볼 수 있습니다.
+
+### 모든 문서 변환하기
+
+```bash
+# Node.js 로 HTML 변환
+node convert-to-html.js
+```
+
+### GitHub 에서 보기
+
+이 저장소를 GitHub 에 푸시하면 GitHub 에서 자동으로 Mermaid 다이어그램을 렌더링합니다.
+
+---
+
 ## 디렉토리 구조
 
 ```
 k8s-adv/
 ├── index.html              # 메인 HTML 파일
+├── index-docs.html         # Mermaid 렌더링 인덱스 (새로 추가!)
+├── convert-to-html.js      # Markdown → HTML 변환기 (새로 추가!)
+├── mermaid-test.md         # Mermaid 테스트 파일
 ├── css/
 │   └── style.css           # 스타일시트
 ├── js/
 │   └── app.js              # JavaScript (Markdown 로드, 탭 기능)
 ├── docs/                   # Markdown 콘텐츠 파일들
 │   ├── 01-kubectl.md
+│   ├── 01-kubectl.html     # 렌더링된 HTML (새로 추가!)
 │   ├── 02-k8s-resources.md
-│   ├── 03-k8s-components.md
-│   ├── 04-addon-concept.md
-│   ├── 05-addon-problems.md
-│   ├── 06-csi-philosophy.md
-│   ├── 07-helm.md
-│   ├── 10-lab-environment.md
-│   └── 11-lab-addon-install.md
+│   ├── 02-k8s-resources.html
+│   ├── ... (52 개 문서)
+│   └── 45-prometheus-grafana-operator-install.html
 └── README.md
 ```
 

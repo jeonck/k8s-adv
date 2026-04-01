@@ -18,19 +18,19 @@ Kubernetes에서 Pod를 대량으로 관리하는 두 가지 핵심 리소스인
 ### ReplicaSet (Deployment)
 모든 Pod가 무작위 이름을 가지며, 서비스는 이를 하나의 덩어리로 묶어 로드밸런싱합니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     D[Deployment] --> RS[ReplicaSet]
     RS --> P1[Pod: web-abc1]
     RS --> P2[Pod: web-def2]
     RS --> P3[Pod: web-ghi3]
     P1 & P2 & P3 --- SVC[Service: LoadBalancer]
-</div>
+```
 
 ### StatefulSet
 각 Pod가 순차적 이름을 가지며, 전용 저장소(PV)와 1:1로 매핑됩니다. Headless Service를 통해 개별 Pod에 직접 접근합니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     SS[StatefulSet] --> P0[Pod: mysql-0]
     SS --> P1[Pod: mysql-1]
@@ -41,7 +41,7 @@ graph TD
     P2 --- PV2[(PV-2)]
     
     P0 & P1 & P2 --- HS[Headless Service: DNS]
-</div>
+```
 
 ---
 
@@ -61,7 +61,7 @@ graph TD
 
 애플리케이션의 특성에 따라 아래 흐름도를 따라 선택하세요.
 
-<div class="mermaid">
+```mermaid
 flowchart TD
     A[애플리케이션이 데이터를 저장하는가?] -->|No| B[ReplicaSet / Deployment]
     A -->|Yes| C[모든 인스턴스가 같은 데이터를 공유하는가?]
@@ -69,7 +69,7 @@ flowchart TD
     C -->|No| D[인스턴스마다 고유한 데이터가 필요한가?]
     D -->|Yes| E[StatefulSet 선택]
     D -->|No| B
-</div>
+```
 
 ---
 

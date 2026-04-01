@@ -22,7 +22,7 @@ Kubernetes가 외부 공개 CA(DigiCert 등)를 사용하지 않고 자체 CA를
 
 Kubernetes CA는 클러스터라는 울타리 안에서만 신뢰받는 '사설 인증 기관'입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     CA[Kubernetes Root CA<br/>ca.crt / ca.key] -- 서명/발급 --> AS[API Server 인증서]
     CA -- 서명/발급 --> KL[Kubelet 인증서]
@@ -38,7 +38,7 @@ graph TD
     
     User[외부 브라우저] -- "신뢰할 수 없음" --> AS
     Note right of User: 브라우저에 해당 CA가<br/>등록되어 있지 않음
-</div>
+```
 
 ---
 

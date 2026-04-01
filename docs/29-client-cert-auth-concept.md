@@ -22,7 +22,7 @@ API 서버로 들어오는 모든 요청은 다음의 3단계를 거칩니다.
 
 ### 동작 원리 (mTLS 흐름)
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as 클라이언트 (kubectl)
     participant S as API Server (6443)
@@ -32,7 +32,7 @@ sequenceDiagram
     Note over S: 3. 인증서 유효기간 및 폐기 여부 확인
     Note over S: 4. 인증서 필드(CN, O)에서 사용자 정보 추출
     S->>C: 5. 인증 성공 및 통신 시작
-</div>
+```
 
 ### 인증서 내 주요 필드와 역할
 

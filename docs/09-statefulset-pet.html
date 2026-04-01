@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>09-statefulset-pet.md</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1775021353410';
+        
+        // Initialize mermaid with improved configuration
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        });
+        
+        // Render mermaid diagrams when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM ready, rendering Mermaid diagrams...');
+                await mermaid.run({
+                    querySelector: '.mermaid',
+                    suppressErrors: false
+                });
+                console.log('Mermaid diagrams rendered successfully');
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                // Show error message for debugging
+                document.querySelectorAll('.mermaid').forEach((el, i) => {
+                    if (!el.querySelector('svg')) {
+                        el.innerHTML = '<div style="color:red;padding:20px;">⚠️ Diagram rendering failed: ' + error.message + '</div><pre>' + el.textContent + '</pre>';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .navigation a {
+            display: block;
+            margin: 5px 0;
+            color: #0366d6;
+        }
+        .file-info {
+            background: #f6f8fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation">
+        <strong>📁 Docs</strong>
+        <a href="01-kubectl.html">01-kubectl</a>
+        <a href="02-k8s-resources.html">02-k8s-resources</a>
+        <a href="03-k8s-components.html">03-k8s-components</a>
+        <a href="04-addon-concept.html">04-addon-concept</a>
+        <a href="05-addon-problems.html">05-addon-problems</a>
+        <a href="06-csi-philosophy.html">06-csi-philosophy</a>
+        <a href="07-helm.html">07-helm</a>
+        <a href="08-pet-vs-cattle.html">08-pet-vs-cattle</a>
+        <a href="09-statefulset-pet.html">09-statefulset-pet</a>
+        <a href="10-lab-environment.html">10-lab-environment</a>
+        <a href="10-statefulset-vs-replicaset.html">10-statefulset-vs-replicaset</a>
+        <a href="11-lab-addon-install.html">11-lab-addon-install</a>
+        <a href="11-package-manager-background.html">11-package-manager-background</a>
+        <a href="12-headless-service.html">12-headless-service</a>
+        <a href="13-crypto-basic-keys.html">13-crypto-basic-keys</a>
+        <a href="14-ca-and-root-ca.html">14-ca-and-root-ca</a>
+        <a href="15-pki-and-x509.html">15-pki-and-x509</a>
+        <a href="16-csr-and-workflow.html">16-csr-and-workflow</a>
+        <a href="17-ssl-handshake-process.html">17-ssl-handshake-process</a>
+        <a href="18-cert-trust-chain.html">18-cert-trust-chain</a>
+        <a href="19-k8s-security-overview.html">19-k8s-security-overview</a>
+        <a href="20-api-server-auth-plugins.html">20-api-server-auth-plugins</a>
+        <a href="20-metric-server-yaml.html">20-metric-server-yaml</a>
+        <a href="21-kubernetes-dashboard-yaml.html">21-kubernetes-dashboard-yaml</a>
+        <a href="21-user-vs-serviceaccount.html">21-user-vs-serviceaccount</a>
+        <a href="22-k8s-root-ca-internal.html">22-k8s-root-ca-internal</a>
+        <a href="22-metallb-yaml.html">22-metallb-yaml</a>
+        <a href="23-ingress-nginx-yaml.html">23-ingress-nginx-yaml</a>
+        <a href="23-k8s-cert-file-locations.html">23-k8s-cert-file-locations</a>
+        <a href="24-kubeadm-cert-management.html">24-kubeadm-cert-management</a>
+        <a href="24-nfs-provisioner-yaml.html">24-nfs-provisioner-yaml</a>
+        <a href="25-static-pod-auth-config.html">25-static-pod-auth-config</a>
+        <a href="26-inspect-cert-info-1.html">26-inspect-cert-info-1</a>
+        <a href="27-inspect-cert-info-2.html">27-inspect-cert-info-2</a>
+        <a href="28-cert-expiration-and-renew.html">28-cert-expiration-and-renew</a>
+        <a href="29-client-cert-auth-concept.html">29-client-cert-auth-concept</a>
+        <a href="30-mtls-communication.html">30-mtls-communication</a>
+        <a href="31-lab-client-cert-auth.html">31-lab-client-cert-auth</a>
+        <a href="32-http-basic-auth-deprecated.html">32-http-basic-auth-deprecated</a>
+        <a href="33-webhook-token-auth-concept.html">33-webhook-token-auth-concept</a>
+        <a href="34-lab-webhook-auth-setup.html">34-lab-webhook-auth-setup</a>
+        <a href="35-lab-multi-cluster-config.html">35-lab-multi-cluster-config</a>
+        <a href="36-oauth2-fundamentals.html">36-oauth2-fundamentals</a>
+        <a href="37-oidc-on-kubernetes.html">37-oidc-on-kubernetes</a>
+        <a href="38-keycloak-setup-guide.html">38-keycloak-setup-guide</a>
+        <a href="39-lab-k8s-keycloak-oidc.html">39-lab-k8s-keycloak-oidc</a>
+        <a href="40-kubectl-plugin-guide.html">40-kubectl-plugin-guide</a>
+        <a href="41-krew-guide.html">41-krew-guide</a>
+        <a href="42-crd-guide.html">42-crd-guide</a>
+        <a href="43-operator-development.html">43-operator-development</a>
+        <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
+        <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+    </div>
+    
+    <div class="file-info">
+        📄 Source: <code>09-statefulset-pet.md</code> | 
+        <a href="09-statefulset-pet.md">View Markdown</a>
+    </div>
+    
+    <h1>StatefulSet - Pet 적 특성을 가진 K8s 리소스</h1>
+<p></p>
+<p>Kubernetes는 기본적으로 <strong>Cattle(가축)</strong> 철학을 따르지만, <strong>StatefulSet</strong>은 예외적으로 <strong>Pet(애완동물)</strong>에 가까운 특성을 가집니다.</p>
+<p></p><br><hr>
+<p></p>
+<h2>StatefulSet이 Pet인 이유</h2>
+<p></p>
+<p>StatefulSet은 일반적인 Deployment와 달리 각 Pod가 고유한 정체성을 유지하도록 설계되었습니다.</p>
+<p></p>
+<h3>1. 고유하고 예측 가능한 식별자</h3>
+<p></p>
+<p>| 구분 | Deployment (Cattle) | StatefulSet (Pet) |</p>
+<p>|------|--------------------|-------------------|</p>
+<p>| <strong>이름 규칙</strong> | <code>web-abc12</code> (무작위 해시) | <code>mysql-0</code>, <code>mysql-1</code> (순차적 번호) |</p>
+<p>| <strong>정체성</strong> | 모든 Pod가 동일함 (교체 가능) | 각 Pod가 고유한 역할 보유 가능 |</p>
+<p>| <strong>순서</strong> | 병렬로 한꺼번에 생성/삭제 | 0번부터 순차적으로 생성, 역순으로 삭제 |</p>
+<p></p>
+<h3>2. 안정적인 네트워크 ID (DNS)</h3>
+<p></p>
+<p>Deployment의 Pod는 삭제 후 재생성되면 이름이 바뀌어 통신 주소가 변경되지만, StatefulSet은 <strong>재생성되어도 동일한 DNS 주소</strong>를 유지합니다.</p>
+<ul><li><strong>DNS 주소 형식:</strong> <code>&lt;Pod이름&gt;.&lt;서비스이름&gt;.&lt;네임스페이스&gt;.svc.cluster.local</code></li>
+<li><strong>장점:</strong> <code>mysql-1</code>이 죽었다 살아나도 다른 Pod들은 여전히 동일한 주소로 <code>mysql-1</code>을 찾을 수 있습니다.</li>
+<p></ul></p>
+<h3>3. 영구 저장소의 1:1 매칭</h3>
+<p></p>
+<p>각 Pod는 자신만의 전용 저장소(Persistent Volume)를 가지며, Pod가 재시작되어도 자신의 데이터를 그대로 유지합니다.</p>
+<p></p>
+<p><div class="mermaid">graph TD
+    Pod0[mysql-0] --- PVC0[(data-mysql-0)]
+    Pod1[mysql-1] --- PVC1[(data-mysql-1)]
+    Pod2[mysql-2] --- PVC2[(data-mysql-2)]
+
+    style PVC0 fill:#f9f,stroke:#333
+    style PVC1 fill:#f9f,stroke:#333
+    style PVC2 fill:#f9f,stroke:#333</div></p>
+<p></p><br><hr>
+<p></p>
+<h2>Pet vs Cattle vs StatefulSet 스펙트럼</h2>
+<p></p>
+<p>관리 철학의 차이를 시각화하면 다음과 같습니다.</p>
+<p></p>
+<p><div class="mermaid">graph LR
+    Pet[Pure Pet<br/>전통적인 물리 서버] --- SS[StatefulSet<br/>K8s 상태 저장 리소스]
+    SS --- Cattle[Pure Cattle<br/>K8s 무상태 리소스]
+
+    subgraph Characteristics
+    direction TB
+    C1[수동 관리 / 수리 중심]
+    C2[자동화 / 복구 중심]
+    C3[완전 자동화 / 교체 중심]
+    end</div></p>
+<p></p><br><hr>
+<p></p>
+<h2>주요 사용 사례</h2>
+<li><strong>데이터베이스 클러스터:</strong> Master/Slave 구조가 명확해야 하는 MySQL, PostgreSQL 등</li>
+<li><strong>분산 메시지 큐:</strong> 노드 간의 ID가 중요한 Kafka, RabbitMQ 등</li>
+<li><strong>분산 저장소:</strong> 클러스터 구성 시 고정된 멤버 정보가 필요한 MongoDB, Cassandra 등</li>
+<p></p><br><hr>
+<p></p>
+<h2>요약: StatefulSet의 핵심 가치</h2>
+<ul><li><strong>고유성:</strong> 각 Pod는 0, 1, 2... 번호와 함께 고유한 정체성을 가짐</li>
+<li><strong>안정성:</strong> 재시작되어도 이름과 네트워크 주소가 변하지 않음</li>
+<li><strong>영속성:</strong> 전용 볼륨을 통해 데이터가 보존됨</li>
+<p></ul></p><br><strong>StatefulSet은 "관리되는 Pet" 또는 "Cattle의 옷을 입은 Pet"이라 할 수 있으며, Kubernetes 환경에서 복잡한 상태 저장 애플리케이션을 운영할 수 있게 해주는 핵심 도구입니다.</strong>
+<p></p>
+</body>
+</html>

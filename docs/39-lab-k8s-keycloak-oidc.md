@@ -19,7 +19,7 @@ Kubernetes API 서버를 외부 IAM 솔루션인 Keycloak과 연동하여 **Open
 
 ## OIDC 연동 아키텍처
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant U as 사용자
     participant K as kubectl (oidc-login)
@@ -34,7 +34,7 @@ sequenceDiagram
     Note over AS: 6. Issuer URL 접속하여 공개키 획득
     Note over AS: 7. 공개키로 Token 서명 검증
     AS-->>U: 8. 최종 승인 및 결과 반환
-</div>
+```
 
 ---
 

@@ -41,7 +41,7 @@ OIDC에서 가장 중요한 요소는 **ID Token**입니다. 이는 JSON Web Tok
 
 Kubernetes와 연동할 때 주로 사용되는 인증 흐름입니다.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant U as 사용자
     participant K as kubectl (Client)
@@ -55,7 +55,7 @@ sequenceDiagram
     K->>A: 5. API 요청 (Header에 ID Token 포함)
     Note over A: 6. IDP의 공개키로 Token 서명 검증
     A->>U: 7. 인증 성공 및 리소스 반환
-</div>
+```
 
 ---
 

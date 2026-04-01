@@ -13,7 +13,7 @@ Operator와 CR의 관계를 가장 쉽게 이해하는 방법은 **'공장'**과
 | **Operator** | 운영 지식을 담은 자동화 소프트웨어 | **관리 로봇이 있는 공장** | Controller, CRD, 도메인 지식 |
 | **Custom Resource** | 사용자가 정의한 리소스 인스턴스 | **고객의 주문서(설계도)** | 원하는 상태(spec) 정의 |
 
-<div class="mermaid">
+```mermaid
 graph TD
     User[사용자] -- "1. 주문서(CR) 제출" --> API[K8s API Server]
     API -- "2. 생성 이벤트 감지" --> OP[Operator / Controller]
@@ -25,7 +25,7 @@ graph TD
     end
     
     Reconcile -- "6. status 업데이트" --> API
-</div>
+```
 
 ---
 

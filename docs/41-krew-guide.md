@@ -14,12 +14,12 @@ Krew는 리눅스의 `apt`, `yum` 또는 macOS의 `brew`와 유사한 역할을 
 - **공식 허브:** 수백 개의 검증된 커뮤니티 플러그인을 제공합니다.
 - **멀티 플랫폼:** Linux, macOS, Windows를 모두 지원합니다.
 
-<div class="mermaid">
+```mermaid
 graph LR
     Krew[Krew CLI] -- "1. search/install" --> Index[Krew Plugin Index]
     Index -- "2. Download" --> Krew
     Krew -- "3. Register to PATH" --> Kubectl[kubectl plugin list]
-</div>
+```
 
 ---
 

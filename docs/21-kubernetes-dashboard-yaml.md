@@ -571,7 +571,7 @@ kubectl -n kubernetes-dashboard create token admin-user
 
 Kubernetes Dashboard를 구성하는 주요 리소스들의 구조입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     NS[Namespace: kubernetes-dashboard] --> SA[ServiceAccount]
     
@@ -594,7 +594,7 @@ graph TD
     
     DEP1 --- S1 & S2 & C1
     DEP2 -- "Collect" --> MS[Metric Server]
-</div>
+```
 
 | 구성 요소 | 주요 역할 |
 |-----------|----------|

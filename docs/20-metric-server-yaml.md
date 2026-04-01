@@ -465,7 +465,7 @@ kubectl top pods
 
 Metric Server를 구성하는 주요 리소스들의 연결 구조입니다.
 
-<div class="mermaid">
+```mermaid
 graph TD
     SA[ServiceAccount: metrics-server] --> RBAC[RBAC: ClusterRole/Binding]
     RBAC --> DEP[Deployment: metrics-server]
@@ -482,7 +482,7 @@ graph TD
     API -- "Register" --> K8S[Kubernetes API Aggregate]
     
     K8S --- TOP["kubectl top command"]
-</div>
+```
 
 | 리소스 유형 | 이름 | 주요 역할 |
 |-----------|------|----------|
