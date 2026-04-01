@@ -569,41 +569,39 @@ kubectl -n kubernetes-dashboard create token admin-user
 
 ## 리소스 관계도
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              Kubernetes Dashboard 구성                      │
-└─────────────────────────────────────────────────────────────┘
+Kubernetes Dashboard를 구성하는 주요 리소스들의 구조입니다.
 
-Namespace: kubernetes-dashboard
-│
-├─ ServiceAccount: kubernetes-dashboard
-│   │
-│   ├─ RoleBinding → Role (dashboard 관련 Secret/ConfigMap)
-│   ├─ ClusterRoleBinding → ClusterRole (메트릭 조회)
-│   └─ ClusterRoleBinding → cluster-admin (관리자 권한) ⚠️
-│
-├─ Service: kubernetes-dashboard (NodePort:30000)
-│   └─ 외부 접속: https://<노드 IP>:30000
-│
-├─ Deployment: kubernetes-dashboard
-│   ├─ Image: kubernetesui/dashboard:v2.7.0
-│   ├─ Port: 8443
-│   └─ Volumes: 인증서, 임시디렉토리
-│
-├─ Service: dashboard-metrics-scraper
-│   └─ Port: 8000
-│
-├─ Deployment: dashboard-metrics-scraper
-│   ├─ Image: kubernetesui/metrics-scraper:v1.0.8
-│   └─ Metric Server 에서 데이터 수집
-│
-├─ Secret (x3)
-│   ├─ kubernetes-dashboard-certs (인증서)
-│   ├─ kubernetes-dashboard-csrf (CSRF 토큰)
-│   └─ kubernetes-dashboard-key-holder (키)
-│
-└─ ConfigMap: kubernetes-dashboard-settings
-```
+<div class="mermaid">
+graph TD
+    NS[Namespace: kubernetes-dashboard] --> SA[ServiceAccount]
+    
+    subgraph Authorization
+    SA --> RB1[RoleBinding: dashboard-settings]
+    SA --> RB2[ClusterRoleBinding: metrics-reader]
+    SA --> RB3[ClusterRoleBinding: cluster-admin ⚠️]
+    end
+    
+    subgraph Core_Components
+    DEP1[Deployment: kubernetes-dashboard] --> SVC1[Service: NodePort 30000]
+    DEP2[Deployment: dashboard-metrics-scraper] --> SVC2[Service: Port 8000]
+    end
+    
+    subgraph Config_Secrets
+    S1[Secret: dashboard-certs]
+    S2[Secret: dashboard-csrf]
+    C1[ConfigMap: dashboard-settings]
+    end
+    
+    DEP1 --- S1 & S2 & C1
+    DEP2 -- "Collect" --> MS[Metric Server]
+</div>
+
+| 구성 요소 | 주요 역할 |
+|-----------|----------|
+| **Dashboard UI** | 웹 기반의 클러스터 관리 인터페이스 제공 |
+| **Metrics Scraper** | Metric Server로부터 데이터를 가져와 차트용 데이터 가공 |
+| **ServiceAccount** | 대시보드 프로세스가 API 서버에 접근하기 위한 신분증 |
+| **Secrets** | HTTPS 통신을 위한 인증서 및 보안 토큰(CSRF) 저장 |
 
 ---
 

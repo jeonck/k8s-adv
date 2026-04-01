@@ -1,168 +1,74 @@
 # Helm - Kubernetes 패키지 관리자
 
-Helm 은 Kubernetes 애플리케이션을 정의하고, 설치하고, 업그레이드하기 위한 패키지 관리자입니다.
+Helm은 Kubernetes 애플리케이션을 정의하고, 설치하고, 업그레이드하기 위한 **패키지 관리자**입니다.
 
-## Helm 이란?
+---
 
-Helm 은 Kubernetes 리소스를 템플릿화하고, 버전 관리하며, 재사용 가능한 패키지로 배포할 수 있게 해주는 CNCF 졸업 프로젝트입니다.
+## 1. Helm 이란?
 
-## 주요 개념
+Helm은 복잡한 Kubernetes 리소스들을 하나의 패키지(Chart)로 묶어서 관리할 수 있게 해주는 도구입니다. 리눅스의 `apt`나 `yum`, Node.js의 `npm`과 유사한 역할을 합니다.
 
-| 용어 | 설명 |
-|------|------|
-| **Chart** | Helm 패키지 (템플릿, 설정, 의존성 포함) |
-| **Release** | 클러스터에 배포된 Chart 의 인스턴스 |
-| **Repository** | Chart 를 호스팅하는 서버 |
-| **Values** | Chart 에 전달하는 사용자 정의 설정 |
+### 주요 핵심 개념
 
-## Helm 아키텍처
+| 용어 | 설명 | 비고 |
+|------|------|------|
+| **Chart** | Helm의 패키지 단위 | 템플릿, 설정 파일 모음 |
+| **Release** | 클러스터에 설치된 Chart 인스턴스 | 동일 Chart를 여러 번 설치 가능 |
+| **Repository** | Chart들이 저장되어 있는 서버 | Artifact Hub 등 |
+| **Values** | 사용자가 주입하는 동적 설정값 | `values.yaml` |
 
-```
-┌─────────────────┐
-│     Helm CLI    │
-│  (사용자 명령)  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐      ┌─────────────────┐
-│  Chart Repo     │      │  Kubernetes     │
-│  (저장소)       │      │  Cluster        │
-│                 │      │  ┌───────────┐  │
-│  - bitnami/     │      │  │ Release   │  │
-│  - prometheus/  │──────│→ │ (배포)    │  │
-│  - grafana/     │      │  └───────────┘  │
-└─────────────────┘      └─────────────────┘
-```
+---
 
-## Chart 디렉토리 구조
+## 2. Helm 동작 아키텍처
 
-```
+Helm CLI를 통해 원격 저장소에서 차트를 가져와 클러스터에 배포하는 흐름입니다.
+
+<div class="mermaid">
+graph LR
+    User[사용자 / Helm CLI] -- "1. helm install" --> Cluster[Kubernetes Cluster]
+    Repo[(Chart Repository)] -- "2. Fetch Chart" --> User
+    User -- "3. Render Templates" --> Cluster
+    Cluster -- "4. Create Objects" --> Release[Release Instance]
+</div>
+
+---
+
+## 3. Chart 디렉토리 구조
+
+Helm 차트는 다음과 같은 표준화된 디렉토리 구조를 가집니다.
+
+```text
 my-chart/
-├── Chart.yaml          # Chart 메타데이터 (이름, 버전, 설명)
-├── values.yaml         # 기본 설정 값
-├── values-prod.yaml    # 프로덕션 환경 설정
-├── charts/             # 서브 차트 (의존성)
-├── templates/          # Kubernetes 매니페스트 템플릿
+├── Chart.yaml          # 차트 정보 (이름, 버전 등)
+├── values.yaml         # 기본 설정값
+├── charts/             # 의존성이 있는 서브 차트들
+├── templates/          # K8s 매니페스트 템플릿
 │   ├── deployment.yaml
 │   ├── service.yaml
-│   ├── configmap.yaml
-│   └── _helpers.tpl    # 템플릿 헬퍼 함수
-└── README.md
+│   └── _helpers.tpl    # 공통 템플릿 함수
+└── README.md           # 도움말
 ```
 
-## 주요 Helm 명령어
+---
 
-### 저장소 관리
+## 4. 주요 명령어 요약
 
-```bash
-# 저장소 추가
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
+### 설치 및 관리
+- **저장소 등록:** `helm repo add <이름> <URL>`
+- **차트 검색:** `helm search repo <검색어>`
+- **차트 설치:** `helm install <릴리스명> <차트명>`
+- **릴리스 조회:** `helm list`
+- **릴리스 업그레이드:** `helm upgrade <릴리스명> <차트명>`
+- **릴리스 롤백:** `helm rollback <릴리스명> <버전>`
+- **릴리스 삭제:** `helm uninstall <릴리스명>`
 
-# Chart 검색
-helm search repo nginx
-helm search hub wordpress
-```
+---
 
-### Chart 설치
+## 5. Helm 사용의 이점
 
-```bash
-helm install my-release bitnami/nginx
-helm install my-app ./my-chart -f values-prod.yaml
-```
+1.  **템플릿화:** YAML 파일에 변수(`{{ .Values.name }}`)를 사용하여 환경(Dev/Prod)별로 다른 설정을 쉽게 적용할 수 있습니다.
+2.  **버전 관리:** 배포 단위로 버전이 관리되어 장애 발생 시 즉각적인 **롤백**이 가능합니다.
+3.  **의존성 해결:** 복잡한 앱에 필요한 여러 오픈소스(DB, Redis 등)를 서브 차트로 간단히 통합할 수 있습니다.
+4.  **표준화:** 사내 배포 규격을 차트 형태로 공유하여 팀 간 배포 일관성을 유지할 수 있습니다.
 
-### Release 관리
-
-```bash
-helm list                    # 설치된 Release 목록
-helm status my-release       # Release 상태 확인
-helm upgrade my-release bitnami/nginx --set image.tag=1.25
-helm rollback my-release 1   # 이전 버전으로 롤백
-helm uninstall my-release    # Release 삭제
-```
-
-### Chart 개발
-
-```bash
-helm create my-chart         # 새 Chart 스캐폴딩
-helm lint ./my-chart         # Chart 문법 검사
-helm template ./my-chart     # 템플릿 렌더링 확인
-helm package ./my-chart      # Chart 패키징 (.tgz)
-```
-
-## values.yaml 예시
-
-```yaml
-replicaCount: 3
-
-image:
-  repository: nginx
-  tag: "1.25"
-  pullPolicy: IfNotPresent
-
-service:
-  type: LoadBalancer
-  port: 80
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-
-ingress:
-  enabled: true
-  hosts:
-    - host: myapp.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-```
-
-## 템플릿 예시 (templates/deployment.yaml)
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Release.Name }}-deployment
-  labels:
-    app: {{ .Release.Name }}
-spec:
-  replicas: {{ .Values.replicaCount }}
-  selector:
-    matchLabels:
-      app: {{ .Release.Name }}
-  template:
-    metadata:
-      labels:
-        app: {{ .Release.Name }}
-    spec:
-      containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          ports:
-            - containerPort: 80
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-```
-
-## Helm 사용 장점
-
-- **재사용성:** 하나의 Chart 로 여러 환경 (dev/staging/prod) 에 배포 가능
-- **버전 관리:** Release 히스토리를 통해 롤백 및 감사 가능
-- **의존성 관리:** 서브 차트를 통해 복잡한 애플리케이션 구성 가능
-- **템플릿 엔진:** Go 템플릿을 사용한 동적 manifest 생성
-- **커뮤니티 Chart:** Artifact Hub 에서 수천 개의 검증된 Chart 사용 가능
-
-## Artifact Hub
-
-[Artifact Hub](https://artifacthub.io) 에서 다양한 Helm Charts 를 검색하고 설치할 수 있습니다.
-
-```bash
-# Prometheus 설치 예시
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm install prometheus prometheus-community/kube-prometheus-stack
-```
+**Helm은 현대적인 Kubernetes 운영에서 CI/CD 파이프라인의 핵심 도구로 자리 잡고 있습니다.**

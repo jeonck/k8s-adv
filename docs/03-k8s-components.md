@@ -1,53 +1,64 @@
 # K8s 클러스터 구성 컴포넌트
 
-Kubernetes 클러스터는 Control Plane 과 Worker Node 로 구성됩니다.
+Kubernetes 클러스터는 관리를 담당하는 **Control Plane**과 실제 워크로드가 실행되는 **Worker Node**로 구성됩니다.
 
-## Control Plane (관리 영역)
+---
 
-| 컴포넌트 | 역할 |
-|----------|------|
-| **kube-apiserver** | 클러스터의 프론트엔드, REST API 제공, 인증/인가 처리 |
-| **etcd** | 클러스터 상태와 설정을 저장하는 분산 키 - 값 저장소 |
-| **kube-scheduler** | Pod 를 적절한 노드에 스케줄링 |
-| **kube-controller-manager** | 컨트롤러들을 실행 (Node, Replication, Endpoint, Namespace 등) |
-| **cloud-controller-manager** | 클라우드 제공자 API 와 연동 (선택적) |
-
-## Worker Node (작업 영역)
+## 1. Control Plane (관리 영역)
 
 | 컴포넌트 | 역할 |
 |----------|------|
-| **kubelet** | 노드에서 실행되는 에이전트, Pod lifecycle 관리 |
-| **kube-proxy** | 네트워크 프록시, Service 트래픽 라우팅 |
-| **Container Runtime** | 컨테이너 실행 (containerd, CRI-O, Docker Engine 등) |
+| **kube-apiserver** | 클러스터의 중앙 통로. 모든 요청을 처리하며 인증/인가를 담당함 |
+| **etcd** | 클러스터의 모든 상태 정보를 저장하는 '두뇌' 역할을 하는 키-값 저장소 |
+| **kube-scheduler** | 생성된 Pod를 어느 노드에 배치할지 결정하는 스케줄러 |
+| **kube-controller-manager** | 노드, 레플리카, 엔드포인트 등 클러스터의 상태를 관리하는 컨트롤러들의 집합 |
 
-## 클러스터 아키텍처
+---
 
-```
-┌─────────────────────────────────────────┐
-│           Control Plane                 │
-│  ┌─────────────┐  ┌──────────────────┐ │
-│  │ kube-       │  │ etcd             │ │
-│  │ apiserver   │  │ (저장소)         │ │
-│  └──────┬──────┘  └──────────────────┘ │
-│         │                               │
-│  ┌──────┴──────┐  ┌──────────────────┐ │
-│  │ kube-       │  │ kube-controller  │ │
-│  │ scheduler   │  │ -manager         │ │
-│  └─────────────┘  └──────────────────┘ │
-└─────────────────┬───────────────────────┘
-                  │
-        ┌─────────┼─────────┐
-        │         │         │
-   ┌────▼────┐ ┌──▼───┐ ┌──▼────┐
-   │Worker 1 │ │Worker│ │Worker │
-   │  Node   │ │  2   │ │  3    │
-   │ ┌─────┐ │ │ ┌──┐ │ │ ┌──┐  │
-   │ │kube │ │ │ │  │ │ │  │  │
-   │ │let  │ │ │ │  │ │ │  │  │
-   │ └──┬──┘ │ │ │  │ │ │  │  │
-   │ ┌──▼──┐ │ │ │  │ │ │  │  │
-   │ │Pod  │ │ │ │  │ │ │  │  │
-   │ │(s)  │ │ │ │  │ │ │  │  │
-   │ └─────┘ │ │ │  │ │ │  │  │
-   └─────────┘ └────┘ └─────┘
-```
+## 2. Worker Node (작업 영역)
+
+| 컴포넌트 | 역할 |
+|----------|------|
+| **kubelet** | 각 노드에서 실행되는 관리자. 컨테이너가 Pod 스펙에 따라 실행되도록 보장함 |
+| **kube-proxy** | 노드 내부의 네트워크 규칙을 관리하고 서비스로의 트래픽을 라우팅함 |
+| **Container Runtime** | 실제로 컨테이너를 실행하는 소프트웨어 (containerd, CRI-O 등) |
+
+---
+
+## 3. 전체 아키텍처 다이어그램
+
+컴포넌트 간의 상호작용을 한눈에 보여주는 아키텍처 구조입니다.
+
+<div class="mermaid">
+graph TD
+    subgraph CP[Control Plane]
+        API[kube-apiserver]
+        ETCD[(etcd)]
+        SCHED[kube-scheduler]
+        KCM[kube-controller-manager]
+        
+        API <--> ETCD
+        API --- SCHED
+        API <--> KCM
+    end
+
+    subgraph Node1[Worker Node 1]
+        K1[kubelet]
+        P1[kube-proxy]
+        Pod1[Pod s]
+        K1 --- Pod1
+    end
+
+    subgraph Node2[Worker Node 2]
+        K2[kubelet]
+        P2[kube-proxy]
+        Pod2[Pod s]
+        K2 --- Pod2
+    end
+
+    API <==> K1
+    API <==> K2
+    Admin[관리자 / kubectl] -- "명령 전달" --> API
+</div>
+
+**각 컴포넌트는 유기적으로 연결되어 있으며, API 서버를 중심으로 클러스터의 선언적 상태(Desired State)를 유지하기 위해 협력합니다.**

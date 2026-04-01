@@ -971,49 +971,37 @@ failurePolicy: Fail
 
 ## 리소스 관계도
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    MetalLB 구성                             │
-└─────────────────────────────────────────────────────────────┘
+MetalLB를 구성하는 주요 컴포넌트와 사용자 정의 리소스(CRD) 간의 관계입니다.
 
-Namespace: metallb-system
-│
-├─ CRDs (6 개)
-│  ├─ IPAddressPool      - IP 주소 풀 정의
-│  ├─ L2Advertisement    - L2 광고 설정
-│  ├─ BGPPeer            - BGP 피어 설정
-│  ├─ BGPAdvertisement   - BGP 광고 설정
-│  ├─ BFDProfile         - BFD 프로파일
-│  └─ Community          - BGP 커뮤니티
-│
-├─ Controller (Deployment)
-│  ├─ ServiceAccount: controller
-│  ├─ Role/ClusterRole: 컨트롤러 권한
-│  ├─ 이미지: quay.io/metallb/controller:v0.14.8
-│  ├─ 포트: 7472(메트릭스), 9443(webhook)
-│  └─ 역할: IP 할당, CRD 관리, Webhook
-│
-├─ Speaker (DaemonSet - 모든 노드)
-│  ├─ ServiceAccount: speaker
-│  ├─ ClusterRole: 스피커 권한
-│  ├─ 이미지: quay.io/metallb/speaker:v0.14.8
-│  ├─ hostNetwork: true
-│  ├─ capabilities: NET_RAW
-│  └─ 역할: ARP/BGP 광고, 상태 업데이트
-│
-├─ 설정 리소스
-│  ├─ ConfigMap: metallb-excludel2 (제외 인터페이스)
-│  ├─ Secret: metallb-webhook-cert (Webhook 인증서)
-│  └─ Secret: memberlist (컨트롤러 간 통신)
-│
-├─ 사용자 설정 (예시)
-│  ├─ IPAddressPool: ip-pool (172.31.1.200-250)
-│  └─ L2Advertisement: l2-advertisement (eth0)
-│
-└─ Webhook
-   ├─ Service: metallb-webhook-service
-   └─ ValidatingWebhookConfiguration (6 개 검증기)
-```
+<div class="mermaid">
+graph TD
+    NS[Namespace: metallb-system] --> CRD[CRDs: IPAddressPool, L2Advertisement, etc.]
+    
+    subgraph Control_Plane
+    CTRL[Controller: Deployment] -- "IP 할당 관리" --> CRD
+    end
+    
+    subgraph Data_Plane
+    SPK[Speaker: DaemonSet] -- "ARP/BGP 광고" --> Net((Physical Network))
+    SPK -- "상태 감시" --> CRD
+    end
+    
+    subgraph User_Config
+    POOL[IPAddressPool: 172.31.1.200-250]
+    ADV[L2Advertisement]
+    end
+    
+    POOL & ADV --> CRD
+    CRD -.-> CTRL
+    CRD -.-> SPK
+</div>
+
+| 구성 요소 | 주요 역할 | 비고 |
+|-----------|----------|------|
+| **Controller** | 클러스터 내 Service(LoadBalancer)를 감시하고 IP를 할당/회수함 | Deployment로 실행 |
+| **Speaker** | 할당된 IP를 외부 네트워크에 알림 (ARP 또는 BGP 프로토콜 사용) | 모든 노드에 DaemonSet으로 실행 |
+| **IPAddressPool** | 외부로 노출할 수 있는 가용 IP 범위를 정의하는 설정 리소스 | 사용자 정의 CRD |
+| **L2Advertisement** | 어떤 인터페이스를 통해 L2 방식으로 광고할지 설정 | 사용자 정의 CRD |
 
 ---
 

@@ -893,40 +893,34 @@ webhooks:
 
 ## 리소스 관계도
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                Ingress-NGINX 구성                           │
-└─────────────────────────────────────────────────────────────┘
+Ingress-NGINX를 구성하는 주요 리소스들과 그 관계입니다.
 
-Namespace: ingress-nginx
-│
-├─ RBAC
-│  ├─ ServiceAccount: ingress-nginx (컨트롤러)
-│  ├─ ServiceAccount: ingress-nginx-admission (Webhook)
-│  ├─ Role (x2), ClusterRole (x2)
-│  └─ RoleBinding (x2), ClusterRoleBinding (x2)
-│
-├─ Controller (Deployment)
-│  ├─ 이미지: ingress-nginx/controller:v1.11.3
-│  ├─ 포트: 80(HTTP), 443(HTTPS), 8443(Webhook)
-│  ├─ ConfigMap: ingress-nginx-controller
-│  └─ Service: LoadBalancer (외부 트래픽)
-│
-├─ Webhook 인증서 (Job x2)
-│  ├─ ingress-nginx-admission-create (생성)
-│  ├─ ingress-nginx-admission-patch (패치)
-│  └─ Secret: ingress-nginx-admission
-│
-├─ Service (x2)
-│  ├─ ingress-nginx-controller (LoadBalancer)
-│  └─ ingress-nginx-controller-admission (ClusterIP)
-│
-├─ IngressClass: nginx
-│  └─ controller: k8s.io/ingress-nginx
-│
-└─ ValidatingWebhookConfiguration
-   └─ validate.nginx.ingress.kubernetes.io
-```
+<div class="mermaid">
+graph TD
+    NS[Namespace: ingress-nginx] --> RBAC[RBAC: SA / Roles / Bindings]
+    NS --> IC[IngressClass: nginx]
+    
+    subgraph Controller_Logic
+    RBAC --> DEP[Deployment: ingress-nginx-controller]
+    DEP --> SVC_LB[Service: LoadBalancer / Port 80, 443]
+    DEP --> CM[ConfigMap: ingress-nginx-controller]
+    end
+    
+    subgraph Admission_Webhook
+    J1[Job: admission-create] --> S_ADM[Secret: ingress-nginx-admission]
+    J2[Job: admission-patch] --> S_ADM
+    S_ADM --> WH[ValidatingWebhookConfiguration]
+    DEP --> SVC_ADM[Service: ClusterIP / Port 443]
+    SVC_ADM --> WH
+    end
+</div>
+
+| 구성 요소 | 주요 역할 |
+|-----------|----------|
+| **Controller** | Ingress 리소스를 감시하고 NGINX 설정을 자동으로 생성/갱신 |
+| **IngressClass** | 클러스터 내 여러 Ingress 컨트롤러 중 nginx를 지정하기 위한 식별자 |
+| **Admission Webhook** | Ingress 리소스 생성/수정 시 문법적 오류가 없는지 사전 검증 |
+| **RBAC** | 컨트롤러가 클러스터 내 리소스(Ingress, Secret 등)를 읽을 수 있는 권한 부여 |
 
 ---
 

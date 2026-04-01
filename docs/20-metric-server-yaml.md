@@ -463,49 +463,33 @@ kubectl top pods
 
 ## 리소스 관계도
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Metric Server 구성                       │
-└─────────────────────────────────────────────────────────────┘
+Metric Server를 구성하는 주요 리소스들의 연결 구조입니다.
 
-ServiceAccount (metrics-server)
-       │
-       │ 바인딩
-       ▼
-┌──────────────────────────────────────────────────────┐
-│  RBAC 권한                                            │
-│  ├─ system:aggregated-metrics-reader (ClusterRole)   │
-│  ├─ system:metrics-server (ClusterRole)              │
-│  ├─ extension-apiserver-authentication-reader (Role) │
-│  └─ system:auth-delegator (ClusterRole)              │
-└──────────────────────────────────────────────────────┘
-       │
-       │ 사용
-       ▼
-┌──────────────────────────────────────────────────────┐
-│  Deployment (metrics-server)                         │
-│  └─ Container                                        │
-│     ├─ Image: metrics-server:v0.7.1                  │
-│     ├─ Port: 10250                                   │
-│     ├─ Probes: /livez, /readyz                       │
-│     └─ Security: non-root, read-only                 │
-└──────────────────────────────────────────────────────┘
-       │
-       │ 노출
-       ▼
-┌──────────────────────────────────────────────────────┐
-│  Service (metrics-server)                            │
-│  └─ Port: 443 → 10250                                │
-└──────────────────────────────────────────────────────┘
-       │
-       │ 등록
-       ▼
-┌──────────────────────────────────────────────────────┐
-│  APIService (v1beta1.metrics.k8s.io)                 │
-│  └─ Kubernetes API 확장                              │
-│     └─ kubectl top 명령어 지원                       │
-└──────────────────────────────────────────────────────┘
-```
+<div class="mermaid">
+graph TD
+    SA[ServiceAccount: metrics-server] --> RBAC[RBAC: ClusterRole/Binding]
+    RBAC --> DEP[Deployment: metrics-server]
+    
+    subgraph Pod
+    DEP --> CONT[Container: v0.7.1]
+    CONT -- "Listen" --> P10250[Port: 10250]
+    end
+    
+    P10250 --- SVC[Service: metrics-server]
+    SVC -- "Expose" --> P443[Port: 443]
+    
+    P443 --- API[APIService: v1beta1.metrics.k8s.io]
+    API -- "Register" --> K8S[Kubernetes API Aggregate]
+    
+    K8S --- TOP["kubectl top command"]
+</div>
+
+| 리소스 유형 | 이름 | 주요 역할 |
+|-----------|------|----------|
+| **RBAC** | `system:metrics-server` | API 집계 및 리소스 조회를 위한 권한 부여 |
+| **Deployment** | `metrics-server` | 실제 메트릭 수집 및 처리 데몬 실행 |
+| **Service** | `metrics-server` | API 서버가 메트릭 서버에 접근하기 위한 통로 |
+| **APIService** | `v1beta1.metrics.k8s.io` | 표준 API 서버에 메트릭 기능을 등록 |
 
 ---
 
