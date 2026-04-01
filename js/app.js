@@ -4,9 +4,9 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
 // Markdown 파일 로드 함수
 async function loadMarkdown(filePath, elementId) {
     try {
-        const response = await fetch(`${filePath}?t=${new Date().getTime()}`);
+        const response = await fetch(filePath);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`파일을 찾을 수 없거나 로드할 수 없습니다. (HTTP ${response.status}: ${response.statusText})`);
         }
         const markdown = await response.text();
         const html = marked.parse(markdown);
@@ -14,14 +14,25 @@ async function loadMarkdown(filePath, elementId) {
         contentElement.innerHTML = html;
         
         // Mermaid 다이어그램 렌더링
-        await mermaid.run({
-            querySelector: '.mermaid'
-        });
+        if (window.mermaid) {
+            try {
+                await mermaid.run({
+                    querySelector: '.mermaid'
+                });
+            } catch (mermaidError) {
+                console.error('Mermaid rendering failed:', mermaidError);
+            }
+        }
         
     } catch (error) {
         console.error('Error loading markdown:', error);
         document.getElementById(elementId).innerHTML = 
-            `<p class="error">콘텐츠를 로드할 수 없습니다: ${filePath}</p>`;
+            `<div class="error-box">
+                <h3>콘텐츠 로드 실패</h3>
+                <p>경로: ${filePath}</p>
+                <p>에러: ${error.message}</p>
+                <button onclick="location.reload()">새로고침</button>
+            </div>`;
     }
 }
 
