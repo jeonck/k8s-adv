@@ -4,7 +4,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
 // Markdown 파일 로드 함수
 async function loadMarkdown(filePath, elementId) {
     try {
-        const response = await fetch(filePath);
+        const response = await fetch(`${filePath}?t=${new Date().getTime()}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
