@@ -274,6 +274,73 @@ body {
     background: #9b2c2c;
 }
 
+/* Security Section Side-by-Side Layout */
+.security-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 1.5rem;
+}
+
+.security-layout .sidebar-tabs {
+    width: 320px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+}
+
+.security-layout .tab-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.security-layout .tab-group {
+    background: #fff;
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #e0e6ed;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.security-layout .resource-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.security-layout .resource-tabs .tab-btn {
+    text-align: left;
+    width: 100%;
+}
+
+.security-layout #security-content {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+@media (max-width: 992px) {
+    .security-layout {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .security-layout .sidebar-tabs {
+        width: 100%;
+        position: static;
+    }
+    
+    .security-layout .resource-tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .security-layout .resource-tabs .tab-btn {
+        width: auto;
+        text-align: center;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header .container {
