@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 탭 기능 초기화 (새로운 섹션 구조)
+    setupTabs('home', 'home-content', 'docs/');
     setupTabs('environment', 'environment-content', 'docs/');
     setupTabs('basics', 'basics-content', 'docs/');
     setupTabs('security', 'security-content', 'docs/');
