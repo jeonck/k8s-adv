@@ -178,15 +178,22 @@ body {
 }
 
 .group-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #1a43a3;
     margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
+    display: block;
     border-bottom: 2px solid #326ce5;
     padding-bottom: 0.5rem;
-    width: fit-content;
+    width: 100%;
+}
+
+.group-title .eng-sub {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #718096;
+    display: block;
+    margin-top: 0.2rem;
 }
 
 .resource-tabs {
@@ -283,7 +290,7 @@ body {
 }
 
 .security-layout .sidebar-tabs {
-    width: 320px;
+    width: 240px;
     flex-shrink: 0;
     position: sticky;
     top: 20px;
