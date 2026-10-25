@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>04-addon-concept.md</title>
     <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1782742750742';
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1792898231254';
         
         // Initialize mermaid with improved configuration
         mermaid.initialize({
@@ -206,6 +206,13 @@
         <a href="43-operator-development.html">43-operator-development</a>
         <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
         <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+        <a href="46-uc-resource-quota.html">46-uc-resource-quota</a>
+        <a href="47-uc-pod-deletion.html">47-uc-pod-deletion</a>
+        <a href="48-uc-node-not-ready.html">48-uc-node-not-ready</a>
+        <a href="49-uc-imagepullbackoff.html">49-uc-imagepullbackoff</a>
+        <a href="50-uc-architecture-crash-course.html">50-uc-architecture-crash-course</a>
+        <a href="51-uc-daemonset-troubleshooting.html">51-uc-daemonset-troubleshooting</a>
+        <a href="52-uc-pod-yaml-structure.html">52-uc-pod-yaml-structure</a>
     </div>
     
     <div class="file-info">
@@ -219,7 +226,7 @@
 <p></p>
 <h2>Add-on 이란?</h2>
 <p></p>
-<p>Add-on 은 Kubernetes 클러스터의 기능을 확장하지만, 핵심 동작에 필수적이지 않은 선택적 컴포넌트입니다.</p>
+<p>Add-on 은 Kubernetes 클러스터의 기능을 확장하지만, 코어 엔진에 내장되지 않고 환경에 맞게 선택·교체하는 컴포넌트입니다. (프로덕션에서는 사실상 필수이며, 아래 '관점' 절 참고)</p>
 <p></p>
 <h2>주요 Add-on 예시</h2>
 <ul><li><strong>CNI 플러그인:</strong> Calico, Flannel, Weave, Cilium (네트워킹)</li>
@@ -246,6 +253,52 @@
 <h3>4. 클라우드 중립성</h3>
 <p></p>
 <p>특정 클라우드 제공자에 종속되지 않고, 다양한 환경에서 동일한 Kubernetes 를 사용할 수 있습니다.</p>
+<p></p>
+<h2>관점: 필수처럼 보이는데 왜 '애드온(Add-on)'이라 부를까?</h2>
+<p></p>
+<p>실제 프로덕션에서 CNI, DNS, 스토리지 같은 기능은 사실상 필수(De facto mandatory)입니다. 그럼에도 '애드온'이라 부르는 이유는 쿠버네티스 코어 엔진의 철학과 설계 사상 때문입니다.</p>
+<p></p>
+<h3>1. 쿠버네티스의 철학: "최소한의 코어와 모듈화(Extensibility)"</h3>
+<p></p>
+<p>컨테이너 오케스트레이션의 핵심 뼈대만 제공하고, 나머지는 사용자가 원하는 방식으로 갈아 끼우거나 확장할 수 있게 한다는 것이 개발 철학입니다.</p>
+<ul><li><strong>코어 엔진</strong>: API 서버, 스케줄러, 컨트롤러 매니저, 각 노드의 Kubelet 등은 컨테이너를 띄우고 관리하는 최소한의 순수 엔진입니다.</li>
+<li>엔진 입장에서는 네트워킹을 Calico 로 하든 Cilium 으로 하든, 스토리지를 AWS EBS 로 하든 Ceph 로 하든 상관이 없습니다. 특정 기술에 종속되지 않고 독립적으로 동작할 수 있습니다.</li>
+<p></ul></p>
+<p><div class="mermaid">graph TB
+    subgraph CORE[Core 엔진 - 특정 기술에 비종속]
+        API[API Server]
+        SCH[Scheduler]
+        CM[Controller Manager]
+        KL[Kubelet]
+    end
+    subgraph ADDON[Add-on - 환경에 맞게 선택/교체]
+        CNI[네트워킹: Calico / Cilium]
+        CSI[스토리지: AWS EBS / Ceph]
+        DNS[DNS: CoreDNS]
+        MON[모니터링: Prometheus]
+    end
+    CORE -. 표준 인터페이스 CNI / CSI / CRI .-> ADDON</div></p>
+<p></p>
+<h3>2. 환경에 따른 '선택의 자유' (Vendor Agnostic &amp; Flexibility)</h3>
+<p></p>
+<p>AWS, GCP, 온프레미스 베어메탈, 사내 가상화 등 인프라 환경은 매우 다양합니다. 특정 네트워킹 방식이나 스토리지 드라이버가 코어에 강제(Built-in)로 박혀 있다면 다음 문제가 생깁니다.</p>
+<p></p>
+<p>| 문제 | 설명 |</p>
+<p>|------|------|</p>
+<p>| <strong>유연성 상실</strong> | 환경에 맞지 않는 기능도 무조건 탑재해야 하므로 불필요하게 크고 무거워짐 |</p>
+<p>| <strong>교체 불가능</strong> | 기본 포함된 도구가 마음에 들지 않아도 바꿀 수 없어 아키텍처가 경직됨 |</p>
+<p></p>
+<p>따라서 쿠버네티스는 "뼈대만 줄 테니, 네 환경에 맞는 부품(애드온)을 골라서 조립해 써라"라는 의미로 '애드온'이라는 용어를 사용합니다.</p>
+<p></p>
+<h3>3. 컴포넌트의 라이프사이클 분리 (업데이트와 관리의 독립성)</h3>
+<p></p>
+<p>쿠버네티스 코어 프로젝트와 애드온 프로젝트들은 각각 독립적으로 개발되고 배포(Release)됩니다.</p>
+<ul><li>코어 업그레이드 시 네트워킹 애드온이나 DNS 서버까지 코어 소스코드에 함께 들어 있다면 버전 업그레이드가 매우 복잡하고 위험해집니다.</li>
+<li>기능을 별도 컴포넌트(애드온)로 분리하면, 쿠버네티스 버전과 무관하게 네트워킹·모니터링 도구를 독립적으로 업그레이드하거나 패치할 수 있어 유지보수가 수월해집니다.</li>
+<p></ul></p>
+<h3>요약</h3>
+<p></p>
+<p>&gt; 프로덕션에서 애드온은 <strong>사실상 필수</strong>입니다. 그러나 '애드온'이라 부르는 것은 기술적 분류의 의미로, 쿠버네티스가 특정 기술 스택(네트워크, 스토리지 등)에 종속되지 않고 <strong>사용자가 원하는 도구를 선택·조합할 수 있는 확장 가능한 구조</strong>임을 나타내기 위해서입니다.</p>
 <p></p>
 <h2>Add-on 예시 설치</h2>
 <p></p>
