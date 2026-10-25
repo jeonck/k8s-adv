@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>51-uc-daemonset-troubleshooting.md</title>
     <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1792895801921';
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1792897482168';
         
         // Initialize mermaid with improved configuration
         mermaid.initialize({
@@ -274,7 +274,50 @@
 <p><pre><code class="language-bash">kubectl rollout undo ds/<name> -n <ns></code></pre></p>
 <p></p><br><hr>
 <p></p>
-<h2>3. 체크리스트</h2>
+<h2>3. 트러블슈팅 사례</h2>
+<p></p>
+<h3>사례 1. control-plane 노드에만 Pod 가 없음 (Taint)</h3>
+<ul><li><strong>증상</strong>: 노드 5대(control-plane 1 + worker 4)인데 <code>DESIRED=4, CURRENT=4</code>. 로그 수집기가 control-plane 로그를 못 가져옴.</li>
+<li><strong>진단</strong></li>
+<p></ul>  <pre><code class="language-bash">kubectl describe node cp-1 | grep -i taint<br>  # Taints: node-role.kubernetes.io/control-plane:NoSchedule</code></pre></p>
+<ul><li><strong>원인</strong>: control-plane 노드의 <code>NoSchedule</code> taint 를 DaemonSet 이 tolerate 하지 않음.</li>
+<li><strong>해결</strong>: <code>tolerations</code> 추가 후 <code>kubectl apply</code> → <code>DESIRED=5</code> 로 증가 확인.</li>
+<p></ul></p>
+<h3>사례 2. 특정 노드에서만 CrashLoopBackOff (hostPath / 권한)</h3>
+<ul><li><strong>증상</strong>: <code>READY</code> 가 <code>DESIRED-1</code>. 한 노드의 Pod 만 <code>CrashLoopBackOff</code>.</li>
+<li><strong>진단</strong></li>
+<p></ul>  <pre><code class="language-bash">kubectl get pods -n logging -o wide | grep -v Running<br>  kubectl logs <pod> -n logging --previous<br>  # open /var/log/containers: permission denied  (또는 no such file or directory)</code></pre></p>
+<ul><li><strong>원인</strong>: 해당 노드의 컨테이너 런타임이 다른 경로(<code>/var/log/pods</code>)를 쓰거나, SELinux/AppArmor 가 hostPath 접근을 차단.</li>
+<li><strong>해결</strong>: 노드 설정을 통일하거나 마운트 경로 수정, 필요 시 <code>securityContext</code> 조정. 노드 간 OS/런타임 편차를 먼저 의심합니다.</li>
+<p></ul></p>
+<h3>사례 3. 신규 노드 추가 후 Pod 가 Pending (리소스 부족)</h3>
+<ul><li><strong>증상</strong>: 노드 증설 직후 DaemonSet Pod 가 <code>Pending</code>, 일반 워크로드가 이미 노드를 가득 채움.</li>
+<li><strong>진단</strong></li>
+<p></ul>  <pre><code class="language-bash">kubectl describe pod <pod> | grep -A5 Events<br>  # 0/1 nodes are available: 1 Insufficient cpu.</code></pre></p>
+<ul><li><strong>원인</strong>: DaemonSet Pod 도 <code>requests</code> 를 만족해야 스케줄됨. 일반 Pod 가 먼저 자리를 차지함.</li>
+<li><strong>해결</strong>: 에이전트에 <code>priorityClassName: system-node-critical</code> 을 부여하면 낮은 우선순위 Pod 를 preempt 하고 배치됩니다. requests 값 자체를 줄이는 것도 방법입니다.</li>
+<p></ul></p>
+<h3>사례 4. 롤링 업데이트가 중간에서 멈춤</h3>
+<ul><li><strong>증상</strong>: <code>UP-TO-DATE</code> 가 3 에서 정체, <code>rollout status</code> 가 계속 대기.</li>
+<li><strong>진단</strong></li>
+<p></ul>  <pre><code class="language-bash">kubectl rollout status ds/node-agent -n monitoring<br>  kubectl get pods -n monitoring -o wide     # 새 버전 Pod 중 Not Ready 확인</code></pre></p>
+<ul><li><strong>원인</strong>: 새 이미지의 readinessProbe 실패(잘못된 설정 값) → <code>maxUnavailable: 1</code> 이라 다음 노드로 진행하지 못함.</li>
+<li><strong>해결</strong>: 즉시 <code>kubectl rollout undo ds/node-agent -n monitoring</code> 로 복구 후 설정 수정. 대규모 클러스터는 <code>maxUnavailable: 10%</code> 처럼 비율로 지정합니다.</li>
+<p></ul></p>
+<h3>사례 5. hostPort 충돌로 Pod 시작 실패</h3>
+<ul><li><strong>증상</strong>: 일부 노드에서 Pod 가 계속 실패하며 <code>Pending</code> 또는 이벤트에 포트 관련 메시지.</li>
+<li><strong>진단</strong></li>
+<p></ul>  <pre><code class="language-bash">kubectl describe pod <pod> | grep -i "port"<br>  # didn't have free ports for the requested pod ports<br>  ss -ltnp | grep :9100        # 노드에서 직접 확인</code></pre></p>
+<ul><li><strong>원인</strong>: 노드에 이미 같은 포트를 쓰는 프로세스(예: 직접 설치한 node_exporter)나 다른 DaemonSet 이 존재.</li>
+<li><strong>해결</strong>: 기존 프로세스 중지 또는 포트 변경. <code>hostNetwork</code> 사용 시 특히 충돌하기 쉽습니다.</li>
+<p></ul></p>
+<h3>사례 6. 노드 drain 이 멈춤</h3>
+<ul><li><strong>증상</strong>: <code>kubectl drain</code> 이 DaemonSet Pod 때문에 진행되지 않음.</li>
+<li><strong>원인/해결</strong>: DaemonSet Pod 는 삭제해도 즉시 재생성되므로 drain 대상에서 제외해야 합니다.</li>
+<p></ul>  <pre><code class="language-bash">kubectl drain <node> --ignore-daemonsets --delete-emptydir-data</code></pre></p>
+<p></p><br><hr>
+<p></p>
+<h2>4. 체크리스트</h2>
 <ul><li>[ ] <code>DESIRED / CURRENT / READY</code> 숫자 비교</li>
 <li>[ ] 문제 노드의 Taint, Label, 리소스 확인</li>
 <li>[ ] 문제 Pod 의 <code>describe</code> Events 와 <code>logs --previous</code></li>
