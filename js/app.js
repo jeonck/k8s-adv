@@ -136,4 +136,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setupTabs('security', 'security-content', 'docs/');
     setupTabs('operator', 'operator-content', 'docs/');
     setupTabs('labs', 'labs-content', 'docs/');
+    setupTabs('usecases', 'usecases-content', 'docs/');
 });

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>00-curriculum.md</title>
     <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1782742750742';
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs?v=1792895801921';
         
         // Initialize mermaid with improved configuration
         mermaid.initialize({
@@ -206,6 +206,13 @@
         <a href="43-operator-development.html">43-operator-development</a>
         <a href="44-operator-and-cr-relationship.html">44-operator-and-cr-relationship</a>
         <a href="45-prometheus-grafana-operator-install.html">45-prometheus-grafana-operator-install</a>
+        <a href="46-uc-resource-quota.html">46-uc-resource-quota</a>
+        <a href="47-uc-pod-deletion.html">47-uc-pod-deletion</a>
+        <a href="48-uc-node-not-ready.html">48-uc-node-not-ready</a>
+        <a href="49-uc-imagepullbackoff.html">49-uc-imagepullbackoff</a>
+        <a href="50-uc-architecture-crash-course.html">50-uc-architecture-crash-course</a>
+        <a href="51-uc-daemonset-troubleshooting.html">51-uc-daemonset-troubleshooting</a>
+        <a href="52-uc-pod-yaml-structure.html">52-uc-pod-yaml-structure</a>
     </div>
     
     <div class="file-info">
@@ -229,6 +236,7 @@
 <p>| <strong>5단계</strong> | <strong>인증서 실무</strong> | API Server 인증서 만료 확인, kubeadm을 통한 인증서 갱신, 인증 파일 관리 | 23-k8s-cert-file-locations, 28-cert-expiration-and-renew |</p>
 <p>| <strong>6단계</strong> | <strong>확장 및 Operator</strong> | Custom Resource Definition(CRD) 설계, Operator 패턴 및 Reconcile 루프 개발 | 42-crd-guide, 43-operator-development, 44-operator-and-cr-relationship |</p>
 <p>| <strong>7단계</strong> | <strong>실전 에드온 실습</strong> | Ingress, MetalLB LoadBalancer, NFS Provisioner, Prometheus/Grafana | 22-metallb-yaml, 23-ingress-nginx-yaml, 45-prometheus-grafana-operator-install |</p>
+<p>| <strong>8단계</strong> | <strong>Use Cases (운영/트러블슈팅)</strong> | Resource Quota, Pod 삭제 과정, Node NotReady, ImagePullBackOff, 아키텍처, DaemonSet 장애, pod.yaml 구조 | 46-uc-resource-quota ~ 52-uc-pod-yaml-structure |</p>
 <p></p><br><hr>
 <p></p>
 <h2>🎯 학습 목표 (Goal)</h2>

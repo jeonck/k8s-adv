@@ -48,7 +48,7 @@ k8s-adv/
 │   ├── 01-kubectl.html     # 렌더링된 HTML (새로 추가!)
 │   ├── 02-k8s-resources.md
 │   ├── 02-k8s-resources.html
-│   ├── ... (52 개 문서)
+│   ├── ... (61 개 문서)
 │   └── 45-prometheus-grafana-operator-install.html
 └── README.md
 ```

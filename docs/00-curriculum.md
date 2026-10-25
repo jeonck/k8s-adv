@@ -15,6 +15,7 @@
 | **5단계** | **인증서 실무** | API Server 인증서 만료 확인, kubeadm을 통한 인증서 갱신, 인증 파일 관리 | 23-k8s-cert-file-locations, 28-cert-expiration-and-renew |
 | **6단계** | **확장 및 Operator** | Custom Resource Definition(CRD) 설계, Operator 패턴 및 Reconcile 루프 개발 | 42-crd-guide, 43-operator-development, 44-operator-and-cr-relationship |
 | **7단계** | **실전 에드온 실습** | Ingress, MetalLB LoadBalancer, NFS Provisioner, Prometheus/Grafana | 22-metallb-yaml, 23-ingress-nginx-yaml, 45-prometheus-grafana-operator-install |
+| **8단계** | **Use Cases (운영/트러블슈팅)** | Resource Quota, Pod 삭제 과정, Node NotReady, ImagePullBackOff, 아키텍처, DaemonSet 장애, pod.yaml 구조 | 46-uc-resource-quota ~ 52-uc-pod-yaml-structure |
 
 ---
 
