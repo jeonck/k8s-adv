@@ -1,0 +1,7 @@
+{{ $sec := .FirstSection }}
+{{ if and $sec (not .IsHome) }}
+<aside class="sidebar">
+  <div class="group-title">{{ $sec.Title }}</div>
+  {{ partial "sidebar-list.html" (dict "sec" $sec "cur" .) }}
+</aside>
+{{ end }}

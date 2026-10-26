@@ -1,0 +1,9 @@
+{{ $cur := .cur }}
+<ul>
+  {{ range .sec.Pages.ByWeight }}
+  <li><a href="{{ .RelPermalink }}"{{ if eq $cur.RelPermalink .RelPermalink }} class="active"{{ end }}>{{ .Title }}</a></li>
+  {{ end }}
+  {{ range .sec.Sections.ByWeight }}
+  <li class="group"><div class="group-title">{{ .Title }}</div>{{ partial "sidebar-list.html" (dict "sec" . "cur" $cur) }}</li>
+  {{ end }}
+</ul>

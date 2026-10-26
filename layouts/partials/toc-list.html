@@ -1,0 +1,4 @@
+<ul>
+  {{ range .Pages.ByWeight }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>{{ end }}
+  {{ range .Sections.ByWeight }}<li><strong>{{ .Title }}</strong>{{ partial "toc-list.html" . }}</li>{{ end }}
+</ul>

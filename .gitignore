@@ -20,3 +20,8 @@ npm-debug.log*
 
 # Node modules (if using Node.js)
 node_modules/
+
+# Hugo
+public/
+resources/_gen/
+.hugo_build.lock

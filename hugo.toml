@@ -1,0 +1,14 @@
+baseURL = "/"
+locale = "ko"
+defaultContentLanguage = "ko"
+title = "K8s 심화 과정"
+enableRobotsTXT = false
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.highlight]
+  noClasses = false
+  style = "github"
+
+[menus]
