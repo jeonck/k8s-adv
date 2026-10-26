@@ -1,6 +1,0 @@
-name = "k8s-adv"
-description = "K8s 심화 과정 문서용 테마 (상단 메뉴, 섹션 사이드바, Mermaid)"
-min_version = "0.146.0"
-
-[author]
-  name = "k8s-adv"

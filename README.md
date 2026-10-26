@@ -22,7 +22,7 @@ k8s-adv/
 │   ├── operator/
 │   ├── labs/              # 실습 가이드
 │   └── usecases/
-├── themes/k8s-adv/        # 로컬 테마 (layouts, static/css, Mermaid 렌더 훅)
+├── themes/hextra/            # Hextra 테마 (git submodule)
 └── .github/workflows/hugo.yml   # GitHub Pages 배포
 ```
 
@@ -40,3 +40,13 @@ weight: 100
 ```
 
 Mermaid 다이어그램은 ` ```mermaid ` 코드블록으로 작성하면 자동 렌더링됩니다.
+
+## 테마
+
+[Hextra](https://github.com/imfing/hextra) 테마를 git submodule 로 사용합니다. 처음 clone 할 때:
+
+```bash
+git clone --recurse-submodules <repo>
+# 이미 clone 했다면
+git submodule update --init --recursive
+```
