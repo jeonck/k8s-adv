@@ -1,3 +1,4 @@
+theme = "k8s-adv"
 baseURL = "/"
 locale = "ko"
 defaultContentLanguage = "ko"

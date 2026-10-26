@@ -22,8 +22,7 @@ k8s-adv/
 │   ├── operator/
 │   ├── labs/              # 실습 가이드
 │   └── usecases/
-├── layouts/               # 템플릿 (baseof, 사이드바, Mermaid 렌더 훅)
-├── static/css/style.css
+├── themes/k8s-adv/        # 로컬 테마 (layouts, static/css, Mermaid 렌더 훅)
 └── .github/workflows/hugo.yml   # GitHub Pages 배포
 ```
 
