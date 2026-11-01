@@ -1,8 +1,7 @@
 baseURL = "/"
-title = "K8s 심화 과정"
 theme = "hextra"
 defaultContentLanguage = "ko"
-locale = "ko"
+defaultContentLanguageInSubdir = false
 
 [markup.goldmark.renderer]
   unsafe = true
@@ -24,43 +23,98 @@ locale = "ko"
     default = "system"
     displayToggle = true
 
-[[menus.main]]
-  name = "검색"
-  weight = 100
-  [menus.main.params]
-    type = "search"
-
-[[menus.main]]
-  name = "소개"
-  pageRef = "/intro"
+[languages.ko]
+  languageName = "한국어"
+  languageCode = "ko"
+  locale = "ko"
   weight = 1
+  title = "K8s 심화 과정"
 
-[[menus.main]]
-  name = "실습 환경"
-  pageRef = "/lab-env"
+  [[languages.ko.menus.main]]
+    name = "검색"
+    weight = 100
+    [languages.ko.menus.main.params]
+      type = "search"
+
+  [[languages.ko.menus.main]]
+    name = "소개"
+    weight = 1
+    pageRef = "/intro"
+
+  [[languages.ko.menus.main]]
+    name = "실습 환경"
+    weight = 2
+    pageRef = "/lab-env"
+
+  [[languages.ko.menus.main]]
+    name = "기초 이론"
+    weight = 3
+    pageRef = "/basics"
+
+  [[languages.ko.menus.main]]
+    name = "인증/보안"
+    weight = 4
+    pageRef = "/security"
+
+  [[languages.ko.menus.main]]
+    name = "Operator"
+    weight = 5
+    pageRef = "/operator"
+
+  [[languages.ko.menus.main]]
+    name = "실습"
+    weight = 6
+    pageRef = "/labs"
+
+  [[languages.ko.menus.main]]
+    name = "Use Cases"
+    weight = 7
+    pageRef = "/usecases"
+
+[languages.en]
+  languageName = "English"
+  languageCode = "en"
+  locale = "en"
   weight = 2
+  title = "Kubernetes Advanced Course"
 
-[[menus.main]]
-  name = "기초 이론"
-  pageRef = "/basics"
-  weight = 3
+  [[languages.en.menus.main]]
+    name = "Search"
+    weight = 100
+    [languages.en.menus.main.params]
+      type = "search"
 
-[[menus.main]]
-  name = "인증/보안"
-  pageRef = "/security"
-  weight = 4
+  [[languages.en.menus.main]]
+    name = "Introduction"
+    weight = 1
+    pageRef = "/intro"
 
-[[menus.main]]
-  name = "Operator"
-  pageRef = "/operator"
-  weight = 5
+  [[languages.en.menus.main]]
+    name = "Lab Environment"
+    weight = 2
+    pageRef = "/lab-env"
 
-[[menus.main]]
-  name = "실습"
-  pageRef = "/labs"
-  weight = 6
+  [[languages.en.menus.main]]
+    name = "Basics"
+    weight = 3
+    pageRef = "/basics"
 
-[[menus.main]]
-  name = "Use Cases"
-  pageRef = "/usecases"
-  weight = 7
+  [[languages.en.menus.main]]
+    name = "Auth & Security"
+    weight = 4
+    pageRef = "/security"
+
+  [[languages.en.menus.main]]
+    name = "Operator"
+    weight = 5
+    pageRef = "/operator"
+
+  [[languages.en.menus.main]]
+    name = "Labs"
+    weight = 6
+    pageRef = "/labs"
+
+  [[languages.en.menus.main]]
+    name = "Use Cases"
+    weight = 7
+    pageRef = "/usecases"
