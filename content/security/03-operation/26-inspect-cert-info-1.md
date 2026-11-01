@@ -35,7 +35,7 @@ graph TD
     CA[Root CA certificate information]
     CA --> Issuer["Issuer: CN = kubernetes-ca (itself)"]
     CA --> Subject["Subject: CN = kubernetes-ca (itself)"]
-    CA --> Validity["Validity: about 10 years (for long-term retention)"]
+    CA --> Validity["Validity: about 10 years (long-lived by design)"]
     CA --> Usage["Key Usage: Certificate Sign (for signing certificates)"]
     CA --> Basic["Basic Constraints: CA:TRUE (is a certificate authority)"]
 ```
@@ -44,7 +44,7 @@ graph TD
 
 ## 2. Inspecting the API Server Certificate
 
-The API Server certificate is a **subordinate certificate** signed by the Root CA.
+The API Server certificate is a **leaf (end-entity) certificate** signed by the Root CA.
 
 ### Command to View Detailed Information
 ```bash
@@ -55,16 +55,16 @@ openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
 
 | Field | Content | Description |
 |--------|------|------|
-| **Issuer** | `CN = kubernetes-ca` | Proves it was issued by the Root CA |
-| **Subject** | `CN = kube-apiserver` | States that the certificate owner is the API server |
-| **Validity** | About 1 year | A shorter cycle than the Root CA for security |
-| **SAN** | `DNS:kubernetes, IP:10.96.0.1...` | List of additional domains and IPs that can be used to connect |
+| **Issuer** | `CN = kubernetes-ca` | Shows that it was issued by the Root CA |
+| **Subject** | `CN = kube-apiserver` | Identifies the certificate owner as the API server |
+| **Validity** | About 1 year | Shorter than the Root CA's validity, for security |
+| **SAN** | `DNS:kubernetes, IP:10.96.0.1...` | Subject Alternative Names: the additional DNS names and IPs that clients can use to connect |
 
 ---
 
 ## 3. Verifying Trust Relationships Between Certificates
 
-This is how to verify that the API server certificate was correctly signed by the Root CA.
+Use the following command to verify that the API server certificate was signed by the Root CA.
 
 ```bash
 # Signature verification command
@@ -74,4 +74,4 @@ openssl verify -CAfile /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/apiserver.
 # /etc/kubernetes/pki/apiserver.crt: OK
 ```
 
-**The ability to inspect and verify certificate information directly is essential for checking a cluster's security posture and resolving authentication-related failures.**
+**Being able to inspect and verify certificates yourself is essential for assessing a cluster's security posture and troubleshooting authentication failures.**

@@ -6,7 +6,7 @@ slug: "52-uc-pod-yaml-structure"
 
 > 📎 Reference: <https://lnkd.in/gVRYM78g>
 
-We break down the Pod definition, the foundation of every Kubernetes manifest, field by field.
+This page breaks down the Pod definition, the foundation of every Kubernetes manifest, field by field.
 
 ---
 
@@ -17,7 +17,7 @@ We break down the Pod definition, the foundation of every Kubernetes manifest, f
 | `apiVersion` | The API group/version to use (`v1` for a Pod) |
 | `kind` | The object type (`Pod`) |
 | `metadata` | Name, namespace, labels, annotations |
-| `spec` | The Desired State. **The most important area** |
+| `spec` | The desired state. **The most important area** |
 
 > `status` is filled in by the cluster, so you do not write it yourself.
 
@@ -108,9 +108,9 @@ graph TD
 
 | Field | Key Point |
 |------|--------|
-| `labels` | The criteria Service and Deployment selectors use to find Pods |
-| `initContainers` | Run **sequentially** before the main containers, and all must succeed before they start |
-| `resources.requests` | The baseline value for scheduling / `limits` is the upper bound while running (determines the QoS class) |
+| `labels` | What Service and Deployment selectors match on to find Pods |
+| `initContainers` | Run **sequentially** before the main containers, and all must succeed before the main containers start |
+| `resources.requests` | The amount the scheduler uses for placement / `limits` is the upper bound at runtime (together they determine the QoS class) |
 | `readinessProbe` | On failure, the Pod is removed from the Service endpoints |
 | `livenessProbe` | On failure, the container is restarted |
 | `restartPolicy` | `Always` (default) / `OnFailure` / `Never` |

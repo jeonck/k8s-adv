@@ -10,14 +10,14 @@ A lab procedure for switching the Kubernetes API server's authentication method 
 
 ## Task Overview
 
-This lab covers the process of extending the API server's default authentication method to delegate authentication to an external service.
+This lab extends the API server's default authentication so that it delegates token authentication to an external service.
 
 | Step | Task | Notes |
 |------|-----------|------|
 | **1. Pre-check** | Check the API server's current authentication settings. | `kube-apiserver.yaml` |
-| **2. Build the server** | Prepare an external webhook server to validate tokens. | HTTPS-based server |
-| **3. Configure** | Write the configuration file the API server will use when calling the webhook. | `webhook-config.yaml` |
-| **4. Apply to the server** | Modify the API server's runtime options to enable the webhook. | Control plane restart |
+| **2. Build the webhook server** | Prepare an external webhook server to validate tokens. | HTTPS-based server |
+| **3. Configure** | Write the configuration file the API server uses when calling the webhook. | `webhook-config.yaml` |
+| **4. Apply to the API server** | Modify the API server's startup flags to enable the webhook. | API server restarts |
 
 ---
 

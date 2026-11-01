@@ -45,17 +45,17 @@ Every CSI driver follows the same common workflow.
 
 | Stage | Function | Role |
 |------|--------|------|
-| **Volume attach** | `ControllerPublish` | Attach a physical volume (such as EBS) to a specific node |
-| **Staging** | `NodeStage` | Format or pre-process the device attached to the node |
-| **Mount** | `NodePublish` | Mount the volume at the path the actual Pod will use |
-| **Unmount** | `NodeUnpublish` | Unmount when the Pod terminates |
+| **Volume attach** | `ControllerPublishVolume` | Attach a physical volume (such as EBS) to a specific node |
+| **Staging** | `NodeStageVolume` | Format or prepare the device attached to the node |
+| **Mount** | `NodePublishVolume` | Mount the volume at the path the Pod will actually use |
+| **Unmount** | `NodeUnpublishVolume` | Unmount the volume when the Pod terminates |
 
 ---
 
 ## 4. Benefits of Adopting CSI
 
-- **Release independence:** Storage vendors can freely improve their driver features regardless of Kubernetes updates.
-- **Safety:** Because driver code runs outside the core Kubernetes processes, a driver error does not bring down the entire cluster.
-- **More choices:** Everything from local disks to high-performance enterprise storage can be used with the same YAML syntax.
+- **Release independence:** Storage vendors can improve their drivers on their own schedule, independent of Kubernetes releases.
+- **Safety:** Because driver code runs outside the core Kubernetes components, a driver bug does not bring down the entire cluster.
+- **More choices:** Everything from local disks to high-performance enterprise storage can be consumed through the same YAML (PersistentVolumeClaim and StorageClass).
 
 **CSI is the key extension mechanism that makes Kubernetes a true "cloud operating system."**

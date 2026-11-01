@@ -1,10 +1,10 @@
 ---
-title: "StatefulSet vs ReplicaSet - Detailed Comparison"
+title: "StatefulSet vs ReplicaSet: Detailed Comparison"
 weight: 101
 slug: "10-statefulset-vs-replicaset"
 ---
 
-This document analyzes the differences between StatefulSet and ReplicaSet, the two core resources for managing Pods at scale in Kubernetes.
+This document analyzes the differences between StatefulSet and ReplicaSet, the two core workload resources for managing multiple Pods in Kubernetes.
 
 ---
 
@@ -20,7 +20,7 @@ This document analyzes the differences between StatefulSet and ReplicaSet, the t
 ## 2. Architecture Comparison
 
 ### ReplicaSet (Deployment)
-Every Pod has a random name, and the Service groups them together as one unit for load balancing.
+Every Pod has a randomly generated name, and the Service load-balances across them as a single group.
 
 ```mermaid
 graph TD
@@ -32,7 +32,7 @@ graph TD
 ```
 
 ### StatefulSet
-Each Pod has a sequential name and is mapped 1:1 to dedicated storage (PV). Individual Pods are accessed directly through a Headless Service.
+Each Pod has an ordinal name and is mapped 1:1 to dedicated storage (PV). Individual Pods can be addressed directly through a Headless Service.
 
 ```mermaid
 graph TD
@@ -55,15 +55,15 @@ graph TD
 |------|------------------------|-------------|
 | **Pod name** | Random hash (`web-abc12`) | Sequential number (`mysql-0`, `mysql-1`) |
 | **Scaling** | Created/deleted immediately in parallel | Created sequentially from 0, deleted in reverse order |
-| **Network ID** | Name/IP changes on re-creation | **Same name (DNS) is kept even after re-creation** |
+| **Network identity** | Name/IP changes when a Pod is re-created | **The same name (DNS) is kept even after re-creation** |
 | **Data retention** | All Pods can share a common volume | **A dedicated volume is allocated and preserved for each Pod** |
-| **Update** | Rolling update (fast) | Sequential update (careful) |
+| **Update** | Rolling update (fast) | Ordered rolling update (careful) |
 
 ---
 
 ## 4. Selection Guide (Decision Tree)
 
-Follow the flowchart below depending on your application's characteristics.
+Follow the flowchart below based on your application's characteristics.
 
 ```mermaid
 flowchart TD
@@ -80,6 +80,6 @@ flowchart TD
 ## 5. Summary
 
 - **ReplicaSet** focuses on "scaling out many replicas that perform the same function."
-- **StatefulSet** focuses on "having each replica keep its own unique name and data."
+- **StatefulSet** focuses on "giving each replica its own stable name and data."
 
-**Whether the application has 'state' is the most important criterion for choosing a resource.**
+**Whether the application has 'state' is the most important criterion when choosing between them.**

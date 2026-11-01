@@ -1,5 +1,5 @@
 ---
-title: "What is kubectl?"
+title: "What Is kubectl?"
 weight: 10
 slug: "01-kubectl"
 ---
@@ -22,8 +22,8 @@ kubectl delete pod my-pod  # DELETE request - delete a Pod
 ## How It Works
 
 - **REST API calls:** Sends HTTP REST requests to the Kubernetes API server (kube-apiserver)
-- **Authentication/authorization:** Uses the kubeconfig file to authenticate to the cluster and verify permissions
-- **Resource management:** Create/read/update/delete Kubernetes resources such as Pod, Deployment, and Service
+- **Authentication/authorization:** Uses the kubeconfig file to authenticate to the cluster and to present the credentials used for authorization
+- **Resource management:** Creates, reads, updates, and deletes Kubernetes resources such as Pods, Deployments, and Services
 
 ### REST Call Structure
 
@@ -36,7 +36,7 @@ kubectl → HTTPS REST API → kube-apiserver → etcd
 
 ## --dry-run Option: client vs server
 
-`--dry-run` is used to test in advance whether a command or manifest is error-free, without actually creating or modifying resources in the cluster. The biggest difference between `client` and `server` is **where validation is performed, and whether it communicates with the API server**.
+`--dry-run` lets you check in advance whether a command or manifest is valid, without actually creating or modifying resources in the cluster. The biggest difference between `client` and `server` is **where validation is performed and whether the request is sent to the API server**.
 
 ```mermaid
 flowchart LR
@@ -52,22 +52,22 @@ flowchart LR
 
 ### 1. --dry-run=client (Client-side validation)
 
-- **How it works**: Processed only inside the client (kubectl) that sent the request. It does not communicate with the Kubernetes API server.
-- **Validation scope**: Based on the schema kubectl has, it validates basic syntax, YAML structure, missing required fields, and so on.
+- **How it works**: Processed entirely inside the client (kubectl) that sent the request. It does not contact the Kubernetes API server.
+- **Validation scope**: Using the schema that kubectl has, it validates basic syntax, YAML structure, missing required fields, and so on.
 - **Characteristics and limitations**
-  - Since it does not go through the API server, it runs quickly even without a cluster connection.
-  - It cannot check server-side Defaulting, Admission Webhooks (Mutating/Validating), detailed validation of custom resources (CRDs), etc.
+  - Because it does not go through the API server, it runs quickly and works even without a cluster connection.
+  - It cannot check server-side Defaulting, Admission Webhooks (Mutating/Validating), detailed validation of Custom Resources (CRs), etc.
   - It has been the default behavior of `--dry-run` since Kubernetes v1.18.
 
 ### 2. --dry-run=server (Server-side validation)
 
-- **How it works**: Sends the request to the Kubernetes API server for processing. The only difference is that the resource is not actually persisted to the etcd database.
-- **Validation scope**: Performs every step the API server goes through when actually creating a resource.
+- **How it works**: Sends the request to the Kubernetes API server for processing. The only difference is that the resource is not persisted to etcd.
+- **Validation scope**: Runs every step the API server performs when it actually creates a resource.
 - **Characteristics and limitations**
-  - Because it communicates with the API server, the real cluster environment (RBAC permissions, API versions, cluster state, etc.) is reflected.
+  - Because the request goes to the API server, the real cluster environment (RBAC permissions, API versions, cluster state, etc.) is taken into account.
   - You can see how server-side Defaulting is applied.
-  - You can test whether Mutating and Validating Admission Webhooks work correctly.
-  - It requires a cluster connection and is slightly slower than the client mode.
+  - You can test whether mutating and validating admission webhooks work correctly.
+  - It requires a cluster connection and is slightly slower than client mode.
 
 ### 📊 Summary Comparison Table
 
@@ -76,10 +76,10 @@ flowchart LR
 | Executor | Client (kubectl) | Kubernetes API server |
 | Communicates with API server | No | Yes |
 | Persisted to etcd | Not persisted | Not persisted |
-| Defaults applied | Not applied (client is unaware) | Applied (filled in by the server) |
+| Defaults applied | Not applied (unknown to the client) | Applied (filled in by the server) |
 | Webhook validation | Not possible | Possible (Mutating / Validating) |
-| Speed | Very fast | Relatively slow (network communication required) |
-| Example use | Quick syntax check of YAML structure | Accurately testing an Admission Controller or the result of default application |
+| Speed | Very fast | Relatively slow (requires a network round trip) |
+| Example use | Quick syntax check of YAML structure | Accurately testing an admission controller or the effect of defaulting |
 
 ### Usage Examples
 
@@ -94,18 +94,18 @@ kubectl apply -f pod.yaml --dry-run=server
 kubectl apply -f pod.yaml --dry-run=server -o yaml
 ```
 
-> 💡 **Tip**: In practice, when validating a CI/CD pipeline or a complex manifest, it is safer to use `--dry-run=server`, which can accurately simulate webhooks and defaults.
+> 💡 **Tip**: In practice, when validating in a CI/CD pipeline or checking a complex manifest, `--dry-run=server` is the safer choice because it accurately simulates webhooks and defaults.
 
 
 ---
 
 ## Advanced Command Examples (custom-columns · jsonpath · sorting/filtering)
 
-By combining `-o custom-columns`, `-o jsonpath`, `--sort-by`, and `--field-selector`, you can extract just the information you need without any extra tools. The output examples are based on a 3-node kind cluster (1 control-plane, 2 workers).
+By combining `-o custom-columns`, `-o jsonpath`, `--sort-by`, and `--field-selector`, you can extract just the information you need without any extra tools. The output examples are based on a three-node kind cluster (one control plane node and two worker nodes).
 
 > `custom-columns` format: join `Header:JSONPath` pairs with commas. Check the field path first with `kubectl get <resource> -o yaml`.
 
-### 1. Check Taints per Node
+### 1. Check Taints on Each Node
 
 ```bash
 kubectl get no -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
@@ -117,12 +117,12 @@ cka-worker          <none>
 cka-worker2         <none>
 ```
 
-If you want to see only the Taint keys cleanly, use jsonpath.
+To see only the taint keys in a cleaner form, use jsonpath.
 ```bash
 kubectl get no -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints[*].key}{"\n"}{end}'
 ```
 
-### 2. See at a Glance Which Node/IP a Pod Is Running On
+### 2. See at a Glance Which Node and IP Each Pod Is Running On
 
 ```bash
 kubectl get po -A -o custom-columns=NS:.metadata.namespace,POD:.metadata.name,NODE:.spec.nodeName,IP:.status.podIP
@@ -144,7 +144,7 @@ cka-control-plane   4     8038828Ki   110
 cka-worker          4     8038828Ki   110
 ```
 
-### 4. List of All Container Images in Use in the Cluster
+### 4. List All Container Images in Use in the Cluster
 
 ```bash
 kubectl get po -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"/"}{.metadata.name}{"\t"}{.spec.containers[*].image}{"\n"}{end}'
@@ -153,7 +153,7 @@ kubectl get po -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"/"}{.meta
 kubectl get po -A -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort | uniq -c | sort -rn
 ```
 
-### 5. Find Pods with Many Restarts (Sorting)
+### 5. Find Pods with the Most Restarts (Sorting)
 
 ```bash
 kubectl get po -A --sort-by='.status.containerStatuses[0].restartCount'
@@ -191,12 +191,12 @@ kubectl get po -l 'app in (web,api),tier!=db'
 kubectl get po -l '!canary'            # Pods without the canary label
 ```
 
-### 10. Permission Check: What Can I / Another Account Do (`auth can-i`)
+### 10. Check Permissions: What Can I (or Another Account) Do (`auth can-i`)
 
 ```bash
 kubectl auth can-i create deployments -n dev
 kubectl auth can-i list secrets -n kube-system --as system:serviceaccount:default:default
-kubectl auth can-i --list -n dev                 # Full list of permissions for the current account
+kubectl auth can-i --list -n dev                 # Full list of permissions for the current user
 ```
 
 ### 11. Decode a Secret Value
@@ -205,7 +205,7 @@ kubectl auth can-i --list -n dev                 # Full list of permissions for 
 kubectl get secret db-secret -o jsonpath='{.data.password}' | base64 -d
 ```
 
-### 12. Top Pods by Resource Usage (requires metrics-server)
+### 12. Show Top Pods by Resource Usage (requires metrics-server)
 
 ```bash
 kubectl top po -A --sort-by=memory | head
@@ -236,10 +236,10 @@ kubectl logs -l app=web --all-containers --prefix --tail=20 -f
 ### 16. Debugging: Ephemeral Container / Node Debug
 
 ```bash
-# Attach an ephemeral container to a running Pod (debugging images without a shell)
+# Attach an ephemeral container to a running Pod (for debugging images that have no shell)
 kubectl debug -it web-6d4cf56db6-xyz12 --image=busybox:1.36 --target=nginx
 
-# Launch a debug Pod on a node to inspect the host filesystem (/host)
+# Start a debug Pod on a node to inspect the host filesystem (mounted at /host)
 kubectl debug node/cka-worker -it --image=busybox:1.36
 ```
 
@@ -247,11 +247,11 @@ kubectl debug node/cka-worker -it --image=busybox:1.36
 
 ```bash
 kubectl api-resources --namespaced=false          # Cluster-scoped resources
-kubectl api-resources --api-group=apps -o wide    # Resources by group and supported verbs
+kubectl api-resources --api-group=apps -o wide    # Resources in a group, with supported verbs
 kubectl explain pod.spec.containers.livenessProbe --recursive
 ```
 
-### 18. Check/Change the Namespace of the Current Context
+### 18. Check or Change the Namespace of the Current Context
 
 ```bash
 kubectl config view --minify -o jsonpath='{..namespace}'

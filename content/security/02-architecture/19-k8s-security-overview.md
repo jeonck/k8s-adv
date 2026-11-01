@@ -21,7 +21,7 @@ Learn about authentication and authorization, the core concepts of Kubernetes se
 
 ## Security Processing Flow
 
-Every request that arrives at the Kubernetes API server goes through the following 3 stages.
+Every request that reaches the Kubernetes API server goes through the following three stages.
 
 ```mermaid
 flowchart TD
@@ -40,35 +40,35 @@ flowchart TD
 
 ## 1. Authentication
 
-This is the process of verifying who the requesting principal is. Kubernetes has no 'user' resource of its own; it verifies identity through external authentication systems or certificates.
+This is the process of verifying who is making the request. Kubernetes has no built-in 'user' object; it verifies identity through certificates or external authentication systems.
 
 ### Main Authentication Methods
-- **X.509 Client Certs:** Authentication via client certificates (kubeadm default)
-- **Static Token File:** Token authentication via a static file
-- **Bootstrap Tokens:** Tokens used when joining a cluster
-- **Service Account Tokens:** Automatically generated tokens used inside Pods
+- **X.509 client certificates:** Authentication via client certificates (kubeadm default)
+- **Static token file:** Token authentication via a static file
+- **Bootstrap tokens:** Tokens used when joining nodes to a cluster
+- **ServiceAccount tokens:** Tokens automatically issued to Pods for in-cluster authentication
 - **OIDC (OpenID Connect):** Authentication integrated with an external IDP (Google, Okta, etc.)
 
 ---
 
 ## 2. Authorization
 
-This checks whether an authenticated user has permission to perform a specific action (Verb) on a specific resource.
+This checks whether an authenticated user is allowed to perform a specific action (verb) on a specific resource.
 
 ### Main Authorization Modes
-- **RBAC (Role-Based Access Control):** Role-based access control (most recommended)
+- **RBAC (Role-Based Access Control):** Role-based access control (the most widely recommended)
 - **ABAC (Attribute-Based Access Control):** Attribute-based access control
-- **Node Authorization:** Special-purpose authorization that restricts the permissions of the kubelet
-- **Webhook:** A method that asks an external service to check permissions
+- **Node Authorization:** Special-purpose authorization that restricts what kubelets can access
+- **Webhook:** Delegates the permission check to an external service
 
 ---
 
 ## 3. Admission Control
 
-For requests that have passed authentication and authorization, this performs a final check that they comply with the cluster's policies, and modifies the data (Mutating) or rejects the request (Validating) as needed.
+For requests that have passed authentication and authorization, this performs a final check that they comply with the cluster's policies, modifying the request (mutating) or rejecting it (validating) as needed.
 
-- **Mutating Admission Webhook:** Modifies the request content (e.g., sidecar injection)
-- **Validating Admission Webhook:** Validates the request content (e.g., resource limit checks)
+- **Mutating Admission Webhook:** Modifies the request (e.g., sidecar injection)
+- **Validating Admission Webhook:** Validates the request (e.g., resource limit checks)
 
 ---
 
@@ -76,8 +76,8 @@ For requests that have passed authentication and authorization, this performs a 
 
 | Stage | Role | Result |
 |------|------|------|
-| **Authentication (AuthN)** | Identity verification | Identifies User/Group |
+| **Authentication (AuthN)** | Identity verification | Identifies the user and groups |
 | **Authorization (AuthZ)** | Permission check | Allow/Deny decision |
-| **Admission** | Policy review | Accept/modify/reject the request |
+| **Admission** | Policy review | Accepts, modifies, or rejects the request |
 
-**Through these 3 layers of security, the Kubernetes cluster is safely protected.**
+**These three layers together keep a Kubernetes cluster secure.**

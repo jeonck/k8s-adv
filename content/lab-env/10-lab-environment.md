@@ -6,10 +6,10 @@ slug: "10-lab-environment"
 
 ## AWS EC2 Instances
 
-- **User:** Root user (root)
+- **User:** root user
 - **Region:** Seoul region (ap-northeast-2)
 - **VPC:** default VPC
-- **Security Group:** default Security Group
+- **Security group:** default security group
 
 ## EC2 Instance Specs
 
@@ -21,7 +21,7 @@ slug: "10-lab-environment"
 
 ## Issuing an Access Key
 
-You need to issue an access key for the "root user".
+Issue an access key for the root user.
 
 ---
 
@@ -44,8 +44,8 @@ variable "secret_key" {
   default = ""
 }
 
-# When using multiple IAM accounts in a corporate environment, enter your own ID
-# Leave it empty when using a personal AWS account
+# In a corporate environment with multiple IAM accounts, enter your own ID
+# Leave it empty if you use a personal AWS account
 variable "identity" {
   default = ""
 }
@@ -63,7 +63,7 @@ variable "identity" {
 [<lab-home>/lab-setup]$ terraform apply --auto-approve
 ```
 
-### SSH Connection with MobaXterm
+### Connect over SSH with MobaXterm
 
 Connect using the private key (`edukey`).
 
@@ -71,7 +71,7 @@ Connect using the private key (`edukey`).
 
 ## Preparing the Lab Environment
 
-### Verify Cloud-init Completion
+### Verify cloud-init Completion
 
 ```bash
 [root@k8s-cp ~]# tail -f /var/log/cloud-init-output.log
@@ -114,9 +114,9 @@ Connection to k8s-w2 closed.
 
 ---
 
-## Join the Worker Nodes to the Cluster
+## Joining the Worker Nodes to the Cluster
 
-### Check Cluster Node Information and Configure the Calico CNI
+### Check the Node Status and Install the Calico CNI
 
 ```bash
 [root@k8s-cp ~]# kubectl get no
@@ -156,7 +156,7 @@ kubeadm join 172.31.1.10:6443 --token njseik.wna0odfa83txmr2l \
 [root@k8s-w2 ~]# exit
 ```
 
-### Check Cluster Node Information
+### Verify the Cluster Nodes
 
 ```bash
 [root@k8s-cp ~]# kubectl get no

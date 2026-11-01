@@ -10,7 +10,7 @@ This document analyzes the YAML files used to install and configure MetalLB.
 
 ```
 MetalLB resources:
-1. Custom Resources (CRDs)
+1. Custom Resource Definitions (CRDs)
    - IPAddressPool
    - L2Advertisement
    - BGPPeer, BGPAdvertisement
@@ -31,7 +31,7 @@ MetalLB resources:
    - Deployment (Controller)
    - DaemonSet (Speaker)
 
-4. Webhook
+4. Admission webhook
    - ValidatingWebhookConfiguration
 ```
 
@@ -137,20 +137,20 @@ metadata:
 
 | Label | Value | Description |
 |--------|-----|------|
-| `audit` | privileged | Records audit logs only |
-| `enforce` | privileged | Allows privileged mode |
-| `warn` | privileged | Displays warnings only |
+| `audit` | privileged | Records violations in the audit log only |
+| `enforce` | privileged | Allows privileged Pods |
+| `warn` | privileged | Shows user-facing warnings only |
 
 ### Role
 
-- Dedicated namespace for MetalLB
-- Requires running privileged containers (network manipulation)
+- Dedicated Namespace for MetalLB
+- Allows privileged containers, which MetalLB needs for network manipulation
 
 ---
 
 ## 3. CustomResourceDefinitions (CRD)
 
-MetalLB defines 6 CRDs.
+MetalLB defines 7 CRDs.
 
 ### 3-1. BFDProfile
 
@@ -330,8 +330,8 @@ metadata:
 
 #### Role
 
-- Monitors Service status in L2 mode
-- Shows the node and interface that actually receive traffic
+- Reports Service status in L2 mode
+- Shows the node and interface that actually receive traffic for the Service
 
 #### Status Information
 
@@ -396,7 +396,7 @@ rules:
 #### Permissions
 
 - Manage Secrets (for memberlist)
-- Read MetalLB CRDs
+- Read MetalLB CRs
 
 ---
 
@@ -419,8 +419,8 @@ rules:
 
 #### Permissions
 
-- View Pods, Secrets, and ConfigMaps
-- Read MetalLB CRDs
+- Read Pods, Secrets, and ConfigMaps
+- Read MetalLB CRs
 
 ---
 
@@ -450,10 +450,10 @@ rules:
 
 #### Permissions
 
-- View Services/namespaces/nodes cluster-wide
+- Read Services, Namespaces, and Nodes cluster-wide
 - Update Service status (LoadBalancer IP assignment)
-- Create events
-- Manage Webhook configurations
+- Create Events
+- Manage webhook configurations
 - Manage CRDs
 
 ---
@@ -482,9 +482,9 @@ rules:
 #### Permissions
 
 - Full permissions on ServiceL2Status
-- View Services, Endpoints, and nodes
-- View EndpointSlices
-- Create events
+- Read Services, Endpoints, Nodes, and Namespaces
+- Read EndpointSlices
+- Create Events
 
 ---
 
@@ -585,14 +585,14 @@ metadata:
 
 #### Role
 
-- Stores the Webhook server TLS certificate
+- Stores the webhook server's TLS certificate
 
 ---
 
 ### 5-3. Secret - Memberlist
 
 ```yaml
-# Secret for communication between controllers (auto-generated)
+# Secret for communication between speakers (auto-generated)
 apiVersion: v1
 kind: Secret
 metadata:
@@ -602,7 +602,7 @@ metadata:
 
 #### Role
 
-- Encrypts cluster communication between controllers
+- Holds the key that encrypts memberlist communication between speakers
 
 ---
 
@@ -626,7 +626,7 @@ spec:
 
 #### Role
 
-- Provides the Webhook validation endpoint
+- Exposes the webhook validation endpoint
 
 ---
 
@@ -760,7 +760,7 @@ env:
 - Monitors LoadBalancer Services
 - Assigns IP addresses
 - Manages CRDs
-- Validates via Webhook
+- Validates MetalLB resources via the admission webhook
 
 ---
 
@@ -888,7 +888,7 @@ env:
 
 ```yaml
 tolerations:
-- key: node-role.kubernetes.io/master        # Tolerate master nodes
+- key: node-role.kubernetes.io/master        # Tolerate legacy master taint
   effect: NoSchedule
 - key: node-role.kubernetes.io/control-plane # Tolerate control plane nodes
   effect: NoSchedule
@@ -968,8 +968,8 @@ webhooks:
 failurePolicy: Fail
 ```
 
-- Rejects the request on Webhook errors
-- Enforces safe configuration
+- Rejects the request if the webhook call fails
+- Ensures only validated configuration is accepted
 
 ---
 
@@ -1002,7 +1002,7 @@ graph TD
 
 | Component | Main Role | Notes |
 |-----------|----------|------|
-| **Controller** | Watches Services (LoadBalancer) in the cluster and allocates/reclaims IPs | Runs as a Deployment |
+| **Controller** | Watches LoadBalancer Services in the cluster and allocates/reclaims IPs | Runs as a Deployment |
 | **Speaker** | Announces allocated IPs to the external network (using the ARP or BGP protocol) | Runs as a DaemonSet on every node |
 | **IPAddressPool** | Configuration resource that defines the range of available IPs that can be exposed externally | Custom CRD |
 | **L2Advertisement** | Configures which interface to use for L2-mode advertisement | Custom CRD |
@@ -1015,7 +1015,7 @@ graph TD
 # Install MetalLB
 kubectl apply -f metallb-native.yaml
 
-# Configure the IP Pool and advertisement
+# Configure the IP address pool and advertisement
 kubectl apply -f metallb-ippool.yaml
 kubectl apply -f metallb-l2advertisement.yaml
 
@@ -1032,7 +1032,7 @@ kubectl get crd | grep metallb
 # l2advertisements.metallb.io
 # ...
 
-# Check the IP Pool
+# Check the IP address pool
 kubectl get ipaddresspool -n metallb-system
 # NAME      AUTO ASSIGN   AVOID BUGGY IPS   ADDRESSES
 # ip-pool   true          false             172.31.1.200-172.31.1.250

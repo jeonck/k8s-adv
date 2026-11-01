@@ -15,8 +15,8 @@ Learn how the main options used when initializing a cluster affect certificate g
 | Option | Description | Certificate impact |
 |--------|------|-------------|
 | `--kubernetes-version` | Specifies the Kubernetes version to install | Generates certificates matching that version's specification |
-| `--apiserver-advertise-address` | IP address the API Server uses for communication | **Adds that IP to the certificate SAN field** |
-| `--apiserver-cert-extra-sans` | Additional domains or IPs to register | **Adds custom addresses to the certificate SAN field** |
+| `--apiserver-advertise-address` | IP address the API server advertises to other components | **Adds that IP to the certificate SAN field** |
+| `--apiserver-cert-extra-sans` | Additional DNS names or IPs to include | **Adds custom addresses to the certificate SAN field** |
 | `--cri-socket` | Specifies the container runtime socket path | (No direct certificate impact) |
 
 ---
@@ -33,11 +33,11 @@ First, the Root CA that serves as the cluster's trust anchor is created.
 ```
 
 - **Generated files:** `/etc/kubernetes/pki/ca.crt`, `ca.key`
-- **Validity period:** Usually 10 years
+- **Validity period:** 10 years by default
 - **Characteristics:** It is a self-signed certificate and becomes the parent of all certificates generated afterward.
 
 ### 2. Issue the API Server Certificate
-The API server certificate is issued using the generated CA.
+The API server certificate is signed by the CA created above.
 
 ```text
 [certs] Generating "apiserver" certificate and key
@@ -48,17 +48,17 @@ The API server certificate is issued using the generated CA.
 - **Key point:** The values given with the `--apiserver-cert-extra-sans` option are included in this certificate's **Subject Alternative Name (SAN)** field.
 
 ### 3. Other Component Certificates
-Certificates for the other control plane components and the surrounding ecosystem are then generated in turn.
+Certificates for the other control plane components and related services are then generated in turn.
 
 ```mermaid
 graph TD
-    CA["Root CA creation<br/>ca.crt / ca.key"] --> AS[API Server certificate]
+    CA["Root CA<br/>ca.crt / ca.key"] --> AS[API Server certificate]
     CA --> CM[Controller Manager certificate]
     CA --> SC[Scheduler certificate]
-    CA --> KP[Kube Proxy certificate]
+    CA --> KP[kube-proxy certificate]
     
-    subgraph ETCD["etcd-only area"]
-    ECA[etcd CA creation] --> ES[etcd Server certificate]
+    subgraph ETCD["etcd-only PKI"]
+    ECA[etcd CA] --> ES[etcd Server certificate]
     end
 ```
 
@@ -66,10 +66,10 @@ graph TD
 
 ## Hands-on: Checking Certificate Information
 
-Use OpenSSL commands to verify that the generated certificates contain the correct information.
+Use OpenSSL commands to verify that the generated certificates contain the expected information.
 
 ```bash
-# Check the SAN information of the API Server certificate
+# Check the SAN entries of the API server certificate
 openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout | grep -A 1 "Subject Alternative Name"
 
 # Example output
@@ -77,4 +77,4 @@ openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout | grep -A 1 "Sub
 #    DNS:kubernetes, DNS:kubernetes.default, IP Address:10.96.0.1, IP Address:172.31.1.10, DNS:jadeedu.com
 ```
 
-**Understanding the relationships among the certificates generated during `kubeadm init` helps you prevent network and authentication problems that can occur during the initial cluster setup.**
+**Understanding the relationships among the certificates generated during `kubeadm init` helps you avoid the network and authentication problems that can occur during initial cluster setup.**
