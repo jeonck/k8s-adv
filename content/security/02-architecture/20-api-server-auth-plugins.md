@@ -4,13 +4,13 @@ weight: 200
 slug: "20-api-server-auth-plugins"
 ---
 
-Learn about the three-stage plugins (Authentication, Authorization, Admission Control) through which the Kubernetes API Server processes requests.
+Learn about the three stages (authentication, authorization, and admission control) through which the Kubernetes API server processes requests.
 
 ---
 
 ## API Server Request Processing Pipeline
 
-Every HTTP request that reaches the Kubernetes API server passes sequentially through the following strict security stages.
+Every HTTP request that reaches the Kubernetes API server passes through the following security stages in order.
 
 ```mermaid
 flowchart TD
@@ -22,7 +22,7 @@ flowchart TD
     AuthZ -- "Authorization succeeded (permissions verified)" --> Admission["3. Admission Control"]
     
     Admission -- "403 Forbidden" --> Deny3[Request denied]
-    Admission -- "Final approval" --> ETCD[("4. etcd operation and result returned")]
+    Admission -- "Approved" --> ETCD[("4. Persist to etcd and return the result")]
 ```
 
 ---
@@ -30,16 +30,16 @@ flowchart TD
 ## Detailed Flow by Stage
 
 ### Stage 1: Authentication
-This stage verifies "Who is the requester?" The API server runs the configured authentication plugins in order, and the user is identified as soon as any one of them succeeds.
+This stage verifies "Who is the requester?" The API server runs the configured authentication plugins in order, and the requester is identified as soon as any one of them succeeds.
 
 | Plugin Type | Description | Main Use |
 |---------------|------|------------|
-| **X.509 Client Certs** | Checks the CN/O fields of the client certificate | Administrators, kubelet communication |
-| **Static Token File** | Checks tokens stored in a static file on the server | Testing, legacy environments |
-| **ServiceAccount** | Checks the JWT token mounted in the Pod | Application (Pod) authentication |
-| **OIDC** | Checks tokens from an external IDP (Google, Okta, etc.) | Enterprise integrated authentication |
+| **X.509 Client Certs** | Checks the CN and O fields of the client certificate | Administrators, kubelet communication |
+| **Static Token File** | Checks tokens defined in a static file on the API server | Testing, legacy environments |
+| **ServiceAccount** | Checks the JWT mounted in the Pod | Pod (application) authentication |
+| **OIDC** | Validates tokens issued by an external identity provider (Google, Okta, etc.) | Enterprise integrated authentication |
 | **Webhook** | Delegates authentication requests to an external service | Integration with custom authentication systems |
-| **Anonymous** | Treated as an anonymous user if all previous authentications fail | Health checks (Healthz), etc. |
+| **Anonymous** | Treated as `system:anonymous` if all other authenticators fail (when enabled) | Health checks (`/healthz`), etc. |
 
 ---
 
@@ -48,19 +48,19 @@ This stage checks "Does the authenticated user have permission to perform a spec
 
 | Authorization Mode | Description | Notes |
 |-----------|------|------|
-| **Node** | Restricts the kubelet to accessing only the resources assigned to it | Special-purpose authorization |
-| **RBAC** | Permission management through Roles and Bindings | **The most recommended approach** |
-| **Webhook** | Asks an external service to check permissions (Allow/Deny) | Custom permission systems |
-| **ABAC** | File-based attribute access control | Not recommended due to management difficulty |
-| **AlwaysAllow** | Unconditionally allows every request | Security risk (for testing only) |
+| **Node** | Restricts each kubelet to accessing only the resources related to its own Node | Special-purpose authorization |
+| **RBAC** | Permission management through Roles and RoleBindings | **The most recommended approach** |
+| **Webhook** | Asks an external service to decide (allow or deny) | Custom authorization systems |
+| **ABAC** | File-based attribute-based access control | Not recommended because it is hard to manage |
+| **AlwaysAllow** | Unconditionally allows every request | Security risk (testing only) |
 
 ---
 
 ### Stage 3: Admission Control
-This is the final check of whether a request that has passed authentication and authorization "satisfies the cluster's policies and requirements."
+This is the final check of whether a request that has passed authentication and authorization "satisfies the cluster's policies."
 
-1.  **Mutating Admission:** Modifies the request data or fills in default values. (e.g., Sidecar injection)
-2.  **Validating Admission:** Validates that the request data is correct and decides whether to reject it. (e.g., Resource Quota check)
+1.  **Mutating admission:** Modifies the request or fills in default values. (e.g., sidecar injection)
+2.  **Validating admission:** Validates the request and decides whether to reject it. (e.g., ResourceQuota check)
 
 ---
 
@@ -68,8 +68,8 @@ This is the final check of whether a request that has passed authentication and 
 
 | Stage | Main Role | Code Returned on Failure |
 |------|-----------|-------------------|
-| **Authentication** | Identity verification (Who) | 401 Unauthorized |
-| **Authorization** | Permission verification (What) | 403 Forbidden |
-| **Admission** | Policy review (Policy) | 403 Forbidden |
+| **Authentication** | Identity verification (who) | 401 Unauthorized |
+| **Authorization** | Permission verification (what) | 403 Forbidden |
+| **Admission** | Policy review (policy) | 403 Forbidden |
 
-**Understanding the API Server's pipeline structure lets you accurately diagnose bottlenecks and misconfigurations in cluster security.**
+**Understanding the API server's request pipeline lets you accurately diagnose security misconfigurations in the cluster.**

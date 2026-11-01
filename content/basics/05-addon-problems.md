@@ -18,18 +18,18 @@ Each add-on works only with a specific range of Kubernetes versions. When you up
 - CNI plugin version
 - CSI driver version
 - CoreDNS version
-- Ingress Controller version
+- Ingress controller version
 ```
 
 ### Interdependencies Between Add-ons
 
-Some add-ons depend on other add-ons. For example, a Service Mesh must be compatible with the CNI plugin.
+Some add-ons depend on other add-ons. For example, a service mesh must be compatible with the CNI plugin.
 
 ## 2. Configuration Complexity
 
 ### Manual Configuration Errors
 
-Each add-on has its own configuration method, and you need to understand its YAML files precisely.
+Each add-on has its own configuration method, and you need to understand its YAML manifests thoroughly.
 
 ```bash
 # Considerations when installing Calico
@@ -55,7 +55,7 @@ Each add-on has its own upgrade cycle, and they must be managed manually.
 □ Update the CSI driver
 □ Update Metrics Server
 □ Update CoreDNS
-□ Update the Ingress Controller
+□ Update the Ingress controller
 □ Update the monitoring stack
 ```
 
@@ -112,7 +112,7 @@ Each add-on stores its logs in a different place, which makes it hard to trace p
 
 ### Cloud-specific Add-ons
 
-Using a specific cloud's CSI/CNI makes it hard to migrate to another cloud.
+Using a specific cloud provider's CSI/CNI add-ons makes it hard to migrate to another cloud.
 
 ```bash
 # Examples of AWS-specific add-ons

@@ -4,13 +4,13 @@ weight: 420
 slug: "42-crd-guide"
 ---
 
-This is how you extend the Kubernetes API to create new resource types that you define yourself.
+A CRD lets you extend the Kubernetes API with new resource types that you define yourself.
 
 ---
 
 ## 1. What Is a CRD?
 
-A CRD is a mechanism for adding **custom resources** needed for your own business logic, beyond Kubernetes' built-in resources (Pod, Service, etc.).
+A CRD is a mechanism for adding **custom resources** needed for your own business logic, beyond the built-in Kubernetes resources (Pod, Service, etc.).
 
 ### Comparing the Core Concepts
 
@@ -27,13 +27,13 @@ A CRD is a mechanism for adding **custom resources** needed for your own busines
 
 ```mermaid
 graph TD
-    KAPI[Kubernetes API Server] -- "Extend API" --> CRD[CustomResourceDefinition]
+    KAPI[Kubernetes API server] -- "Extend API" --> CRD[CustomResourceDefinition]
     CRD -- "Create instance" --> CR[Custom Resource]
     
     subgraph User_Benefits
     B1[Declarative management]
     B2[Manageable with kubectl]
-    B3[Core of the operator pattern]
+    B3[Foundation of the Operator pattern]
     end
     
     CR -.-> User_Benefits
@@ -41,7 +41,7 @@ graph TD
 
 1.  **Declarative infrastructure:** You can define and manage complex application configuration in a single YAML file.
 2.  **Tool integration:** You can check status with the `kubectl get <my-resource>` command, with no extra tooling.
-3.  **Operator integration:** True automation is achieved through 'operators', which watch the state defined by CRDs and carry out automation.
+3.  **Operator integration:** True automation is achieved through Operators, which watch the state defined by custom resources and reconcile the cluster toward it.
 
 ---
 
@@ -49,7 +49,7 @@ graph TD
 
 | Feature | Built-in Resources | CRD (Extension) |
 |------|-----------------------|----------------|
-| **Availability** | Immediately usable in every K8s cluster | The CRD resource must be created (installed) first |
+| **Availability** | Immediately usable in every K8s cluster | The CRD must be created (installed) first |
 | **API group** | Standard groups such as `v1`, `apps/v1` | Custom groups such as `example.com`, `stable.dw.com` |
 | **Data storage** | Stored at standard paths in etcd | Stored at user-defined paths in etcd |
 | **Versioning** | Updated with the K8s release cycle | Versioned freely by the user (v1alpha1, v1, etc.) |
@@ -58,6 +58,6 @@ graph TD
 
 ## 4. Summary
 
-With CRDs, you can turn Kubernetes from a mere container orchestrator into a **"user-defined database"** and a **"general-purpose Control Plane"**.
+With CRDs, you can turn Kubernetes from a mere container orchestrator into a **"user-defined database"** and a **"general-purpose control plane"**.
 
-**CRDs are the essential first step toward implementing the 'operator pattern', the heart of modern cloud-native application operations.**
+**CRDs are the essential first step toward implementing the Operator pattern, the heart of modern cloud-native application operations.**

@@ -1,28 +1,28 @@
 ---
-title: "Use Case 3. How to Resolve a Kubernetes Node NotReady"
+title: "Use Case 3. Resolving a Kubernetes Node in NotReady State"
 weight: 480
 slug: "48-uc-node-not-ready"
 ---
 
 > 📎 Reference: <https://lnkd.in/gdH9SVuN>
 
-A troubleshooting procedure that systematically narrows down the causes of a node going into the `NotReady` state.
+A troubleshooting procedure that systematically narrows down why a Node goes into the `NotReady` state.
 
 ---
 
 ## 1. What Is NotReady?
 
-This is the state where the kubelet fails to periodically report its status (Lease/NodeStatus) to the API Server, or the reported **Ready condition is False/Unknown**. After a certain period (a 40-second grace by default), the Node Controller marks the node as `NotReady` and then evicts the Pods on that node.
+A Node is `NotReady` when its kubelet fails to report its status (Lease/NodeStatus) to the API server periodically, or when the reported **Ready condition is False or Unknown**. After a grace period (40 seconds by default), the node lifecycle controller marks the Node as `NotReady` and later evicts the Pods on that Node.
 
 ```mermaid
 flowchart TD
-    A["NotReady node found"] --> B{"kubectl describe node<br/>Check Conditions"}
-    B -->|Unknown: Kubelet stopped posting| C["Check kubelet / node connectivity"]
-    B -->|MemoryPressure / DiskPressure / PIDPressure| D["Relieve resource shortage"]
+    A["NotReady Node found"] --> B{"kubectl describe node<br/>Check Conditions"}
+    B -->|Unknown: Kubelet stopped posting| C["Check kubelet / Node connectivity"]
+    B -->|MemoryPressure / DiskPressure / PIDPressure| D["Relieve resource pressure"]
     B -->|NetworkUnavailable| E["Check CNI"]
     C --> F{systemctl status kubelet}
     F -->|inactive| G["Restart kubelet / check configuration"]
-    F -->|active| H["Check container runtime, certificates, API communication"]
+    F -->|active| H["Check container runtime, certificates, API server connectivity"]
 ```
 
 ---
@@ -36,7 +36,7 @@ kubectl describe node <node> | sed -n '/Conditions/,/Addresses/p'
 kubectl get events --field-selector involvedObject.name=<node>
 ```
 
-### Step 2. Log in to the node and check the kubelet
+### Step 2. Log in to the Node and check the kubelet
 ```bash
 systemctl status kubelet
 journalctl -u kubelet -n 100 --no-pager
@@ -49,13 +49,13 @@ crictl ps
 crictl info
 ```
 
-### Step 4. Check for resource shortage
+### Step 4. Check for resource pressure
 ```bash
 df -h        # DiskPressure (/var/lib/kubelet, /var/lib/containerd)
 free -m      # MemoryPressure
 ```
 
-### Step 5. Network / CNI / certificates
+### Step 5. Network, CNI, and certificates
 ```bash
 ls /etc/cni/net.d/
 kubectl get pods -n kube-system -o wide | grep <node>
@@ -65,25 +65,25 @@ curl -k https://<apiserver>:6443/healthz
 
 ---
 
-## 3. Table of Common Causes
+## 3. Common Causes
 
 | Symptom (Log/Condition) | Cause | Action |
 |--------------------|------|------|
-| `Kubelet stopped posting node status` | kubelet is down | `systemctl restart kubelet`, check logs |
-| `container runtime is down` | containerd failure | Restart the runtime |
-| `DiskPressure=True` | Disk usage exceeded the threshold | Clean up images/logs (`crictl rmi --prune`) |
-| `MemoryPressure=True` | Node is out of memory | Move workloads, adjust limits |
-| `cni plugin not initialized` | CNI not installed/misconfigured | Check the CNI DaemonSet |
-| `x509: certificate has expired` | kubelet certificate expired | Renew the certificate (see doc 28) |
-| swap enabled | kubelet fails to start | `swapoff -a` and edit `/etc/fstab` |
+| `Kubelet stopped posting node status` | kubelet is not running | `systemctl restart kubelet`, check logs |
+| `container runtime is down` | Container runtime failure (e.g., containerd) | Restart the runtime |
+| `DiskPressure=True` | Disk usage exceeds the eviction threshold | Clean up images/logs (`crictl rmi --prune`) |
+| `MemoryPressure=True` | Node is low on memory | Move workloads, adjust memory limits |
+| `cni plugin not initialized` | CNI plugin not installed or misconfigured | Check the CNI DaemonSet |
+| `x509: certificate has expired` | kubelet certificate has expired | Renew the certificate (see doc 28) |
+| swap enabled | kubelet fails to start | Run `swapoff -a` and edit `/etc/fstab` |
 
 ---
 
 ## 4. Verification After Recovery
 
 ```bash
-kubectl uncordon <node>      # Release it if you had cordoned the node
+kubectl uncordon <node>      # Uncordon the Node if you had cordoned it
 kubectl get nodes -w
 ```
 
-> If recovery is not possible, run `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data` and then replace the node.
+> If the Node cannot be recovered, run `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data` and then replace the Node.

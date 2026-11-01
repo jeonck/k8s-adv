@@ -4,13 +4,13 @@ weight: 270
 slug: "27-inspect-cert-info-2"
 ---
 
-Hands-on practice with encryption verification using the public key of the Root CA certificate.
+Hands-on practice verifying encryption using the public key of the Root CA certificate.
 
 ---
 
 ## Encryption Verification Overview
 
-Using the Root CA certificate, you will directly verify the core principle of asymmetric-key cryptography: **'encrypt with the public key, decrypt with the private key'**.
+Using the Root CA certificate, you will verify the core principle of asymmetric-key cryptography: **'encrypt with the public key, decrypt with the private key'**.
 
 | Step | Task | Tool |
 |------|------|------|
@@ -56,7 +56,7 @@ openssl pkeyutl -encrypt -pubin -inkey ca.pub -in hello.txt -out hello.enc
 ```
 
 ### Decrypt a File
-Restore the encrypted file back to readable text using only its one matching private key.
+Restore the encrypted file back to readable text using only the matching private key.
 ```bash
 openssl pkeyutl -decrypt -inkey /etc/kubernetes/pki/ca.key -in hello.enc -out hello.dec
 ```

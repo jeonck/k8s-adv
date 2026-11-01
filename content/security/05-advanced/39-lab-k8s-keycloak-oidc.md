@@ -1,5 +1,5 @@
 ---
-title: "Adding Keycloak OIDC Configuration to the API Server"
+title: "Configuring Keycloak OIDC on the API Server"
 weight: 390
 slug: "39-lab-k8s-keycloak-oidc"
 ---
@@ -35,16 +35,16 @@ sequenceDiagram
     KC-->>U: 3. Login screen (enter ID/PW)
     KC->>K: 4. Issue ID Token
     K->>AS: 5. Send request with Token
-    Note over AS: 6. Access the Issuer URL to obtain the public key
+    Note over AS: 6. Fetch the public key from the Issuer URL
     Note over AS: 7. Verify the Token signature with the public key
-    AS-->>U: 8. Final approval and return result
+    AS-->>U: 8. Request authenticated; return result
 ```
 
 ---
 
 ## Step 1: Add OIDC Options to the API Server
 
-Register the Keycloak information in the `kube-apiserver.yaml` file on the master node.
+Register the Keycloak information in the `kube-apiserver.yaml` file on the control plane node.
 
 ```yaml
 # /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -63,9 +63,9 @@ spec:
 
 ---
 
-## Step 2: RBAC Permission Mapping
+## Step 2: Map Keycloak Groups to RBAC Permissions
 
-Even if a Keycloak user authenticates successfully, they cannot perform any actions without permissions. Assign Kubernetes permissions based on Keycloak group names.
+Even if a Keycloak user authenticates successfully, they cannot perform any actions without permissions. Grant Kubernetes permissions based on Keycloak group names.
 
 ```yaml
 # keycloak-admin-binding.yaml

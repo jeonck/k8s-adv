@@ -31,7 +31,7 @@ graph LR
 
 | Category | Manual Installation | Using Krew |
 |------|--------------------|-----------|
-| **Search** | Have to dig through GitHub and similar sites yourself | Instant search with `kubectl krew search` |
+| **Search** | Search GitHub and similar sites yourself | Instant search with `kubectl krew search` |
 | **Install** | Manually copy files and set permissions | Just `kubectl krew install <name>` |
 | **Update** | Check for a new version and reinstall | Update everything at once with `kubectl krew upgrade` |
 | **Remove** | Find the file location and delete it manually | `kubectl krew uninstall <name>` |
@@ -63,4 +63,4 @@ graph LR
 
 ## 5. Conclusion
 
-With Krew, you can integrate powerful management tools that go beyond the basic features of `kubectl` into your cluster operations environment in just a few clicks. It is an essential tool for any experienced Kubernetes operator.
+With Krew, you can integrate powerful management tools that go beyond the basic features of `kubectl` into your cluster operations workflow with just a few commands. It is an essential tool for any experienced Kubernetes administrator.

@@ -46,17 +46,17 @@ graph TB
 
 | Component | Role |
 |----------|------|
-| **kube-apiserver** | The center of all communication. Provides authentication, authorization, Admission, and the REST API. The **only** component that talks to etcd |
+| **kube-apiserver** | The center of all communication. Provides authentication, authorization, admission control, and the REST API. The **only** component that talks to etcd |
 | **etcd** | A distributed key-value store that holds cluster state (Raft consensus) |
 | **kube-scheduler** | Places unassigned Pods on suitable nodes (filtering → scoring) |
 | **kube-controller-manager** | Runs controller loops such as Deployment, ReplicaSet, Node, and Job |
-| **cloud-controller-manager** | Integrates with the cloud's LB, nodes, and routes |
+| **cloud-controller-manager** | Integrates with the cloud provider's load balancers, nodes, and routes |
 
 ### Worker Node
 
 | Component | Role |
 |----------|------|
-| **kubelet** | The node agent. Runs and monitors containers per the PodSpec, and reports status |
+| **kubelet** | The node agent. Runs and monitors containers according to the PodSpec, and reports status |
 | **kube-proxy** | Implements a Service's virtual IP with iptables/IPVS rules |
 | **Container Runtime** | containerd, CRI-O, etc. Integrates with the kubelet through the CRI |
 
@@ -82,12 +82,12 @@ sequenceDiagram
     K->>A: Report Pod status
 ```
 
-The core principle is **declarative state (Desired State) + a Watch-based control loop (Reconcile)**.
+The core principle is **declarative desired state + a watch-based reconcile loop**.
 
 ---
 
 ## 4. Points to Remember
 
-- Components do not talk to each other directly; they exchange state **only through the API Server**.
+- Components do not talk to each other directly; they exchange state **only through the API server**.
 - etcd failure = loss of cluster control → backups and an HA setup are essential.
 - Add-ons (CoreDNS, CNI, Metrics Server, etc.) run on top of the cluster as Pods.

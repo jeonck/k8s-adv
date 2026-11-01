@@ -10,7 +10,7 @@ Let's look at the key reasons why a **Headless Service**, rather than a regular 
 
 ## 1. What Is a Headless Service?
 
-Unlike a regular Service, it is a Service that is not assigned a virtual IP, by setting `clusterIP: None`.
+A Headless Service is a Service that, unlike a regular Service, is not assigned a virtual IP because it sets `clusterIP: None`.
 
 | Property | Regular Service (ClusterIP) | Headless Service |
 |------|-------------------------|------------------|
@@ -42,15 +42,15 @@ graph LR
 
 - **Benefit:** Even if `mysql-0` restarts and its IP changes, its DNS name (`mysql-0.mysql`) stays the same, so other Pods can keep communicating without interruption.
 
-### Reason 2: Distinguishing Master/Slave Roles and Communicating Directly
-A regular Service sends traffic randomly, so it is impossible to "connect only to the master (`mysql-0`) for write operations."
+### Reason 2: Distinguishing Primary/Replica Roles and Communicating Directly
+A regular Service distributes traffic across Pods, so it is impossible to "connect only to the primary (`mysql-0`) for write operations."
 
-- **Headless approach:** The client can look up the master Pod's address directly through a DNS query and talk only to it.
+- **Headless approach:** The client can look up the primary Pod's address directly through a DNS query and talk only to it.
 
 ### Reason 3: Building the Data Replication Topology
-Distributed databases (Kafka, MongoDB, MySQL, etc.) require nodes to know each other clearly and replicate data between themselves.
+Distributed databases (Kafka, MongoDB, MySQL, etc.) require members to identify each other reliably and replicate data between themselves.
 
-- **Replication flow:** It becomes possible to define "I am number 1, and my data parent is number 0."
+- **Replication flow:** It becomes possible to define "I am instance 1, and I replicate from instance 0."
 
 ---
 
@@ -76,6 +76,6 @@ sequenceDiagram
 
 1.  **Predictability:** Makes Pod names and DNS addresses predictable.
 2.  **Direct access:** Lets you talk 1:1 with a Pod, with no load balancer in between.
-3.  **Stability:** Lets you find a Pod by the same name even after it dies and comes back.
+3.  **Stability:** Lets you find a Pod by the same name even after it is terminated and recreated.
 
 **A Headless Service is the core infrastructure that lets a StatefulSet operate as a clustered system with 'identity', rather than a mere bundle of containers.**

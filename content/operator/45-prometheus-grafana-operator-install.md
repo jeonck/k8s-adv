@@ -10,13 +10,13 @@ A lab guide for building and automating a monitoring system in a Kubernetes envi
 
 ## 1. Lab Overview and Architecture
 
-In this lab, instead of deploying Prometheus and Grafana manually, you will learn how to manage their lifecycle through Operators.
+In this lab, instead of deploying Prometheus and Grafana manually, you will manage their lifecycle through Operators.
 
 | Component | Role | Notes |
 |-----------|------|------|
 | **Prometheus Operator** | Manages the Prometheus server, Alertmanager, and ServiceMonitor | Automatic target discovery |
 | **Grafana Operator** | Manages Grafana instances, DataSources, and Dashboards | Configuration automation |
-| **ServiceMonitor** | A CRD that defines which services to collect metrics from | Core configuration object |
+| **ServiceMonitor** | A CRD that defines which Services to scrape metrics from | Core configuration object |
 
 ---
 
@@ -26,7 +26,7 @@ In this lab, instead of deploying Prometheus and Grafana manually, you will lear
 graph LR
     App[Application Pod] -- "Metrics" --> SM[ServiceMonitor]
     SM -- "Pass target info" --> PROM[Prometheus Server]
-    PROM -- "Data visualization" --> GRAF[Grafana UI]
+    PROM -- "Visualize data" --> GRAF[Grafana UI]
     
     subgraph Operators
     PO[Prometheus Operator] -.-> PROM
@@ -57,16 +57,16 @@ helm install grafana-operator grafana-operator/grafana-operator --namespace moni
 
 ---
 
-## 4. Core Resource Definitions (CRDs)
+## 4. Core Custom Resources
 
-After installing the Operators, you manage configuration through the following custom resources.
+After installing the Operators, you manage configuration through the following Custom Resources (CRs).
 
-| Resource Type | Purpose |
+| Resource Kind | Purpose |
 |-------------|------|
 | **Prometheus** | Defines the actual Prometheus server instance |
-| **ServiceMonitor** | Specifies the endpoints (Services) to collect metrics from |
+| **ServiceMonitor** | Specifies the Services (endpoints) to scrape metrics from |
 | **Grafana** | Defines the Grafana server instance |
-| **GrafanaDatasource** | Configures the data sources (Prometheus, etc.) to connect to Grafana |
+| **GrafanaDatasource** | Configures the data sources (Prometheus, etc.) that Grafana connects to |
 | **GrafanaDashboard** | Deploys dashboards via JSON or a Grafana.com ID |
 
 ---
@@ -87,4 +87,4 @@ flowchart TD
 
 ## 6. Summary
 
-With the Prometheus and Grafana Operators, **"without having to modify configuration every time a monitoring target is added"**, you can automate metric collection simply by adding a `ServiceMonitor` resource. This demonstrates the core value of declarative infrastructure management.
+With the Prometheus and Grafana Operators, you can **avoid editing configuration every time a monitoring target is added**: simply adding a `ServiceMonitor` resource automates metric collection. This demonstrates the core value of declarative infrastructure management.

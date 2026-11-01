@@ -1,12 +1,12 @@
 ---
-title: "Installing Add-on Components"
+title: "Installing Add-ons"
 weight: 110
 slug: "11-lab-addon-install"
 ---
 
-Install the essential Add-on components on the Kubernetes cluster.
+Install the essential add-ons on the Kubernetes cluster.
 
-## 1. Check the Add-on Configuration Files
+## 1. Check the Add-on Manifests
 
 ```bash
 [root@k8s-cp ~]# tree -L 2 ~/lab/add-on
@@ -27,9 +27,9 @@ Install the essential Add-on components on the Kubernetes cluster.
 6 directories, 7 files
 ```
 
-## 2. Install Metric Server
+## 2. Install Metrics Server
 
-Metric Server collects cluster resource usage information.
+Metrics Server collects resource usage metrics from the cluster.
 
 ```bash
 # Install
@@ -55,14 +55,14 @@ Provides a web-based UI.
 # Install Dashboard
 [root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/02_dashboard/kubernetes-dashboard.yaml
 
-# Create an admin user
+# Create an admin ServiceAccount
 [root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/02_dashboard/dashboard-adminuser.yaml
 
 # Issue a token
 [root@k8s-cp ~]# kubectl -n kubernetes-dashboard create token admin-user
 eyJhbGciOiJSUzI1NiIsImtpZCI6Ii4uLiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50...
 
-# Access the Dashboard
+# Start a local proxy to the API server
 [root@k8s-cp ~]# kubectl proxy
 Starting to serve on 127.0.0.1:8001
 
@@ -72,7 +72,7 @@ http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kube
 
 ## 4. Install MetalLB
 
-Supports LoadBalancer-type Services in bare-metal environments.
+Supports Services of type LoadBalancer in bare-metal environments.
 
 ```bash
 # Install MetalLB
@@ -84,7 +84,7 @@ Supports LoadBalancer-type Services in bare-metal environments.
   --selector=component=controller \
   --timeout=120s
 
-# Configure the IP Pool (adjust to match your cluster network)
+# Configure the IP address pool (adjust to match your cluster network)
 [root@k8s-cp ~]# kubectl apply -f ~/lab/add-on/03_metal-LB/metallb-ippool.yaml
 
 # Configure the L2 Advertisement
@@ -130,7 +130,7 @@ Provides dynamic volume provisioning using NFS.
 NAME                    PROVISIONER                                     RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 nfs-client (default)    k8s-sigs.io/nfs-subdir-external-provisioner     Delete          Immediate           true                   30s
 
-# Test with a PVC
+# Test with a PersistentVolumeClaim
 [root@k8s-cp ~]# cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -169,8 +169,8 @@ default               nfs-subdir-external-provisioner-xx    1/1   Running   0   
 
 | Add-on | Purpose | Namespace |
 |--------|------|--------------|
-| Metric Server | Collects resource usage (kubectl top) | kube-system |
-| Dashboard | Web-based UI | kubernetes-dashboard |
+| Metrics Server | Collects resource usage (kubectl top) | kube-system |
+| Dashboard | Web UI | kubernetes-dashboard |
 | MetalLB | LoadBalancer support (bare metal) | metallb-system |
 | Ingress Controller | HTTP/S traffic routing | ingress-nginx |
-| NFS Provisioner | Dynamic NFS volume provisioning | default |
+| NFS Provisioner | Dynamic provisioning of NFS volumes | default |

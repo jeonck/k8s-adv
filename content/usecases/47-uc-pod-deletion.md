@@ -1,5 +1,5 @@
 ---
-title: "Use Case 2. Pod Deletion Process - Internal Behavior Analysis"
+title: "Use Case 2. Pod Deletion Process - Internals"
 weight: 470
 slug: "47-uc-pod-deletion"
 ---
@@ -35,10 +35,10 @@ sequenceDiagram
     A->>E: Final deletion of Pod object
 ```
 
-1. **Delete request**: The API Server does not remove the Pod immediately; it sets `metadata.deletionTimestamp` (status: `Terminating`).
+1. **Delete request**: The API server does not remove the Pod immediately; it sets `metadata.deletionTimestamp` (status: `Terminating`).
 2. **Endpoint removal**: The EndpointSlice controller removes the Pod from the Service's backend list.
 3. **kubelet termination handling**: `preStop` hook → `SIGTERM` → wait for the grace period → `SIGKILL`.
-4. **Final deletion**: When the kubelet reports termination, the API Server deletes the object from etcd.
+4. **Final deletion**: When the kubelet reports termination, the API server deletes the object from etcd.
 
 > ⚠️ Steps 2 and 3 proceed **in parallel**. This means SIGTERM can arrive before endpoint propagation has finished, and some requests may flow into the terminating Pod in the meantime.
 
@@ -61,7 +61,7 @@ spec:
 |------|------|
 | `terminationGracePeriodSeconds` | The time allowed between SIGTERM and SIGKILL |
 | `preStop` hook | Runs before SIGTERM. Used for connection draining, a short sleep, etc. |
-| `kubectl delete --grace-period=0 --force` | Immediately removes from the API without a grace period (containers may remain on the node, so this is **dangerous**) |
+| `kubectl delete --grace-period=0 --force` | Removes the Pod object from the API immediately, without a grace period (containers may remain on the node, so this is **dangerous**) |
 
 ---
 
@@ -69,9 +69,9 @@ spec:
 
 | Cause | Check/Action |
 |------|-----------|
-| The app ignores SIGTERM (PID 1 problem) | Use `exec` instead of a shell script, implement a signal handler |
+| The app ignores SIGTERM (PID 1 problem) | Run the app directly (or use `exec` in the shell entrypoint) and implement a SIGTERM handler |
 | A **Finalizer** remains | `kubectl get pod <p> -o jsonpath='{.metadata.finalizers}'` |
-| The node is `NotReady` | The kubelet is unresponsive → recover the node or force delete |
+| The node is `NotReady` | The kubelet is unresponsive → recover the node or force-delete the Pod |
 | Volume detach delay | Check the CSI driver logs |
 
 ```bash
@@ -82,5 +82,5 @@ kubectl delete pod <name> --grace-period=0 --force   # Last resort
 
 ## 4. Summary
 
-> Deletion = **set deletionTimestamp → remove Endpoint + (preStop → SIGTERM → SIGKILL) → delete from etcd**.
-> If you want zero-downtime deployments, be sure to design for `preStop sleep` and SIGTERM handling.
+> Deletion = **set deletionTimestamp → remove from EndpointSlice + (preStop → SIGTERM → SIGKILL) → delete from etcd**.
+> If you want zero-downtime deployments, be sure to design for a `preStop` sleep and SIGTERM handling.

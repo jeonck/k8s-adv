@@ -16,10 +16,10 @@ An Operator is a software extension that encodes the knowledge of a human operat
 
 | Category | Manual Operation | Operator Automation |
 |------|--------------------|-----------------|
-| **Monitoring** | A person checks dashboards directly | 24/7 automatic watching and health checks |
+| **Monitoring** | A person checks dashboards directly | 24/7 automated monitoring and health checks |
 | **Failure recovery** | Manually restart Pods and recover data | Automatic recovery immediately upon detecting a failure |
 | **Backup/Upgrade** | Manual work after a maintenance notice | Scheduled automatic backups and zero-downtime upgrades |
-| **Analogy** | Emergency rescue crew (dispatched when needed) | Self-driving management robot |
+| **Analogy** | Emergency rescue crew (dispatched when needed) | Autonomous management robot |
 
 ---
 
@@ -40,8 +40,8 @@ graph LR
 ```
 
 1.  **CRD (Custom Resource Definition):** A new API object that defines an application's configuration (e.g., `kind: Database`)
-2.  **Controller:** A loop (Reconcile Loop) that watches resources and takes action to reach the 'desired state'
-3.  **Domain Knowledge:** Expert knowledge of how to back up and scale a specific app (MySQL, Kafka, etc.)
+2.  **Controller:** A control loop (reconcile loop) that watches resources and acts to drive the cluster toward the desired state
+3.  **Domain Knowledge:** Expert knowledge of how to back up, scale, and recover a specific application (MySQL, Kafka, etc.)
 
 ---
 
@@ -52,18 +52,18 @@ Building a Kubernetes controller from scratch is very complex.
 | Difficulty | Details |
 |-----------|----------|
 | **Low-level API** | Requires understanding complex libraries such as `client-go`, Informer, and Lister |
-| **State synchronization** | Implementing real-time event handling logic using the `Watch` mechanism |
-| **Reconcile loop** | Designing sophisticated control logic that guarantees idempotency |
-| **Repetitive code** | A huge amount of boilerplate code that must be written every time |
+| **State synchronization** | Implementing real-time event handling on top of the `Watch` mechanism |
+| **Reconcile loop** | Designing robust control logic that is idempotent |
+| **Repetitive code** | A large amount of boilerplate that must be written every time |
 
-**To address this complexity, using frameworks such as Operator SDK and Kubebuilder is recommended.**
+**To manage this complexity, we recommend using a framework such as Operator SDK or Kubebuilder.**
 
 ---
 
 ## Major Development Frameworks
 
-- **Operator SDK:** Supports Helm, Ansible, and Go; widely used as a CNCF project
-- **Kubebuilder:** The standard Go-based controller development tool
-- **KUDO:** Builds operators using a declarative YAML approach
+- **Operator SDK:** Supports Helm, Ansible, and Go; widely used (part of the CNCF Operator Framework)
+- **Kubebuilder:** The standard Go-based framework for building controllers
+- **KUDO:** Builds Operators using a declarative YAML approach
 
-**Operator development is a journey that goes beyond simple deployment to automate the entire lifecycle of an application.**
+**Operator development goes beyond simple deployment: it automates the entire lifecycle of an application.**

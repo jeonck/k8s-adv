@@ -119,7 +119,7 @@ rules:
   resources: ["services"]
   verbs: ["get", "list", "watch"]
 
-# Manage Ingress resources
+# Read Ingress resources
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
   verbs: ["get", "list", "watch"]
@@ -129,12 +129,12 @@ rules:
   resources: ["ingresses/status"]
   verbs: ["update"]
 
-# Get IngressClass
+# Read IngressClass
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingressclasses"]
   verbs: ["get", "list", "watch"]
 
-# Leader Election
+# Leader election
 - apiGroups: ["coordination.k8s.io"]
   resourceNames: ["ingress-nginx-leader"]
   resources: ["leases"]
@@ -158,15 +158,15 @@ rules:
 
 | Resource | Permissions | Purpose |
 |--------|------|------|
-| namespaces | get | Get namespace information |
-| configmaps, pods, secrets, endpoints | get, list, watch | Get basic resources |
-| services | get, list, watch | Get services |
-| ingresses | get, list, watch | Monitor Ingress resources |
+| namespaces | get | Read Namespace information |
+| configmaps, pods, secrets, endpoints | get, list, watch | Read core resources |
+| services | get, list, watch | Read Services |
+| ingresses | get, list, watch | Watch Ingress resources |
 | ingresses/status | update | Update Ingress status |
-| ingressclasses | get, list, watch | Get Ingress classes |
+| ingressclasses | get, list, watch | Read IngressClasses |
 | leases | get, update, create | Leader election (high availability) |
 | events | create, patch | Record events |
-| endpointslices | list, watch, get | Get endpoints |
+| endpointslices | list, watch, get | Read EndpointSlices (backend endpoints) |
 
 ---
 
@@ -634,8 +634,8 @@ lifecycle:
       - /wait-shutdown
 ```
 
-- Waits for connection draining on Pod termination
-- Graceful Shutdown
+- Waits for connections to drain when the Pod terminates
+- Graceful shutdown
 
 ### Probes
 
@@ -664,7 +664,7 @@ securityContext:
     - NET_BIND_SERVICE               # Allow binding to ports below 1024
     drop:
     - ALL                            # Drop all other capabilities
-  runAsNonRoot: true                 # No root user
+  runAsNonRoot: true                 # Must not run as root
   runAsUser: 101                     # nginx user
   seccompProfile:
     type: RuntimeDefault             # Default seccomp profile
@@ -921,9 +921,9 @@ graph TD
 
 | Component | Main Role |
 |-----------|----------|
-| **Controller** | Watches Ingress resources and automatically generates/updates the NGINX configuration |
-| **IngressClass** | An identifier for selecting nginx among the multiple Ingress controllers in the cluster |
-| **Admission Webhook** | Pre-validates that there are no syntax errors when Ingress resources are created/modified |
+| **Controller** | Watches Ingress resources and automatically generates and updates the NGINX configuration |
+| **IngressClass** | An identifier for selecting the nginx controller when multiple Ingress controllers run in the cluster |
+| **Admission Webhook** | Validates Ingress resources up front, catching configuration errors when they are created or modified |
 | **RBAC** | Grants the controller permission to read cluster resources (Ingress, Secret, etc.) |
 
 ---

@@ -18,7 +18,7 @@ This analogy expresses a philosophical difference in how you treat and manage se
 | **Failure response** | When sick, it is repaired and nursed back carefully | When sick, it is replaced immediately with a newly created one |
 | **Management style** | Manual configuration, managed individually | Automated provisioning, managed in bulk |
 | **Dependency** | If one server dies, the service is at risk of an outage | Even if one dies, another instance takes over immediately |
-| **Typical infrastructure** | Traditional physical servers, Mainframe | **Kubernetes, cloud instances** |
+| **Typical infrastructure** | Traditional physical servers, mainframes | **Kubernetes, cloud instances** |
 
 ---
 
@@ -47,9 +47,9 @@ graph LR
 
 Kubernetes automates 'cattle'-style management through the following resources.
 
-- **Deployment:** When a Pod dies, it creates a new Pod immediately, no questions asked, to maintain the replica count.
-- **Service:** Even as Pod IPs keep changing (the cattle being replaced), clients can reach the service through a single fixed name.
-- **Auto-scaling:** When traffic grows, it increases the number of cattle; when traffic drops, it reduces them again.
+- **Deployment:** When a Pod dies, it immediately creates a replacement Pod to maintain the desired replica count.
+- **Service:** Even as Pod IPs keep changing (the cattle being replaced), clients can reach the application through a single stable name.
+- **Autoscaling:** When traffic grows, it increases the number of cattle; when traffic drops, it scales them back down.
 
 ---
 

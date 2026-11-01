@@ -4,7 +4,7 @@ weight: 400
 slug: "40-kubectl-plugin-guide"
 ---
 
-A kubectl plugin is the easiest way to extend kubectl commands to suit your own needs.
+A kubectl plugin is the easiest way to extend kubectl with commands tailored to your own needs.
 
 ---
 
@@ -17,7 +17,7 @@ A kubectl plugin is a standalone executable file that works as a subcommand of `
 | Item | Description | Note |
 |------|------|------|
 | **Naming convention** | Must follow the `kubectl-<plugin-name>` format | Required |
-| **File location** | A path registered in the user's `$PATH` environment variable | Required |
+| **File location** | A directory listed in the user's `$PATH` environment variable | Required |
 | **How it runs** | Invoked as `kubectl <plugin-name>` | - |
 | **Language** | Any language works as long as the file is executable (Bash, Go, Python, etc.) | Flexibility |
 
@@ -33,7 +33,7 @@ graph LR
     Input2["Terminal: kubectl oidc-login"] -- "Search $PATH" --> File2["File: kubectl-oidc-login"]
     
     subgraph Execution
-    File -- "Execute" --> Result["Namespace switching logic"]
+    File -- "Execute" --> Result["Namespace-switching logic"]
     File2 -- "Execute" --> Result2["Login flow logic"]
     end
 ```
@@ -43,7 +43,7 @@ graph LR
 ## Step 1: Building the Simplest Plugin (Bash)
 
 ### 1. Write the script
-Let's create a very simple plugin that says hello.
+Create a very simple plugin that prints a greeting.
 
 ```bash
 # Create the /usr/local/bin/kubectl-hello file
@@ -53,9 +53,9 @@ echo "Hello! This is a custom kubectl plugin."
 EOF
 ```
 
-### 2. Grant permission and verify
+### 2. Make it executable and verify
 ```bash
-# Grant execute permission
+# Make the file executable
 chmod +x /usr/local/bin/kubectl-hello
 
 # List installed plugins
@@ -70,9 +70,9 @@ kubectl hello
 
 ---
 
-## Step 2: A Practical Plugin Example (Namespace Switching)
+## Step 2: A Practical Plugin Example (Switching Namespaces)
 
-This is an example that implements, in Bash, a frequently used namespace switching tool.
+This example implements a commonly used namespace-switching tool in Bash.
 
 ```bash
 #!/bin/bash
@@ -90,7 +90,7 @@ fi
 ## Key Takeaways
 
 1.  **Rule:** The file name must always start with `kubectl-`.
-2.  **Distribution:** Copy the file into a `$PATH` directory and give it execute permission with `chmod +x`, and the installation is done.
+2.  **Distribution:** Copy the file into a `$PATH` directory and give it execute permission with `chmod +x`, and the plugin is installed.
 3.  **Management:** The `kubectl plugin list` command shows all currently available plugins at a glance.
 4.  **Recommended tool:** To manage more plugins easily, use the plugin manager **Krew**.
 

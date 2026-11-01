@@ -4,7 +4,7 @@ weight: 20
 slug: "02-k8s-resources"
 ---
 
-Kubernetes combines a variety of resource objects organically to build a cluster and run applications.
+Kubernetes builds a cluster and runs applications by combining many kinds of resource objects.
 
 ---
 
@@ -37,14 +37,14 @@ graph TD
 
 ---
 
-## 2. Resource Relationship Diagram
+## 2. Resource Relationships
 
 Resources do not exist in isolation; they reference or contain one another.
 
 | Relationship Type | Structure | Description |
 |-----------|------|------|
 | **Deployment structure** | `Deployment` → `ReplicaSet` → `Pod` | Declarative updates and replica management |
-| **Network connectivity** | `Service` → `Endpoints` → `Pod` | Provides a stable access address and load balancing |
+| **Network connectivity** | `Service` → `Endpoints` → `Pod` | Provides a stable address and load balancing |
 | **Configuration injection** | `ConfigMap/Secret` → `Pod` | Delivers configuration as environment variables or files (Volumes) |
 | **Storage binding** | `Pod` → `PVC` → `PV` | Allocates persistent storage to the application |
 
@@ -57,8 +57,8 @@ Resources do not exist in isolation; they reference or contain one another.
 | **Pod** | The smallest unit that runs in a cluster (a group of containers) |
 | **Deployment** | Defines the desired state of an app and maintains it automatically (recommended for stateless apps) |
 | **StatefulSet** | Manages apps where identity and order matter (stateful apps such as databases) |
-| **Service** | Gives a fixed IP and name for accessing a set of Pods |
-| **Namespace** | Separates a single cluster so that multiple teams or projects can share it |
+| **Service** | Provides a stable IP and DNS name for accessing a set of Pods |
+| **Namespace** | Divides a single cluster into isolated scopes so that multiple teams or projects can share it |
 
 ---
 
@@ -80,7 +80,7 @@ kubectl explain deployment.spec.template
 
 ## 5. Common Resource Short Names
 
-`kubectl` lets you enter resource names as short names. (e.g., `kubectl get po` = `kubectl get pods`)
+`kubectl` accepts short names for resources. (e.g., `kubectl get po` = `kubectl get pods`)
 
 ### 5.1 Core Resources
 
@@ -90,7 +90,7 @@ kubectl explain deployment.spec.template
 | `po` | `pods` | Pod |
 | `svc` | `services` | Service |
 | `ns` | `namespaces` | Namespace |
-| `sa` | `serviceaccounts` | Service account |
+| `sa` | `serviceaccounts` | ServiceAccount |
 | `ep` | `endpoints` | Endpoints |
 
 ### 5.2 Workloads and Scheduling
@@ -126,7 +126,7 @@ kubectl explain deployment.spec.template
 | (`clusterrole`) | `clusterroles` | ClusterRole |
 | (`clusterrolebinding`) | `clusterrolebindings` | ClusterRoleBinding |
 
-> ⚠️ **Note**: RBAC resources (`roles`, `rolebindings`, `clusterroles`, `clusterrolebindings`) have no official short names. Notations such as `rb`, `crb`, and `crole` are not recognized by kubectl, so use the singular names (`role`, `rolebinding`, etc.) as shown above.
+> ⚠️ **Note**: RBAC resources (`roles`, `rolebindings`, `clusterroles`, `clusterrolebindings`) have no official short names. Abbreviations such as `rb`, `crb`, and `crole` are not recognized by kubectl, so use the singular names (`role`, `rolebinding`, etc.) as shown above.
 
 ### 5.5 Usage Examples
 

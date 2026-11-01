@@ -4,7 +4,7 @@ weight: 210
 slug: "21-kubernetes-dashboard-yaml"
 ---
 
-We analyze the YAML file used to install the Kubernetes Dashboard.
+This page walks through the YAML manifest used to install the Kubernetes Dashboard.
 
 ## Overall Structure
 
@@ -144,7 +144,7 @@ data:
 
 ### Role
 
-- A token that protects against Cross-Site Request Forgery attacks
+- A token that protects against Cross-Site Request Forgery (CSRF) attacks
 
 ### 4-3. Key Holder
 
@@ -227,7 +227,7 @@ rules:
 
 | Resource | Resource Names | Permissions |
 |--------|-------------|------|
-| Secrets | the 3 dashboard-related ones | get, update, delete |
+| Secrets | the three Dashboard Secrets | get, update, delete |
 | ConfigMaps | settings | get, update |
 | Services | heapster, metrics-scraper | proxy |
 | Services/Proxy | heapster, metrics-scraper | get |
@@ -306,7 +306,7 @@ subjects:
 
 - Binds the ClusterRole's metrics query permission
 
-### 9-2. Administrator Permission (Important!)
+### 9-2. Administrator Permissions (Important!)
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -341,12 +341,12 @@ subjects:
 ⚠️ Risks:
 1. The cluster can be fully controlled through the Dashboard
 2. If the Dashboard is compromised, the entire cluster is compromised
-3. Serious security problems if exposed externally
+3. Serious security risk if exposed externally
 
 ✅ Recommendations:
 1. Use Ingress instead of NodePort
-2. Strengthen authentication/authorization
-3. Apply network policies
+2. Strengthen authentication and authorization
+3. Apply NetworkPolicies
 4. Apply the principle of least privilege instead of cluster-admin
 ```
 
@@ -597,15 +597,15 @@ graph TD
     end
     
     DEP1 --- S1 & S2 & C1
-    DEP2 -- "Collect" --> MS[Metric Server]
+    DEP2 -- "Collect" --> MS[Metrics Server]
 ```
 
 | Component | Main Role |
 |-----------|----------|
 | **Dashboard UI** | Provides a web-based cluster management interface |
-| **Metrics Scraper** | Fetches data from the Metric Server and processes it into chart data |
-| **ServiceAccount** | The ID the dashboard process uses to access the API server |
-| **Secrets** | Store certificates for HTTPS communication and the security token (CSRF) |
+| **Metrics Scraper** | Fetches data from the Metrics Server and processes it into chart data |
+| **ServiceAccount** | The identity the Dashboard Pod uses to access the API server |
+| **Secrets** | Store certificates for HTTPS communication and the CSRF token |
 
 ---
 
@@ -653,4 +653,4 @@ kubectl -n kubernetes-dashboard create token admin-user
 | Deployment | 2 | Pod deployment |
 | **Total** | **15** | |
 
-**The Kubernetes Dashboard provides a web-based UI, and you need to be careful about security when granting it cluster-admin permissions.**
+**The Kubernetes Dashboard provides a web-based UI, and be careful about security when granting it cluster-admin permissions.**

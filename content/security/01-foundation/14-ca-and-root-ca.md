@@ -4,7 +4,7 @@ weight: 140
 slug: "14-ca-and-root-ca"
 ---
 
-Learn about Certificate Authorities (CAs) to understand the Kubernetes API Server certificate.
+Learn about Certificate Authorities (CAs) to understand the Kubernetes API server certificate.
 
 ---
 
@@ -12,7 +12,7 @@ Learn about Certificate Authorities (CAs) to understand the Kubernetes API Serve
 
 ### 1. Does the receiver publish its public key?
 
-Yes. A public key (Public Key) can, quite literally, be known to anyone.
+Yes. A public key can, quite literally, be known to anyone.
 
 - **For websites:** A web server (the receiver) distributes a certificate containing its public key to every user who connects, either in advance or immediately on request.
 - **For individuals:** They register their public key on a key server or attach it to email signatures, so that others can retrieve and use it at any time.
@@ -33,7 +33,7 @@ sequenceDiagram
 
 ### 3. Hybrid Approach: Symmetric Key + Asymmetric Key
 
-The reason asymmetric keys alone are not used is that they are 100-1000 times slower than symmetric keys, making them unsuitable for encrypting large amounts of data.
+Asymmetric keys alone are not used because they are roughly 100-1000 times slower than symmetric keys, which makes them unsuitable for encrypting large amounts of data.
 
 ```mermaid
 sequenceDiagram
@@ -139,7 +139,7 @@ graph TD
 
 The reason we can trust a website is that the following chain is connected.
 
-1.  The browser has the **Root CA's public key** built in in advance
+1.  The browser has the **Root CA's certificate (public key)** preinstalled
 2.  The browser verifies the **subordinate CA's certificate** with the Root CA's public key
 3.  The browser verifies the **website's certificate** with the verified subordinate CA's public key
 
@@ -151,6 +151,6 @@ Kubernetes builds and uses its own CA hierarchy to secure communication inside t
 
 - **kube-ca:** The root of trust for the entire cluster
 - **etcd-ca:** A dedicated CA for securing etcd communication
-- **front-proxy-ca:** A CA for API Server proxy authentication
+- **front-proxy-ca:** A CA for authenticating the API server's front proxy (aggregation layer)
 
 **Understanding the structure of certificates and CAs lets you clearly grasp Kubernetes' complex communication security settings.**

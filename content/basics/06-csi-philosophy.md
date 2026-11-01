@@ -1,10 +1,10 @@
 ---
-title: "The Philosophy of K8s CSI (Container Storage Interface)"
+title: "The Philosophy of Kubernetes CSI (Container Storage Interface)"
 weight: 60
 slug: "06-csi-philosophy"
 ---
 
-CSI is a core standard specification that lets Kubernetes scale flexibly without being locked in to any particular storage vendor.
+CSI is the standard specification that lets Kubernetes work with a wide range of storage without being locked in to any particular vendor.
 
 ---
 
@@ -35,7 +35,7 @@ graph TD
 ```
 
 ### 3) Pluggability
-Even when a new storage technology appears, there is no need to upgrade Kubernetes itself. Simply install the CSI driver for that storage and it integrates immediately.
+When a new storage technology appears, there is no need to upgrade Kubernetes itself. Simply install the CSI driver for that storage and it works right away.
 
 ---
 

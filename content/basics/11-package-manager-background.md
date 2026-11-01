@@ -8,10 +8,10 @@ Starting from the problems of configuring Kubernetes add-on components, let's se
 
 ---
 
-## 1. Traditional Problems with Add-On Configuration
+## 1. Traditional Problems with Add-on Configuration
 
 ### 1) Limits of Manual YAML Management
-Installing a component requires many changes to fit the environment, and editing them by hand every time is very risky.
+Installing a component requires many changes to fit the environment, and editing the manifests by hand every time is very risky.
 
 | Problem Type | Details |
 |-----------|-----------|
@@ -42,8 +42,8 @@ To meet the requirements of complex cluster operations, the following capabiliti
 |----------|------|------------------------|
 | **Templating** | Make configuration reusable | Inject variables through `values.yaml` |
 | **Version management** | Track deployment history and roll back | Manage by Release version |
-| **Packaging knowledge** | Share experts' optimal configurations | Provide verified Charts |
-| **Dependency resolution** | Automate integration across multiple components | Manage Sub-charts |
+| **Packaging knowledge** | Share experts' best-practice configurations | Provide verified Charts |
+| **Dependency resolution** | Automate integration across multiple components | Manage subcharts |
 
 ---
 

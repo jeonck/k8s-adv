@@ -1,10 +1,10 @@
 ---
-title: "CSR (Certificate Signing Request) and Certificate Requests"
+title: "CSR (Certificate Signing Request) and the Certificate Request Workflow"
 weight: 160
 slug: "16-csr-and-workflow"
 ---
 
-Learn about creating a CSR and the certificate request process for issuing a certificate.
+Learn how to create a CSR and how the certificate request process works.
 
 ---
 
@@ -35,9 +35,9 @@ sequenceDiagram
     
     Note over U: Step 1: Generate private key (private.key)
     Note over U: Step 2: Create CSR (public key + owner information)
-    U->>CA: Step 3: Submit CSR (certification request)
+    U->>CA: Step 3: Submit CSR (certificate request)
     Note over CA: Step 4: Verify information and approve
-    Note over CA: Step 5: Sign with the CA private key to create the certificate
+    Note over CA: Step 5: Sign with the CA private key to issue the certificate
     CA->>U: Step 6: Deliver the issued certificate (certificate.crt)
 ```
 
@@ -57,18 +57,18 @@ The main owner-information fields entered when applying for a certificate are as
 
 | Abbreviation | Field | Description | Example |
 |------|--------|------|------|
-| **CN** | Common Name | Domain name or user name | *.google.com, admin |
+| **CN** | Common Name | Domain name or username | *.google.com, admin |
 | **O** | Organization | Organization/company name | Google LLC, Kubernetes |
 | **OU** | Organizational Unit | Department name | IT, Security |
-| **L** | Locality | City/county | Mountain View, Seoul |
-| **ST** | State | Province/metropolitan city | California, Seoul |
+| **L** | Locality | City | Mountain View, Seoul |
+| **ST** | State | State/province | California, Seoul |
 | **C** | Country | Country code (2 letters) | US, KR |
 
 ---
 
 ## The Importance of SAN (Subject Alternative Name)
 
-For security reasons, modern browsers and Kubernetes **validate the SAN field in preference to CN (Common Name)**.
+For security reasons, modern browsers and Kubernetes **validate the SAN field instead of CN (Common Name)**.
 
 - **Limitation of CN:** Only one name can be specified per certificate
 - **Advantage of SAN:** Multiple domains or IP addresses can be specified in a single certificate
@@ -80,8 +80,8 @@ For security reasons, modern browsers and Kubernetes **validate the SAN field in
 
 Certificate issuance also happens frequently inside a Kubernetes cluster.
 
-1.  **kubelet certificates:** When a node joins the cluster, it sends a CSR to the API Server.
-2.  **Adding users:** When creating a new user, you create a CSR resource and get the administrator's approval.
-3.  **Cert-manager:** Automatically creates CSRs and renews certificates through Let's Encrypt and similar CAs.
+1.  **kubelet certificates:** When a Node joins the cluster, its kubelet sends a CSR to the API server.
+2.  **Adding users:** When creating a new user, you create a CertificateSigningRequest resource and have an administrator approve it.
+3.  **cert-manager:** Automatically creates CSRs and renews certificates through CAs such as Let's Encrypt.
 
 **A CSR is the "application form" for secure communication, and understanding this process is essential for managing Kubernetes security settings.**

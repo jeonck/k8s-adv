@@ -22,14 +22,14 @@ Unlike a typical Deployment, a StatefulSet is designed so that each Pod keeps it
 
 ### 2. Stable Network ID (DNS)
 
-When a Deployment's Pod is deleted and recreated, its name changes and so does its communication address. A StatefulSet, however, keeps the **same DNS address even after being recreated**.
+When a Pod managed by a Deployment is deleted and recreated, its name changes and so does its network address. A StatefulSet Pod, however, keeps the **same DNS name even after being recreated**.
 
-- **DNS address format:** `<Pod name>.<service name>.<namespace>.svc.cluster.local`
+- **DNS name format:** `<Pod name>.<Headless Service name>.<namespace>.svc.cluster.local`
 - **Benefit:** Even if `mysql-1` dies and comes back, other Pods can still find `mysql-1` at the same address.
 
 ### 3. 1:1 Matching of Persistent Storage
 
-Each Pod has its own dedicated storage (Persistent Volume), and keeps its data intact even when the Pod restarts.
+Each Pod has its own dedicated storage (a PersistentVolumeClaim bound to a PersistentVolume) and keeps its data intact even when the Pod restarts.
 
 ```mermaid
 graph TD
@@ -65,16 +65,16 @@ graph LR
 
 ## Main Use Cases
 
-1.  **Database clusters:** MySQL, PostgreSQL, etc., where a clear Master/Slave structure is required
+1.  **Database clusters:** MySQL, PostgreSQL, etc., where a clear primary/replica (master/slave) structure is required
 2.  **Distributed message queues:** Kafka, RabbitMQ, etc., where node IDs matter
-3.  **Distributed storage:** MongoDB, Cassandra, etc., which need fixed membership information when forming a cluster
+3.  **Distributed databases and storage:** MongoDB, Cassandra, etc., which need fixed membership information when forming a cluster
 
 ---
 
 ## Summary: The Core Value of StatefulSet
 
-- **Uniqueness:** Each Pod has a unique identity, along with its number 0, 1, 2...
-- **Stability:** Its name and network address do not change even after a restart
+- **Uniqueness:** Each Pod has a unique identity, given by its ordinal index (0, 1, 2...)
+- **Stability:** Its name and network identity do not change even after a restart
 - **Persistence:** Data is preserved through its dedicated volume
 
-**StatefulSet can be called a "managed Pet" or a "Pet in Cattle's clothing," and it is the key tool that makes it possible to run complex stateful applications in a Kubernetes environment.**
+**StatefulSet can be called a "managed Pet" or a "Pet in Cattle's clothing," and it is the key tool for running complex stateful applications on Kubernetes.**

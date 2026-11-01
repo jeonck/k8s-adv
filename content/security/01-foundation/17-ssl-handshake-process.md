@@ -4,13 +4,13 @@ weight: 170
 slug: "17-ssl-handshake-process"
 ---
 
-A detailed explanation of how SSL (Secure Sockets Layer) and TLS (Transport Layer Security) work, and of the hybrid encryption scheme.
+A detailed explanation of how SSL (Secure Sockets Layer) and TLS (Transport Layer Security) work, including the hybrid encryption scheme.
 
 ---
 
 ## 1. Core Concept: Hybrid Encryption
 
-SSL/TLS, the foundation of modern internet security, uses a **hybrid scheme** that combines only the strengths of asymmetric and symmetric keys.
+SSL/TLS, the foundation of modern internet security, uses a **hybrid scheme** that combines the strengths of asymmetric and symmetric keys.
 
 ### Symmetric vs Asymmetric Key Comparison
 
@@ -18,7 +18,7 @@ SSL/TLS, the foundation of modern internet security, uses a **hybrid scheme** th
 |------|-----------------|-------------------|
 | **Speed** | **Very fast** (about 1000x) | Relatively slow |
 | **Security** | Risk of interception during key delivery | Solves the key delivery problem (public-key based) |
-| **Number of keys** | Grows exponentially as users increase | Only 1 key pair per user |
+| **Number of keys** | Grows rapidly as users increase (n(n-1)/2) | Only 1 key pair per user |
 | **Main use** | **Encrypting actual data** | **Key exchange and identity verification** |
 
 ---
@@ -30,7 +30,7 @@ The slow asymmetric key is used only for the initial connection; once a secure e
 ```mermaid
 graph TD
     subgraph Handshake_Phase["Handshake phase: uses asymmetric keys"]
-    A[Certificate exchange and verification] --> B[Deliver symmetric key secret value]
+    A[Certificate exchange and verification] --> B[Securely exchange the key secret]
     B --> C[Both sides generate the same session key]
     end
     
@@ -44,8 +44,8 @@ graph TD
 ```
 
 ### Understanding Through an Analogy
-- **Asymmetric key:** A **special armored vehicle** that carries the key (symmetric key) to a valuable vault (slow but extremely secure)
-- **Symmetric key:** An **ordinary truck** that carries containers that can be opened with that key (fast and efficient)
+- **Asymmetric key:** An **armored vehicle** that transports the key (the symmetric key) to the vault (slow but extremely secure)
+- **Symmetric key:** An **ordinary truck** that hauls cargo locked with that key (fast and efficient)
 
 ---
 
@@ -61,9 +61,9 @@ graph TD
 
 ## 4. History of SSL and TLS
 
-SSL is the name first coined by Netscape, and TLS is its standardized successor. Today the security-hardened **TLS 1.2** and **TLS 1.3** are mainly used.
+SSL was originally developed by Netscape, and TLS is its standardized successor. Today, the security-hardened **TLS 1.2** and **TLS 1.3** are the ones mainly in use.
 
-- **SSL 3.0 (1996):** No longer used due to vulnerabilities
+- **SSL 3.0 (1996):** Deprecated due to vulnerabilities
 - **TLS 1.2 (2008):** The most widely used standard version today (2 RTT)
 - **TLS 1.3 (2018):** The latest version, with stronger security and improved speed (1 RTT)
 
@@ -123,4 +123,4 @@ sequenceDiagram
 
 ## 6. Summary
 
-SSL/TLS is a clever secure communication method that combines the **safety of asymmetric keys** with the **efficiency of symmetric keys**. Through this process, we can use the internet and the Kubernetes API safely, free from the threat of phishing sites.
+SSL/TLS is a clever secure communication method that combines the **safety of asymmetric keys** with the **efficiency of symmetric keys**. Through this process, we can use the internet and the Kubernetes API with encrypted, authenticated connections.

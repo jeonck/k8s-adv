@@ -1,21 +1,21 @@
 ---
-title: "Metric Server YAML Analysis"
+title: "Metrics Server YAML Analysis"
 weight: 201
 slug: "20-metric-server-yaml"
 ---
 
-This page analyzes the YAML file used to install Metric Server.
+This page analyzes the YAML file used to install Metrics Server.
 
 ## Overall Composition
 
 ```
-Resources that make up Metric Server:
+Resources that make up Metrics Server:
 1. ServiceAccount          - Identity of the Pod
 2. ClusterRole (x2)        - Permission definitions
 3. RoleBinding             - Permission binding within a namespace
 4. ClusterRoleBinding (x2) - Cluster-wide permission binding
 5. Service                 - Network endpoint
-6. Deployment              - Pod deployment
+6. Deployment              - Runs the Metrics Server Pod
 7. APIService              - Kubernetes API extension
 ```
 
@@ -43,7 +43,7 @@ metadata:
 
 ### Role
 
-- The identity the Metric Server Pod uses when communicating with the Kubernetes API
+- The identity the Metrics Server Pod uses when communicating with the Kubernetes API
 - The RBAC permissions bound to this ServiceAccount are applied to the Pod
 
 ---
@@ -78,7 +78,7 @@ rules:
 |------|-----|------|
 | `name` | system:aggregated-metrics-reader | Standard name (reserved by the system) |
 | `apiGroups` | metrics.k8s.io | Metrics API group |
-| `resources` | pods, nodes | Pod and node metrics |
+| `resources` | pods, nodes | Pod and Node metrics |
 | `verbs` | get, list, watch | Read-only permissions |
 
 ### Aggregation Labels
@@ -125,13 +125,13 @@ rules:
 
 | Resource | Permission | Purpose |
 |--------|------|------|
-| `nodes/metrics` | get | Collect node metrics from the Kubelet |
-| `pods` | get, list, watch | Query Pod information |
-| `nodes` | get, list, watch | Query node information |
+| `nodes/metrics` | get | Collect Node metrics from the kubelet |
+| `pods` | get, list, watch | Read Pod information |
+| `nodes` | get, list, watch | Read Node information |
 
 ### Role
 
-- Permissions that allow Metric Server to read data from the Kubelet and the Kubernetes API
+- Permissions that allow Metrics Server to read data from the kubelet and the Kubernetes API
 
 ---
 
@@ -164,8 +164,8 @@ subjects:
 
 ### Role
 
-- Grants permission to read the API Server extension authentication configuration
-- Required for Metric Server to be registered as an extension API server
+- Grants permission to read the extension API server authentication configuration
+- Required for Metrics Server to run as an extension API server
 
 ---
 
@@ -197,8 +197,8 @@ subjects:
 
 ### Role
 
-- Gives Metric Server the permission to delegate authentication/authorization
-- Allows the API Server to delegate authentication checks to Metric Server
+- Allows Metrics Server to delegate authentication and authorization checks to the API server
+- Required so that Metrics Server can validate incoming requests via TokenReview and SubjectAccessReview
 
 ---
 
@@ -231,7 +231,7 @@ subjects:
 ### Role
 
 - Binds the ClusterRole defined in section 3 to the ServiceAccount
-- Grants the Metric Server Pod permission to collect metrics
+- Grants the Metrics Server Pod permission to collect metrics
 
 ---
 
@@ -265,8 +265,8 @@ spec:
 
 ### Role
 
-- Provides a network endpoint for Metric Server
-- Used when the API Server queries metrics
+- Provides a network endpoint for Metrics Server
+- Used when the API server forwards metrics requests to Metrics Server
 
 ---
 
@@ -352,12 +352,12 @@ spec:
 
 | Argument | Description |
 |------|------|
-| `--cert-dir=/tmp` | Directory where certificates are stored |
+| `--cert-dir=/tmp` | Directory where certificates are stored (self-signed serving certs) |
 | `--secure-port=10250` | Secure port |
-| `--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname` | Priority order of addresses used to connect to the Kubelet |
+| `--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname` | Preferred order of address types used to connect to the kubelet |
 | `--kubelet-use-node-status-port` | Use the port reported in the node status |
-| `--metric-resolution=15s` | Metric collection interval (15 seconds) |
-| `--kubelet-insecure-tls` | Disable Kubelet TLS verification (for testing only) |
+| `--metric-resolution=15s` | Metrics collection interval (15 seconds) |
+| `--kubelet-insecure-tls` | Skip kubelet TLS certificate verification (for testing only) |
 
 ### Probes
 
@@ -382,7 +382,7 @@ readinessProbe:
 
 ```yaml
 securityContext:
-  allowPrivilegeEscalation: false  # No privilege escalation
+  allowPrivilegeEscalation: false  # Disallow privilege escalation
   capabilities:
     drop:
     - ALL                          # Drop all Linux capabilities
@@ -399,7 +399,7 @@ securityContext:
 resources:
   requests:
     cpu: 100m      # Guarantees 0.1 core
-    memory: 200Mi  # Guarantees 200MB
+    memory: 200Mi  # Guarantees 200Mi
 ```
 
 ### Other Important Settings
@@ -451,7 +451,7 @@ spec:
 ### API Endpoints
 
 ```bash
-# APIs registered by Metric Server
+# APIs registered by Metrics Server
 /apis/metrics.k8s.io/v1beta1/nodes
 /apis/metrics.k8s.io/v1beta1/pods
 
@@ -467,7 +467,7 @@ kubectl top pods
 
 ## Resource Relationship Diagram
 
-This shows how the main resources that make up Metric Server are connected.
+This shows how the main resources that make up Metrics Server are connected.
 
 ```mermaid
 graph TD
@@ -483,7 +483,7 @@ graph TD
     SVC -- "Expose" --> P443[Port: 443]
     
     P443 --- API[APIService: v1beta1.metrics.k8s.io]
-    API -- "Register" --> K8S[Kubernetes API Aggregate]
+    API -- "Register" --> K8S[Kubernetes API Aggregation Layer]
     
     K8S --- TOP["kubectl top command"]
 ```
@@ -491,8 +491,8 @@ graph TD
 | Resource Type | Name | Main Role |
 |-----------|------|----------|
 | **RBAC** | `system:metrics-server` | Grants permissions for API aggregation and resource queries |
-| **Deployment** | `metrics-server` | Runs the daemon that actually collects and processes metrics |
-| **Service** | `metrics-server` | Channel through which the API server reaches the metrics server |
+| **Deployment** | `metrics-server` | Runs the process that actually collects and serves metrics |
+| **Service** | `metrics-server` | Endpoint through which the API server reaches Metrics Server |
 | **APIService** | `v1beta1.metrics.k8s.io` | Registers the metrics feature with the standard API server |
 
 ---
@@ -500,7 +500,7 @@ graph TD
 ## Verifying the Installation
 
 ```bash
-# Install Metric Server
+# Install Metrics Server
 kubectl apply -f components.yaml
 
 # Check Pod status
@@ -513,7 +513,7 @@ kubectl get apiservice v1beta1.metrics.k8s.io
 # NAME                     SERVICE                      AVAILABLE   AGE
 # v1beta1.metrics.k8s.io   kube-system/metrics-server   True        1m
 
-# Test metric queries
+# Test metrics queries
 kubectl top nodes
 kubectl top pods
 ```
@@ -529,8 +529,8 @@ kubectl top pods
 | RoleBinding | 1 | Namespace permissions |
 | ClusterRoleBinding | 2 | Cluster permissions |
 | Service | 1 | Network endpoint |
-| Deployment | 1 | Pod deployment |
+| Deployment | 1 | Runs the Pods |
 | APIService | 1 | API extension |
 | **Total** | **9** | |
 
-**Metric Server is a system component that extends the Kubernetes API to add metric query capabilities.**
+**Metrics Server is a system component that extends the Kubernetes API to add metric query capabilities.**

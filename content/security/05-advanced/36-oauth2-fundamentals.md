@@ -12,7 +12,7 @@ OAuth 2.0 is the most widely used **authorization framework** in modern web and 
 
 > **"Authentication is performed by the user, and authorization is granted to the client."**
 
-This sentence best explains why OAuth 2.0 exists. It lets a third-party app access specific data on your behalf (for example, reading your Google Calendar) without you ever handing over your precious password to that app.
+This sentence best explains why OAuth 2.0 exists. It lets a third-party app access specific data on your behalf (for example, reading your Google Calendar) without ever handing your password over to that app.
 
 ---
 
@@ -21,9 +21,9 @@ This sentence best explains why OAuth 2.0 exists. It lets a third-party app acce
 | Category | Authentication | Authorization |
 |------|-----------------------|--------------------------|
 | **Question** | "Who are you?" | "What can you do?" |
-| **Purpose** | Identity verification | Obtaining access rights to resources |
-| **Means** | ID/PW, biometrics, OTP | **Access Token** |
-| **Subject** | User | Application (Client) |
+| **Purpose** | Identity verification | Granting access rights to resources |
+| **Mechanism** | ID/password, biometrics, OTP | **Access Token** |
+| **Performed by / for** | User | Application (Client) |
 
 ---
 
@@ -39,7 +39,7 @@ graph TD
     ResServer[Resource Server<br/>Data Server]
 
     User -- "1. I will log in" --> AuthServer
-    AuthServer -- "2. Authenticated, issue authorization token" --> Client
+    AuthServer -- "2. Authenticated, issue access token" --> Client
     Client -- "3. Request data with the token" --> ResServer
     ResServer -- "4. Provide data" --> Client
 ```
@@ -56,7 +56,7 @@ graph TD
 | Type | Characteristics | Typical Use |
 |------|------|------------|
 | **Authorization Code** | Strongest security (code exchange) | Typical web server applications |
-| **Implicit** | Simple but vulnerable (being phased out) | JavaScript-based single-page apps (SPA) |
+| **Implicit** | Simple but insecure (deprecated) | JavaScript-based single-page apps (SPA) |
 | **Resource Owner Password** | Receives the user's password directly (not recommended) | Trusted first-party apps |
 | **Client Credentials** | App-to-app communication without a user | Server-to-server API communication (M2M) |
 

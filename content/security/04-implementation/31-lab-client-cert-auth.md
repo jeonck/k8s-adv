@@ -4,7 +4,7 @@ weight: 310
 slug: "31-lab-client-cert-auth"
 ---
 
-A lab on building a certificate-based environment so that a regular user (`honggildong`) can work only in their own namespace.
+A lab on building a certificate-based environment so that a normal user (`honggildong`) can work only in their own Namespace.
 
 ---
 
@@ -17,7 +17,7 @@ This lab covers the entire process, from issuing an X.509 client certificate to 
 | **1. Generate keys** | Generate a user-specific private key and CSR. | Uses `openssl` |
 | **2. Issue certificate** | Sign the CSR using the Kubernetes Root CA. | Requires `ca.key` |
 | **3. Configure environment** | Create a `kubeconfig` file to set the connection information. | `kubectl config` |
-| **4. Grant permissions** | Grant namespace permissions through a Role and RoleBinding. | RBAC applied |
+| **4. Grant permissions** | Grant Namespace permissions through a ClusterRole and RoleBinding. | RBAC applied |
 
 ---
 
@@ -28,14 +28,14 @@ graph LR
     User[honggildong] -- "Submit certificate" --> API[API Server]
     API -- "Verify with Root CA" --> AuthN{Authentication succeeded}
     AuthN -- "RBAC check" --> AuthZ{Authorization succeeded}
-    AuthZ -- "Access limited resources" --> NS[honggildong Namespace]
+    AuthZ -- "Access only permitted resources" --> NS[honggildong Namespace]
 ```
 
 ---
 
 ## Step 1: Generate the User's Private Key and CSR
 
-To create the certificate that will serve as the user's ID, first generate a private key and a signing request (CSR).
+To create the certificate that will serve as the user's ID, first generate a private key and a Certificate Signing Request (CSR).
 
 ```bash
 # Create the working directory
@@ -54,7 +54,7 @@ openssl req -new -key honggildong.key \
 
 ## Step 2: Issue the Certificate (Sign)
 
-Sign the user certificate using the Kubernetes Root CA key on the master node.
+Sign the user certificate using the Kubernetes Root CA key on the control plane node.
 
 ```bash
 # Issue a certificate valid for 365 days using the Root CA's key
@@ -68,9 +68,9 @@ openssl x509 -req -in honggildong.csr \
 
 ---
 
-## Step 3: Configure Kubeconfig
+## Step 3: Configure the kubeconfig
 
-Configure the settings file so that you can use `kubectl` commands with the generated certificate.
+Create a kubeconfig file so that you can run `kubectl` commands with the generated certificate.
 
 ```bash
 # 1. Register the cluster information
@@ -99,7 +99,7 @@ kubectl config set-context honggildong-context \
 
 ## Step 4: Grant RBAC Permissions (Performed from the Admin Account)
 
-The user is authenticated but has no permissions yet. Grant permissions so that the user can work only in their own namespace.
+The user is authenticated but has no permissions yet. Grant permissions so that the user can work only in their own Namespace.
 
 ```yaml
 # role-binding.yaml
@@ -114,8 +114,8 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: admin # Use the built-in admin permissions
+  name: admin # Use the built-in admin ClusterRole
   apiGroup: rbac.authorization.k8s.io
 ```
 
-**Now a user holding the `honggildong.conf` file can safely perform work only within the designated namespace.**
+**Now a user holding the `honggildong.conf` file can safely perform work only within the designated Namespace.**

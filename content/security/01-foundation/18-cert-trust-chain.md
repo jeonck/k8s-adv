@@ -51,11 +51,11 @@ The server responds to the client's request and proves its identity.
 - **Certificate Chain:** The intermediate CA certificates that prove the certificate's legitimacy
 
 ### Step 3: Certificate Verification (Trust Check)
-A core security procedure performed inside the client browser.
+A core security procedure performed by the client (for example, the browser).
 
 | Verification Item | Description | Notes |
 |-----------|------|------|
-| **CA signature verification** | Check the server certificate's signature with the upper CA's public key | Chain verification |
+| **CA signature verification** | Check the server certificate's signature with the issuing CA's public key | Chain verification |
 | **Validity period check** | Check whether the current time is between the start and expiration dates | Expiration |
 | **Revocation check** | Look up via CRL or OCSP whether the certificate has been revoked | Key compromise |
 | **Domain match check** | Check whether the certificate's CN/SAN matches the domain actually being accessed | Phishing prevention |
@@ -68,7 +68,7 @@ A core security procedure performed inside the client browser.
 1.  **Generate the Premaster Secret:** The client generates a new random value (the seed of the symmetric key).
 2.  **Encrypt with the server's public key:** It encrypts this value with the **public key** included in the server's certificate.
 3.  **Send:** It sends the encrypted value to the server. Even if a hacker intercepts it along the way, the content cannot be read without the server's **private key**.
-4.  **Derive the symmetric key:** Both sides combine the shared Premaster Secret with the random numbers exchanged earlier to generate the **session key (symmetric key)** used for actual communication.
+4.  **Derive the symmetric key:** Both sides combine the Premaster Secret with the random numbers exchanged earlier to generate the **session key (symmetric key)** used for actual communication.
 
 ---
 

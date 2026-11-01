@@ -4,7 +4,7 @@ weight: 30
 slug: "03-k8s-components"
 ---
 
-A Kubernetes cluster consists of a **Control Plane** that handles management and **Worker Nodes** where the actual workloads run.
+A Kubernetes cluster consists of a **control plane** that manages the cluster and **worker nodes** where the actual workloads run.
 
 ---
 
@@ -12,10 +12,10 @@ A Kubernetes cluster consists of a **Control Plane** that handles management and
 
 | Component | Role |
 |----------|------|
-| **kube-apiserver** | The central gateway of the cluster. Handles all requests and is responsible for authentication and authorization |
+| **kube-apiserver** | The central gateway of the cluster. Handles all requests, including authentication and authorization |
 | **etcd** | A key-value store that holds all cluster state, acting as the cluster's "brain" |
 | **kube-scheduler** | The scheduler that decides which node a newly created Pod should be placed on |
-| **kube-controller-manager** | A collection of controllers that manage cluster state such as nodes, replicas, and endpoints |
+| **kube-controller-manager** | A collection of controllers that reconcile cluster state, such as Nodes, replicas, and endpoints |
 
 ---
 
@@ -25,13 +25,13 @@ A Kubernetes cluster consists of a **Control Plane** that handles management and
 |----------|------|
 | **kubelet** | The agent that runs on each node. Ensures containers run according to the Pod spec |
 | **kube-proxy** | Manages network rules on the node and routes traffic to Services |
-| **Container Runtime** | The software that actually runs containers (containerd, CRI-O, etc.) |
+| **Container runtime** | The software that actually runs containers (containerd, CRI-O, etc.) |
 
 ---
 
 ## 3. Overall Architecture Diagram
 
-This architecture shows the interactions between components at a glance.
+The diagram below shows how the components interact.
 
 ```mermaid
 graph TD
@@ -65,4 +65,4 @@ graph TD
     Admin[Administrator / kubectl] -- "Send commands" --> API
 ```
 
-**The components are tightly interconnected and work together, centered on the API server, to maintain the cluster's declarative Desired State.**
+**The components work closely together, with the API server at the center, to maintain the cluster's declarative desired state.**

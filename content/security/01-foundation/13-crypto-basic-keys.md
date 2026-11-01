@@ -55,7 +55,7 @@ flowchart LR
 | **Number of keys** | 1 (shared by sender and receiver) |
 | **Speed** | Fast (easy hardware acceleration) |
 | **Key distribution** | Difficult (requires a secure channel) |
-| **Use** | Encrypting large amounts of data |
+| **Typical use** | Encrypting large amounts of data |
 
 ### Representative Algorithms
 
@@ -113,7 +113,7 @@ sequenceDiagram
 | Scenario | Description | Pros | Cons |
 |----------|------|------|------|
 | **Direct handoff** | Deliver offline, e.g., on a USB drive | Safe | Impractical, does not scale |
-| **Encrypted channel** | Encrypt the key and send it | Convenient | Infinite loop problem of "a key for the key" |
+| **Encrypted channel** | Encrypt the key and send it | Convenient | Infinite regress: "a key to protect the key" |
 | **Reliance on a third party** | Use a trusted courier | Practical | If the third party is hacked, all keys leak |
 
 ### Key Management Complexity
@@ -202,7 +202,7 @@ sequenceDiagram
     participant C as Client
     participant S as Server
     
-    C->>S: 1. ClientHello (send supported list)
+    C->>S: 1. ClientHello (send supported cipher suites)
     S->>C: 2. ServerHello + certificate (includes server public key)
     Note over C: 3. Verify certificate and generate pre-master secret
     C->>S: 4. Send pre-master secret encrypted with server public key
@@ -217,9 +217,9 @@ sequenceDiagram
 
 These mechanisms are used in various security areas inside Kubernetes.
 
-1.  **API Server TLS:** Combines server/client certificates (asymmetric keys) with the actual data communication (symmetric keys)
+1.  **API Server TLS:** Uses server/client certificates (asymmetric keys) to authenticate and establish the connection, then symmetric keys to encrypt the actual traffic
 2.  **ServiceAccount:** Signs tokens with a private key and verifies they have not been tampered with using the public key
-3.  **Secret encryption:** Uses AES (symmetric key) when storing in etcd; key management can integrate with KMS (asymmetric key/KMS)
+3.  **Secret encryption:** Encrypts data with AES (symmetric key) before storing it in etcd; the encryption keys can be managed through an external KMS
 
 ---
 
