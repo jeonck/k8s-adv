@@ -14,7 +14,7 @@ Why a Pod ends up in the `ErrImagePull` → `ImagePullBackOff` state, and how to
 
 | State | Meaning |
 |------|------|
-| `ErrImagePull` | The moment an attempt to pull the image **fails** |
+| `ErrImagePull` | An attempt to pull the image has just **failed** |
 | `ImagePullBackOff` | After a failure, the kubelet is waiting to retry with **exponential backoff** (10s, 20s, 40s … up to 5 minutes) |
 
 ```mermaid
@@ -50,9 +50,9 @@ Failed to pull image "registry.example.com/app": ... pull access denied, authori
 | **Typo in image/tag** | `not found`, `manifest unknown` | Fix the name and tag (beware of overusing `latest`) |
 | **Private registry authentication failure** | `unauthorized`, `pull access denied` | Configure `imagePullSecrets` |
 | **Registry unreachable** | `i/o timeout`, `no such host` | Check node DNS/firewall/proxy |
-| **Rate limit** | `toomanyrequests` (Docker Hub) | Pull while logged in, use a private mirror |
+| **Rate limit** | `toomanyrequests` (Docker Hub) | Authenticate when pulling, or use a private mirror |
 | **Architecture mismatch** | `no matching manifest for linux/arm64` | Use a multi-architecture image (see the procedure in Section 5) |
-| **TLS certificate issue** | `x509: certificate signed by unknown authority` | Register the CA as trusted on the node |
+| **TLS certificate issue** | `x509: certificate signed by unknown authority` | Add the CA to the node's trust store |
 
 ### Configuring imagePullSecrets
 
@@ -134,14 +134,14 @@ docker buildx imagetools create \
 ```
 
 ### Step 5. Deploy to the Cluster
-Specify just a single image tag, and each node pulls the image matching its own architecture.
+Specify a single image tag, and each node pulls the image matching its own architecture.
 ```yaml
 spec:
   containers:
   - name: app
     image: registry.example.com/team/app:1.0.0   # manifest list tag
 ```
-For a single-architecture image that must be deployed only to nodes of a specific architecture, restrict it with nodeSelector.
+For a single-architecture image that must be deployed only to nodes of a specific architecture, restrict scheduling with a `nodeSelector`.
 ```yaml
 spec:
   nodeSelector:
@@ -159,5 +159,5 @@ crictl pull --platform linux/arm64 registry.example.com/team/app:1.0.0   # Repro
 ## 6. Prevention Tips
 
 - Use immutable version tags or a digest (`@sha256:...`)
-- Know what `imagePullPolicy` means: `IfNotPresent` / `Always` / `Never`
-- Private registry secrets are needed in every namespace (you can attach `imagePullSecrets` to a ServiceAccount)
+- Understand how `imagePullPolicy` works: `IfNotPresent` / `Always` / `Never`
+- The registry Secret must exist in every Namespace that pulls from the private registry (you can attach `imagePullSecrets` to a ServiceAccount)

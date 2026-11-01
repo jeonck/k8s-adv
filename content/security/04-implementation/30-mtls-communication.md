@@ -38,7 +38,7 @@ sequenceDiagram
     S->>C: 4. Certificate Request (request client certificate)
     C->>S: 5. Submit client certificate
     Note over S: 6. Verify client certificate (Root CA)
-    Note over C,S: 7. Key exchange; mTLS session established
+    Note over C,S: 7. Key exchange and mTLS session established
     C<->>S: 8. Secure communication between mutually authenticated peers
 ```
 

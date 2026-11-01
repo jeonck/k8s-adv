@@ -58,12 +58,12 @@ graph TD
 
 ---
 
-## Synergy with Kubernetes
+## Using Keycloak with Kubernetes
 
-The Kubernetes API server natively supports OIDC authentication. Setting up Keycloak as Kubernetes's IdP provides the following benefits.
+The Kubernetes API server natively supports OIDC authentication. Using Keycloak as the cluster's OIDC identity provider (IdP) provides the following benefits.
 
-- **Internal account integration:** Use `kubectl` with existing company accounts without issuing separate certificates
-- **Automated permission management:** Control permissions by linking Keycloak 'Group' information with Kubernetes 'RBAC'
-- **Enhanced security:** Maximize cluster access security through short-lived tokens and MFA
+- **Integration with existing accounts:** Use `kubectl` with existing company accounts, without issuing separate client certificates
+- **Automated permission management:** Map Keycloak groups to Kubernetes RBAC subjects to control permissions
+- **Stronger security:** Secure cluster access with short-lived tokens and MFA
 
-**Keycloak is the best choice for any organization looking to standardize and modernize a complex authentication system.**
+**Keycloak is an excellent choice for organizations that want to standardize and modernize a complex authentication setup.**

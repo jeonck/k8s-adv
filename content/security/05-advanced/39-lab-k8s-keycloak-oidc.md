@@ -37,7 +37,7 @@ sequenceDiagram
     K->>AS: 5. Send request with Token
     Note over AS: 6. Fetch the public key from the Issuer URL
     Note over AS: 7. Verify the Token signature with the public key
-    AS-->>U: 8. Request authenticated; return result
+    AS-->>U: 8. Request authenticated, result returned
 ```
 
 ---
