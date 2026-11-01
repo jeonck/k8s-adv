@@ -1,5 +1,5 @@
 ---
-title: "Procedure for Changing the API Server Authentication Plugin to Webhook Authentication"
+title: "Switching the API Server to Webhook Authentication"
 weight: 340
 slug: "34-lab-webhook-auth-setup"
 ---
@@ -25,8 +25,8 @@ This lab extends the API server's default authentication so that it delegates to
 
 ```mermaid
 graph LR
-    User[User request] -- "Submit Token" --> API[API Server]
-    API -- "TokenReview request" --> Webhook[External Webhook server]
+    User[User request] -- "Submit token" --> API[API server]
+    API -- "TokenReview request" --> Webhook[External webhook server]
     Webhook -- "DB/LDAP lookup" --> Verify{Verify}
     Verify -- "Authentication success" --> API
     API -- "After RBAC authorization" --> Resource[Cluster resources]
@@ -51,7 +51,7 @@ grep -E "mode|auth" /etc/kubernetes/manifests/kube-apiserver.yaml
 
 ## Step 2: Write the Webhook Configuration File (`/etc/kubernetes/pki/webhook-config.yaml`)
 
-Define the address and authentication information the API server needs to communicate with the external webhook server.
+Define the address and credentials the API server needs to communicate with the external webhook server.
 
 ```yaml
 apiVersion: v1
@@ -95,8 +95,8 @@ spec:
 
 ## Cautions and Tips
 
-1.  **Beware of SPOF:** If the external webhook server goes down, cluster authentication itself can be paralyzed. A high-availability (HA) configuration is recommended.
-2.  **Authentication failure logs:** If a problem occurs, check the API server logs (`kubectl logs -n kube-system <apiserver-pod>`) for communication errors with the webhook server.
-3.  **Use caching:** The `--authentication-token-webhook-cache-ttl` option can reduce the load on the external server and improve authentication performance.
+1.  **Beware of a single point of failure (SPOF):** If the external webhook server goes down, authentication for the whole cluster can be disrupted. A high-availability (HA) setup is recommended.
+2.  **Authentication failure logs:** If a problem occurs, check the API server logs (`kubectl logs -n kube-system <apiserver-pod>`) for errors communicating with the webhook server.
+3.  **Use caching:** The `--authentication-token-webhook-cache-ttl` option reduces the load on the external server and improves authentication performance.
 
-**Once the webhook authentication setup is complete, you can flexibly integrate the Kubernetes cluster with your enterprise's unified authentication system.**
+**Once webhook authentication is set up, you can flexibly integrate the Kubernetes cluster with your organization's centralized authentication system.**
