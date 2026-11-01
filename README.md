@@ -26,6 +26,18 @@ k8s-adv/
 └── .github/workflows/hugo.yml   # GitHub Pages 배포
 ```
 
+## 다국어 (Languages)
+
+| 언어 | 경로 | 파일 규칙 |
+|------|------|-----------|
+| 한국어 (기본) | `/` | `foo.md` |
+| English | `/en/` | `foo.en.md` |
+
+- 번역 문서는 원본과 같은 폴더에 `.en.md` 로 둡니다. (`_index.md` → `_index.en.md`)
+- front matter 의 `weight`, `slug` 는 원본과 동일하게 유지하고 `title` 만 번역합니다. 같은 경로의 두 파일이 자동으로 번역본으로 연결되어 상단 언어 전환 버튼으로 이동할 수 있습니다.
+- 메뉴 이름은 `hugo.toml` 의 `[languages.ko]` / `[languages.en]` 아래 `menus.main` 에서 관리합니다.
+- 새 문서를 추가할 때는 `.md` 와 `.en.md` 를 함께 작성하세요. `.en.md` 가 없으면 영어 사이트에는 해당 문서가 표시되지 않습니다.
+
 ## 새 문서 추가
 
 `content/<섹션>/` 아래에 파일을 만들고 front matter 를 작성합니다. 메뉴/사이드바는 자동 생성되며 `weight` 로 순서를 정합니다.

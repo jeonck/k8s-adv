@@ -41,7 +41,7 @@ graph TD
     end
     
     User[외부 브라우저] -- "신뢰할 수 없음" --> AS
-    Note right of User: 브라우저에 해당 CA가<br/>등록되어 있지 않음
+    User -.-> Note["브라우저에 해당 CA가<br/>등록되어 있지 않음"]
 ```
 
 ---

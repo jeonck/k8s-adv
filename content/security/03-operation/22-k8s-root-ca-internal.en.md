@@ -41,7 +41,7 @@ graph TD
     end
     
     User[External browser] -- "Not trusted" --> AS
-    Note right of User: That CA is not<br/>registered in the browser
+    User -.-> Note["That CA is not<br/>registered in the browser"]
 ```
 
 ---

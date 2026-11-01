@@ -73,7 +73,7 @@ flowchart TD
     H2 --> HV2["Hash value 1"]
     S_SIG -- "Pass signature" --> V["Verify signature - sender's public key"]
     V --> HV3["Hash value 2"]
-    HV2 == "Compare" == HV3
+    HV2 == "Compare" ==> HV3
     end
 ```
 

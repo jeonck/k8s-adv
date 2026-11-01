@@ -143,3 +143,34 @@ spec:
   resources:
     requests:
       storage: 1Gi
+EOF
+
+# Check the PVC status
+[root@k8s-cp ~]# kubectl get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-test-claim   Bound    pvc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   1Gi        RWX            nfs-client     10s
+```
+
+## 7. Check the Status of All Add-ons
+
+```bash
+[root@k8s-cp ~]# kubectl get pods -A | grep -E 'metric|dashboard|metallb|ingress|nfs'
+
+# Example of expected output
+kube-system           metrics-server-xxxxxxxxxx-xxxxx       1/1   Running   0   5m
+kubernetes-dashboard  kubernetes-dashboard-xxxxxxxxxx       1/1   Running   0   4m
+metallb-system        controller-xxxxxxxxxx-xxxxx           1/1   Running   0   3m
+metallb-system        speaker-xxxxx                         1/1   Running   0   3m
+ingress-nginx         ingress-nginx-controller-xxxxxxxxx    1/1   Running   0   2m
+default               nfs-subdir-external-provisioner-xx    1/1   Running   0   1m
+```
+
+## Lab Summary
+
+| Add-on | Purpose | Namespace |
+|--------|------|--------------|
+| Metric Server | Collects resource usage (kubectl top) | kube-system |
+| Dashboard | Web-based UI | kubernetes-dashboard |
+| MetalLB | LoadBalancer support (bare metal) | metallb-system |
+| Ingress Controller | HTTP/S traffic routing | ingress-nginx |
+| NFS Provisioner | Dynamic NFS volume provisioning | default |
