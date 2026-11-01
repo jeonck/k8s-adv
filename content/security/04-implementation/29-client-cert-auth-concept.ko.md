@@ -33,7 +33,7 @@ sequenceDiagram
     
     C->>S: 1. TLS 연결 요청 및 자신의 인증서 제출
     Note over S: 2. Root CA 인증서로 클라이언트 서명 확인
-    Note over S: 3. 인증서 유효기간 및 폐기 여부 확인
+    Note over S: 3. 인증서 유효기간 확인
     Note over S: 4. 인증서 필드(CN, O)에서 사용자 정보 추출
     S->>C: 5. 인증 성공 및 통신 시작
 ```

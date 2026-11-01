@@ -47,9 +47,11 @@ kubeadm certs check-expiration
 flowchart LR
     Check[만료 확인<br/>check-expiration] --> Decision{30일 미만?}
     Decision -- Yes --> Renew[인증서 갱신<br/>certs renew all]
-    Renew --> Restart[컴포넌트 재시작<br/>Static Pod 자동 재시작]
+    Renew --> Restart[컴포넌트 재시작<br/>Static Pod 수동 재시작 필요]
     Decision -- No --> Wait[정기 점검 대기]
 ```
+
+> ⚠️ `kubeadm certs renew` 는 인증서 파일만 다시 생성합니다. 컨트롤 플레인 Static Pod(kube-apiserver, kube-controller-manager, kube-scheduler, etcd)는 **자동으로 재시작되지 않으므로** 직접 재시작해야 합니다. (예: `/etc/kubernetes/manifests/` 의 매니페스트를 잠시 다른 곳으로 옮겼다가 되돌리거나 `crictl` 로 컨테이너를 재시작) 위 흐름도의 30일 기준은 kubeadm 규칙이 아니라 운영상의 관례입니다.
 
 ### 갱신 명령어 예시
 ```bash

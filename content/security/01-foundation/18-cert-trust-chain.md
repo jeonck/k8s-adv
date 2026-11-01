@@ -72,6 +72,8 @@ A core security procedure performed by the client (for example, the browser).
 
 ---
 
+> 💡 **Note:** This page describes the classic **RSA key exchange** (TLS 1.2 and earlier) because it is the easiest way to see how asymmetric and symmetric keys work together. In **TLS 1.3** (and ECDHE cipher suites in TLS 1.2), the client and server instead run an **ephemeral Diffie-Hellman (ECDHE)** exchange to derive the session key. No Premaster Secret is encrypted with the server's public key; the certificate's key is only used to **sign** the handshake, which gives forward secrecy.
+
 ### Step 5: Finished and Start of Encrypted Communication
 
 - **Finished:** Both sides confirm that the handshake so far was correct and signal that, from now on, they will communicate encrypted with the generated symmetric key.
@@ -102,6 +104,6 @@ graph TD
 | **Confidentiality** | A man-in-the-middle cannot read the data | Symmetric-key encryption (AES) |
 | **Integrity** | Tampering with data is detected immediately | Hash-based message authentication (HMAC) |
 | **Authentication** | The server's identity is reliably confirmed | Digital certificates and signatures |
-| **Non-repudiation** | The fact of communication cannot be denied later | Private-key-based digital signatures |
+| **Non-repudiation** | A signer cannot later deny having signed (provided by digital signatures on documents/code; the TLS channel itself does not provide it) | Private-key-based digital signatures |
 
 **Through this multi-step security procedure, the websites we use every day and Kubernetes API communication are kept secure.**

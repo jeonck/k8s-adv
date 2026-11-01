@@ -211,6 +211,8 @@ sequenceDiagram
     C<->>S: 7. Begin high-speed encrypted communication with the generated symmetric key
 ```
 
+> 💡 **Note:** The flow above is simplified and follows the classic RSA key exchange (TLS 1.2 and earlier). In TLS 1.3 the session key is derived through an ephemeral ECDHE exchange, and the server certificate's key is used only to sign the handshake.
+
 ---
 
 ## Relevance to Kubernetes

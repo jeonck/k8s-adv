@@ -832,8 +832,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-app
-  annotations:
-    kubernetes.io/ingress.class: nginx
 spec:
   ingressClassName: nginx  # ← uses this class
   rules:
@@ -845,7 +843,8 @@ spec:
         backend:
           service:
             name: my-app
-            port: 80
+            port:
+              number: 80
 ```
 
 ---
@@ -958,9 +957,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: test-ingress
-  annotations:
-    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
   - host: test.example.com
     http:
@@ -970,7 +968,8 @@ spec:
         backend:
           service:
             name: test-service
-            port: 80
+            port:
+              number: 80
 EOF
 
 # Check Ingress
@@ -997,6 +996,6 @@ kubectl get ingress
 | **Job** | create, patch | 2 |
 | **IngressClass** | nginx | 1 |
 | **ValidatingWebhook** | admission | 1 |
-| **Total** | | **17** |
+| **Total** | | **19** |
 
 **Ingress-NGINX is the most widely used controller implementing the Kubernetes Ingress resource.**

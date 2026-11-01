@@ -14,10 +14,10 @@ Kubernetes API 서버의 인증 방식을 외부 웹훅(Webhook) 서버 기반�
 
 | 단계 | 작업 내용 | 비고 |
 |------|-----------|------|
+| **사전 준비** | 토큰을 검증할 외부 웹훅 서버가 HTTPS 로 이미 동작 중이어야 합니다. | HTTPS 기반 서버 |
 | **1. 사전 점검** | 현재 API 서버의 인증 설정을 확인합니다. | `kube-apiserver.yaml` |
-| **2. 서버 구축** | 토큰을 검증할 외부 웹훅 서버를 준비합니다. | HTTPS 기반 서버 |
-| **3. 설정 구성** | API 서버가 웹훅을 호출할 때 쓸 설정 파일을 작성합니다. | `webhook-config.yaml` |
-| **4. 서버 적용** | API 서버의 실행 옵션을 수정하여 웹훅을 활성화합니다. | 컨트롤 플레인 재시작 |
+| **2. 설정 구성** | API 서버가 웹훅을 호출할 때 쓸 설정 파일을 작성합니다. | `webhook-config.yaml` |
+| **3. 서버 적용** | API 서버의 실행 옵션을 수정하여 웹훅을 활성화합니다. | API 서버 재시작 |
 
 ---
 
@@ -51,7 +51,7 @@ grep -E "mode|auth" /etc/kubernetes/manifests/kube-apiserver.yaml
 
 ## 2단계: Webhook 설정 파일 작성 (`/etc/kubernetes/pki/webhook-config.yaml`)
 
-API 서버가 외부 웹훅 서버와 통신하기 위한 주소와 인증 정보를 정의합니다.
+API 서버가 외부 웹훅 서버와 통신하기 위한 주소와 인증 정보를 정의합니다. 파일은 kubeadm 이 만든 kube-apiserver Pod 에 이미 마운트되어 있는 `/etc/kubernetes/pki/` 아래에 둡니다. 클러스터 CA 나 API 서버 자신의 인증서를 재사용하지 말고 웹훅 전용 CA 와 클라이언트 인증서를 사용하세요.
 
 ```yaml
 apiVersion: v1
@@ -60,12 +60,12 @@ clusters:
 - name: external-auth-service
   cluster:
     server: https://auth.example.com/authenticate # 웹훅 서버 주소
-    certificate-authority: /etc/kubernetes/pki/ca.crt # 웹훅 서버 검증용 CA
+    certificate-authority: /etc/kubernetes/pki/webhook-ca.crt # 웹훅 서버 인증서를 발급한 CA (클러스터 CA 아님)
 users:
 - name: kube-apiserver
   user:
-    client-certificate: /etc/kubernetes/pki/apiserver.crt
-    client-key: /etc/kubernetes/pki/apiserver.key
+    client-certificate: /etc/kubernetes/pki/webhook-client.crt # 웹훅 호출 전용 클라이언트 인증서
+    client-key: /etc/kubernetes/pki/webhook-client.key
 contexts:
 - context:
     cluster: external-auth-service

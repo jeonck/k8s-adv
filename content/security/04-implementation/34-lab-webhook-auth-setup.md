@@ -14,10 +14,10 @@ This lab extends the API server's default authentication so that it delegates to
 
 | Step | Task | Notes |
 |------|-----------|------|
+| **Prerequisite** | An external webhook server that validates tokens, served over HTTPS, must already be running. | HTTPS-based server |
 | **1. Pre-check** | Check the API server's current authentication settings. | `kube-apiserver.yaml` |
-| **2. Build the webhook server** | Prepare an external webhook server to validate tokens. | HTTPS-based server |
-| **3. Configure** | Write the configuration file the API server uses when calling the webhook. | `webhook-config.yaml` |
-| **4. Apply to the API server** | Modify the API server's startup flags to enable the webhook. | API server restarts |
+| **2. Write the webhook configuration** | Write the configuration file the API server uses when calling the webhook. | `webhook-config.yaml` |
+| **3. Apply to the API server** | Modify the API server's startup flags to enable the webhook. | API server restarts |
 
 ---
 
@@ -51,7 +51,7 @@ grep -E "mode|auth" /etc/kubernetes/manifests/kube-apiserver.yaml
 
 ## Step 2: Write the Webhook Configuration File (`/etc/kubernetes/pki/webhook-config.yaml`)
 
-Define the address and credentials the API server needs to communicate with the external webhook server.
+Define the address and credentials the API server needs to communicate with the external webhook server. The files are placed under `/etc/kubernetes/pki/` because that directory is already mounted into the kubeadm-generated kube-apiserver Pod; use a dedicated CA and client certificate for the webhook instead of reusing the cluster CA or the API server's own certificate.
 
 ```yaml
 apiVersion: v1
@@ -60,12 +60,12 @@ clusters:
 - name: external-auth-service
   cluster:
     server: https://auth.example.com/authenticate # Webhook server address
-    certificate-authority: /etc/kubernetes/pki/ca.crt # CA for verifying the webhook server
+    certificate-authority: /etc/kubernetes/pki/webhook-ca.crt # CA that signed the webhook server's certificate (not the cluster CA)
 users:
 - name: kube-apiserver
   user:
-    client-certificate: /etc/kubernetes/pki/apiserver.crt
-    client-key: /etc/kubernetes/pki/apiserver.key
+    client-certificate: /etc/kubernetes/pki/webhook-client.crt # dedicated client certificate for calling the webhook
+    client-key: /etc/kubernetes/pki/webhook-client.key
 contexts:
 - context:
     cluster: external-auth-service

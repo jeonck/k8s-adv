@@ -51,6 +51,8 @@ flowchart LR
     Decision -- No --> Wait[Wait for the next routine check]
 ```
 
+> ⚠️ `kubeadm certs renew` only rewrites the certificate files. The control plane static Pods (kube-apiserver, kube-controller-manager, kube-scheduler, etcd) do **not** restart automatically, so restart them manually (for example, move the manifests out of `/etc/kubernetes/manifests/` and back, or restart the containers with `crictl`). The 30-day threshold above is an operational convention, not a kubeadm rule.
+
 ### Renewal Command Examples
 ```bash
 # Renew all certificates at once

@@ -17,7 +17,7 @@ slug: "31-lab-client-cert-auth"
 | **1. 키 생성** | 사용자 전용 개인키와 CSR을 생성합니다. | `openssl` 사용 |
 | **2. 인증서 발급** | Kubernetes Root CA를 이용해 CSR에 서명합니다. | `ca.key` 필요 |
 | **3. 환경 설정** | `kubeconfig` 파일을 생성하여 접속 정보를 설정합니다. | `kubectl config` |
-| **4. 권한 부여** | Role과 RoleBinding을 통해 네임스페이스 권한을 줍니다. | RBAC 적용 |
+| **4. 권한 부여** | ClusterRole과 RoleBinding을 통해 네임스페이스 권한을 줍니다. | RBAC 적용 |
 
 ---
 

@@ -51,8 +51,8 @@ helm install prometheus prometheus-community/kube-prometheus-stack --namespace m
 
 ### [Step 3] Install Grafana Operator (Helm)
 ```bash
-helm repo add grafana-operator https://grafana-operator.github.io/grafana-operator/helm-charts
-helm install grafana-operator grafana-operator/grafana-operator --namespace monitoring
+# The Grafana Operator chart is published as an OCI artifact (no `helm repo add` needed)
+helm install grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring
 ```
 
 ---
