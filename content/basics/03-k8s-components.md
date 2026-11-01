@@ -1,37 +1,37 @@
 ---
-title: "K8s 클러스터 구성 컴포넌트"
+title: "K8s Cluster Components"
 weight: 30
 slug: "03-k8s-components"
 ---
 
-Kubernetes 클러스터는 관리를 담당하는 **Control Plane**과 실제 워크로드가 실행되는 **Worker Node**로 구성됩니다.
+A Kubernetes cluster consists of a **Control Plane** that handles management and **Worker Nodes** where the actual workloads run.
 
 ---
 
-## 1. Control Plane (관리 영역)
+## 1. Control Plane (Management Layer)
 
-| 컴포넌트 | 역할 |
+| Component | Role |
 |----------|------|
-| **kube-apiserver** | 클러스터의 중앙 통로. 모든 요청을 처리하며 인증/인가를 담당함 |
-| **etcd** | 클러스터의 모든 상태 정보를 저장하는 '두뇌' 역할을 하는 키-값 저장소 |
-| **kube-scheduler** | 생성된 Pod를 어느 노드에 배치할지 결정하는 스케줄러 |
-| **kube-controller-manager** | 노드, 레플리카, 엔드포인트 등 클러스터의 상태를 관리하는 컨트롤러들의 집합 |
+| **kube-apiserver** | The central gateway of the cluster. Handles all requests and is responsible for authentication and authorization |
+| **etcd** | A key-value store that holds all cluster state, acting as the cluster's "brain" |
+| **kube-scheduler** | The scheduler that decides which node a newly created Pod should be placed on |
+| **kube-controller-manager** | A collection of controllers that manage cluster state such as nodes, replicas, and endpoints |
 
 ---
 
-## 2. Worker Node (작업 영역)
+## 2. Worker Node (Workload Layer)
 
-| 컴포넌트 | 역할 |
+| Component | Role |
 |----------|------|
-| **kubelet** | 각 노드에서 실행되는 관리자. 컨테이너가 Pod 스펙에 따라 실행되도록 보장함 |
-| **kube-proxy** | 노드 내부의 네트워크 규칙을 관리하고 서비스로의 트래픽을 라우팅함 |
-| **Container Runtime** | 실제로 컨테이너를 실행하는 소프트웨어 (containerd, CRI-O 등) |
+| **kubelet** | The agent that runs on each node. Ensures containers run according to the Pod spec |
+| **kube-proxy** | Manages network rules on the node and routes traffic to Services |
+| **Container Runtime** | The software that actually runs containers (containerd, CRI-O, etc.) |
 
 ---
 
-## 3. 전체 아키텍처 다이어그램
+## 3. Overall Architecture Diagram
 
-컴포넌트 간의 상호작용을 한눈에 보여주는 아키텍처 구조입니다.
+This architecture shows the interactions between components at a glance.
 
 ```mermaid
 graph TD
@@ -62,7 +62,7 @@ graph TD
 
     API <==> K1
     API <==> K2
-    Admin[관리자 / kubectl] -- "명령 전달" --> API
+    Admin[Administrator / kubectl] -- "Send commands" --> API
 ```
 
-**각 컴포넌트는 유기적으로 연결되어 있으며, API 서버를 중심으로 클러스터의 선언적 상태(Desired State)를 유지하기 위해 협력합니다.**
+**The components are tightly interconnected and work together, centered on the API server, to maintain the cluster's declarative Desired State.**

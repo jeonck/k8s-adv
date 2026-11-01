@@ -1,72 +1,72 @@
 ---
-title: "Kubernetes 의 Root CA 역할"
+title: "The Role of the Kubernetes Root CA"
 weight: 220
 slug: "22-k8s-root-ca-internal"
 ---
 
-Kubernetes 클러스터는 자체 Root CA 로서 동작하며, 클러스터 내부의 모든 인증서를 발급하고 관리합니다.
+A Kubernetes cluster operates as its own Root CA, issuing and managing all certificates inside the cluster.
 
 ---
 
-## Kubernetes 가 Root CA 로 동작하는 이유
+## Why Kubernetes Acts as a Root CA
 
-Kubernetes가 외부 공개 CA(DigiCert 등)를 사용하지 않고 자체 CA를 운영하는 이유는 클러스터 내부 통신의 특수성 때문입니다.
+The reason Kubernetes operates its own CA instead of using an external public CA (such as DigiCert) is the particular nature of intra-cluster communication.
 
-| 구분 | 공개 CA (Let's Encrypt 등) | Kubernetes 자체 CA |
+| Category | Public CA (Let's Encrypt, etc.) | Kubernetes's Own CA |
 |------|----------------------------|--------------------|
-| **용도** | 인터넷에 공개된 서비스용 | 클러스터 내부 컴포넌트 간 통신용 |
-| **신뢰 범위** | 전 세계 모든 브라우저/기기 | 해당 Kubernetes 클러스터 내부 |
-| **비용/시간** | 비용 발생 가능, 발급 대기 시간 | 무료, 자동화로 즉시 발급 |
-| **유효기간** | 보통 90일 ~ 1년 | 기본 1년 (설정 가능) |
-| **비유** | 국제 여권 | 사내 사원증 |
+| **Purpose** | For services exposed to the internet | For communication between components inside the cluster |
+| **Trust scope** | All browsers/devices worldwide | Inside that Kubernetes cluster only |
+| **Cost/Time** | Possible cost, issuance wait time | Free, issued instantly through automation |
+| **Validity period** | Usually 90 days to 1 year | 1 year by default (configurable) |
+| **Analogy** | International passport | Company employee ID card |
 
 ---
 
-## Kubernetes CA 의 신뢰 범위
+## Trust Scope of the Kubernetes CA
 
-Kubernetes CA는 클러스터라는 울타리 안에서만 신뢰받는 '사설 인증 기관'입니다.
+The Kubernetes CA is a 'private certificate authority' trusted only within the boundary of the cluster.
 
 ```mermaid
 graph TD
-    CA[Kubernetes Root CA<br/>ca.crt / ca.key] -- 서명/발급 --> AS[API Server 인증서]
-    CA -- 서명/발급 --> KL[Kubelet 인증서]
-    CA -- 서명/발급 --> ET[etcd 인증서]
-    CA -- 서명/발급 --> CTL[Controller Manager 인증서]
+    CA[Kubernetes Root CA<br/>ca.crt / ca.key] -- "Sign/Issue" --> AS[API Server certificate]
+    CA -- "Sign/Issue" --> KL[Kubelet certificate]
+    CA -- "Sign/Issue" --> ET[etcd certificate]
+    CA -- "Sign/Issue" --> CTL[Controller Manager certificate]
     
-    subgraph Cluster[Kubernetes Cluster 내부]
+    subgraph Cluster["Inside the Kubernetes Cluster"]
     AS
     KL
     ET
     CTL
     end
     
-    User[외부 브라우저] -- "신뢰할 수 없음" --> AS
-    User -.-> Note["브라우저에 해당 CA가<br/>등록되어 있지 않음"]
+    User[External browser] -- "Not trusted" --> AS
+    User -.-> Note["That CA is not<br/>registered in the browser"]
 ```
 
 ---
 
-## Kubernetes CA 구조 및 파일 위치
+## Kubernetes CA Structure and File Locations
 
-### 주요 인증서 파일 (kubeadm 기준)
+### Key Certificate Files (kubeadm)
 
-Kubernetes의 핵심 인증서들은 마스터 노드의 `/etc/kubernetes/pki/` 디렉토리에 보관됩니다.
+Kubernetes's core certificates are stored in the `/etc/kubernetes/pki/` directory on the control plane node.
 
-| 파일명 | 역할 | 설명 |
+| File Name | Role | Description |
 |--------|------|------|
-| **ca.crt** | Root CA 인증서 | 모든 컴포넌트가 신뢰의 기점으로 사용하는 공개키 |
-| **ca.key** | Root CA 개인키 | **절대 유출 금지.** 새로운 인증서 서명 시 사용 |
-| **apiserver.crt** | API Server 서버 인증서 | 클라이언트가 API 서버 신원 확인 시 사용 |
-| **apiserver-kubelet-client.crt** | API Server용 클라이언트 인증서 | API 서버가 kubelet에 접속할 때 사용 |
-| **front-proxy-ca.crt** | 프록시용 Root CA | 확장 API 서버와의 통신을 위한 별도 CA |
-| **sa.pub / sa.key** | ServiceAccount 서명용 키 | 인증서가 아닌 JWT 토큰 서명용 키 쌍 |
+| **ca.crt** | Root CA certificate | The public key that all components use as the anchor of trust |
+| **ca.key** | Root CA private key | **Must never be leaked.** Used when signing new certificates |
+| **apiserver.crt** | API Server serving certificate | Used when clients verify the API server's identity |
+| **apiserver-kubelet-client.crt** | Client certificate for the API Server | Used when the API server connects to the kubelet |
+| **front-proxy-ca.crt** | Root CA for the proxy | A separate CA for communication with extension API servers |
+| **sa.pub / sa.key** | Key for signing ServiceAccounts | Not a certificate; a key pair for signing JWT tokens |
 
 ---
 
-## Kubernetes 에서 인증서가 사용되는 흐름
+## Flow of Certificate Usage in Kubernetes
 
-1.  **클러스터 초기화:** `kubeadm init` 실행 시 `ca.key`와 `ca.crt`가 생성됩니다.
-2.  **컴포넌트 발급:** 생성된 CA 키를 사용하여 `apiserver`, `scheduler` 등의 인증서를 자동으로 발급합니다.
-3.  **상호 인증 (mTLS):** 예를 들어 `kube-scheduler`가 API 서버에 접속할 때, 서로 상대방의 인증서가 `ca.crt`에 의해 서명되었는지 확인하여 신뢰를 형성합니다.
+1.  **Cluster initialization:** Running `kubeadm init` generates `ca.key` and `ca.crt`.
+2.  **Component issuance:** The generated CA key is used to automatically issue certificates for `apiserver`, `scheduler`, and others.
+3.  **Mutual authentication (mTLS):** For example, when `kube-scheduler` connects to the API server, each side verifies that the other's certificate was signed by `ca.crt`, establishing trust.
 
-**Kubernetes Root CA는 클러스터 보안의 뿌리이며, 이 CA를 통해 클러스터 내 모든 통신이 암호화되고 신뢰받게 됩니다.**
+**The Kubernetes Root CA is the root of cluster security, and through this CA all communication within the cluster is encrypted and trusted.**

@@ -1,30 +1,30 @@
 ---
-title: "MetalLB YAML 분석"
+title: "MetalLB YAML Analysis"
 weight: 220
 slug: "22-metallb-yaml"
 ---
 
-MetalLB 설치 및 설정에 사용되는 YAML 파일을 분석합니다.
+This document analyzes the YAML files used to install and configure MetalLB.
 
-## 전체 구성
+## Overall Structure
 
 ```
-MetalLB 구성 리소스:
-1. 사용자 정의 리소스 (CRD)
+MetalLB resources:
+1. Custom Resources (CRDs)
    - IPAddressPool
    - L2Advertisement
    - BGPPeer, BGPAdvertisement
    - BFDProfile, Community
    - ServiceL2Status
 
-2. RBAC 리소스
+2. RBAC resources
    - ServiceAccount (x2)
    - Role (x2)
    - ClusterRole (x2)
    - RoleBinding (x2)
    - ClusterRoleBinding (x2)
 
-3. 애플리케이션 리소스
+3. Application resources
    - ConfigMap
    - Secret
    - Service
@@ -37,7 +37,7 @@ MetalLB 구성 리소스:
 
 ---
 
-## 1. 사용자 정의 리소스 설정
+## 1. Custom Resource Configuration
 
 ### 1-1. IPAddressPool
 
@@ -52,24 +52,24 @@ spec:
   - 172.31.1.200-172.31.1.250
 ```
 
-#### 설명
+#### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `addresses` | 172.31.1.200-172.31.1.250 | 할당할 IP 주소 범위 |
+| `addresses` | 172.31.1.200-172.31.1.250 | IP address range to allocate |
 
-#### 역할
+#### Role
 
-- LoadBalancer Service 에 할당할 IP 주소 풀 정의
-- 총 51 개 IP 사용 가능 (200~250)
+- Defines the pool of IP addresses to assign to LoadBalancer Services
+- 51 IPs available in total (200~250)
 
-#### IP 주소 지정 방식
+#### Ways to Specify IP Addresses
 
 ```yaml
-# CIDR 표기법도 사용 가능
+# CIDR notation is also supported
 addresses:
-- 192.168.1.0/24      # 256 개 IP
-- 10.0.0.1-10.0.0.10  # 명시적 범위
+- 192.168.1.0/24      # 256 IPs
+- 10.0.0.1-10.0.0.10  # Explicit range
 ```
 
 ---
@@ -89,33 +89,33 @@ spec:
   - eth0
 ```
 
-#### 설명
+#### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `ipAddressPools` | ip-pool | 광고할 IP 풀 |
-| `interfaces` | eth0 | 광고할 네트워크 인터페이스 |
+| `ipAddressPools` | ip-pool | IP pool to advertise |
+| `interfaces` | eth0 | Network interface to advertise on |
 
-#### 역할
+#### Role
 
-- L2 (레이어 2) 모드를 통한 IP 광고 설정
-- ARP 프로토콜을 사용하여 IP 주소 알림
-- 특정 인터페이스 (eth0) 에서만 광고
+- Configures IP advertisement through L2 (Layer 2) mode
+- Announces IP addresses using the ARP protocol
+- Advertises only on a specific interface (eth0)
 
 #### L2 vs BGP
 
 ```
-L2 모드:
-- ARP 사용 (단순함)
-- 단일 노드에서 IP 소유
-- 빠른 페일오버
-- 라우터 설정 불필요
+L2 mode:
+- Uses ARP (simple)
+- A single node owns the IP
+- Fast failover
+- No router configuration needed
 
-BGP 모드:
-- BGP 프로토콜 사용 (복잡함)
-- ECMP 지원 (로드밸런싱)
-- 네트워크 장비와 연동
-- BGP 피어 설정 필요
+BGP mode:
+- Uses the BGP protocol (complex)
+- ECMP support (load balancing)
+- Integrates with network equipment
+- BGP peer configuration required
 ```
 
 ---
@@ -135,22 +135,22 @@ metadata:
 
 ### Pod Security Standards
 
-| 레이블 | 값 | 설명 |
+| Label | Value | Description |
 |--------|-----|------|
-| `audit` | privileged | 감사 로그만 기록 |
-| `enforce` | privileged | 특권 모드 허용 |
-| `warn` | privileged | 경고만 표시 |
+| `audit` | privileged | Records audit logs only |
+| `enforce` | privileged | Allows privileged mode |
+| `warn` | privileged | Displays warnings only |
 
-### 역할
+### Role
 
-- MetalLB 전용 네임스페이스
-- 특권 컨테이너 실행 필요 (네트워크 조작)
+- Dedicated namespace for MetalLB
+- Requires running privileged containers (network manipulation)
 
 ---
 
 ## 3. CustomResourceDefinitions (CRD)
 
-MetalLB 는 6 개의 CRD 를 정의합니다.
+MetalLB defines 6 CRDs.
 
 ### 3-1. BFDProfile
 
@@ -167,19 +167,19 @@ spec:
   scope: Namespaced
 ```
 
-#### 역할
+#### Role
 
-- BFD (Bidirectional Forwarding Detection) 세션 설정
-- 네트워크 장애 빠른 감지
+- Configures BFD (Bidirectional Forwarding Detection) sessions
+- Fast detection of network failures
 
-#### 주요 설정
+#### Key Settings
 
 ```yaml
 spec:
-  detectMultiplier: 3        # 장애 감지 승수
-  transmitInterval: 300      # 전송 간격 (ms)
-  receiveInterval: 300       # 수신 간격 (ms)
-  passiveMode: false         # 패시브 모드
+  detectMultiplier: 3        # Failure detection multiplier
+  transmitInterval: 300      # Transmit interval (ms)
+  receiveInterval: 300       # Receive interval (ms)
+  passiveMode: false         # Passive mode
 ```
 
 ---
@@ -192,19 +192,19 @@ metadata:
   name: bgpadvertisements.metallb.io
 ```
 
-#### 역할
+#### Role
 
-- BGP 를 통한 IP 경로 광고 설정
-- BGP 커뮤니티, 로컬 선호도 등 설정
+- Configures IP route advertisement through BGP
+- Sets BGP communities, local preference, etc.
 
-#### 주요 설정
+#### Key Settings
 
 ```yaml
 spec:
-  aggregationLength: 32      # IPv4 집계 길이
-  communities:               # BGP 커뮤니티
+  aggregationLength: 32      # IPv4 aggregation length
+  communities:               # BGP communities
   - "65000:100"
-  localPref: 100             # 로컬 선호도
+  localPref: 100             # Local preference
 ```
 
 ---
@@ -217,21 +217,21 @@ metadata:
   name: bgppeers.metallb.io
 ```
 
-#### 역할
+#### Role
 
-- BGP 피어 (라우터) 설정
-- v1beta1 과 v1beta2 버전 지원
+- Configures BGP peers (routers)
+- Supports versions v1beta1 and v1beta2
 
-#### 주요 설정 (v1beta2)
+#### Key Settings (v1beta2)
 
 ```yaml
 spec:
-  myASN: 65000               # 로컬 AS 번호
-  peerASN: 65001             # 피어 AS 번호
-  peerAddress: 192.168.1.1   # 피어 주소
-  peerPort: 179              # BGP 포트
-  bfdProfile: bfd-profile    # BFD 프로파일 참조
-  ebgpMultiHop: false        # 멀티홝 여부
+  myASN: 65000               # Local AS number
+  peerASN: 65001             # Peer AS number
+  peerAddress: 192.168.1.1   # Peer address
+  peerPort: 179              # BGP port
+  bfdProfile: bfd-profile    # BFD profile reference
+  ebgpMultiHop: false        # Whether multihop is enabled
 ```
 
 ---
@@ -244,12 +244,12 @@ metadata:
   name: communities.metallb.io
 ```
 
-#### 역할
+#### Role
 
-- BGP 커뮤니티 별명 정의
-- 재사용 가능한 커뮤니티 이름 매핑
+- Defines BGP community aliases
+- Maps reusable community names
 
-#### 사용 예시
+#### Usage Example
 
 ```yaml
 spec:
@@ -270,20 +270,20 @@ metadata:
   name: ipaddresspools.metallb.io
 ```
 
-#### 역할
+#### Role
 
-- IP 주소 풀 정의
-- 자동 할당, 우선순위, 네임스페이스 선택기 설정
+- Defines IP address pools
+- Configures auto-assignment, priority, and namespace selectors
 
-#### 주요 설정
+#### Key Settings
 
 ```yaml
 spec:
   addresses:
   - 192.168.1.0/24
-  autoAssign: true           # 자동 할당
-  avoidBuggyIPs: true        # .0, .255 제외
-  serviceAllocation:         # 서비스 할당 규칙
+  autoAssign: true           # Auto-assign
+  avoidBuggyIPs: true        # Exclude .0 and .255
+  serviceAllocation:         # Service allocation rules
     priority: 10
     namespaces:
     - production
@@ -299,12 +299,12 @@ metadata:
   name: l2advertisements.metallb.io
 ```
 
-#### 역할
+#### Role
 
-- L2 모드 IP 광고 설정
-- 인터페이스, 노드 선택기 지정
+- Configures IP advertisement in L2 mode
+- Specifies interfaces and node selectors
 
-#### 주요 설정
+#### Key Settings
 
 ```yaml
 spec:
@@ -313,7 +313,7 @@ spec:
   interfaces:
   - eth0
   - eth1
-  nodeSelectors:             # 특정 노드만
+  nodeSelectors:             # Specific nodes only
   - matchLabels:
       node-type: lb
 ```
@@ -328,25 +328,25 @@ metadata:
   name: servicel2statuses.metallb.io
 ```
 
-#### 역할
+#### Role
 
-- L2 모드 서비스 상태 모니터링
-- 실제 트래픽을 받는 노드 및 인터페이스 표시
+- Monitors Service status in L2 mode
+- Shows the node and interface that actually receive traffic
 
-#### 상태 정보
+#### Status Information
 
 ```yaml
 status:
-  node: k8s-w1                      # 트래픽 받는 노드
-  serviceName: my-service           # 서비스 이름
-  serviceNamespace: default         # 네임스페이스
-  interfaces:                       # 인터페이스 목록
+  node: k8s-w1                      # Node receiving traffic
+  serviceName: my-service           # Service name
+  serviceNamespace: default         # Namespace
+  interfaces:                       # List of interfaces
   - name: eth0
 ```
 
 ---
 
-## 4. RBAC 리소스
+## 4. RBAC Resources
 
 ### 4-1. ServiceAccount
 
@@ -368,14 +368,14 @@ metadata:
   namespace: metallb-system
 ```
 
-#### 역할
+#### Role
 
-- **controller**: MetalLB 컨트롤러 Pod 신원
-- **speaker**: MetalLB 스피커 Pod 신원 (각 노드에서 실행)
+- **controller**: Identity of the MetalLB controller Pod
+- **speaker**: Identity of the MetalLB speaker Pod (runs on every node)
 
 ---
 
-### 4-2. Role (컨트롤러)
+### 4-2. Role (Controller)
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -393,10 +393,10 @@ rules:
   verbs: ["get", "list", "watch"]
 ```
 
-#### 권한
+#### Permissions
 
-- 시크릿 관리 (memberlist 용)
-- MetalLB CRD 읽기
+- Manage Secrets (for memberlist)
+- Read MetalLB CRDs
 
 ---
 
@@ -417,14 +417,14 @@ rules:
   verbs: ["get", "list", "watch"]
 ```
 
-#### 권한
+#### Permissions
 
-- Pod, 시크릿, ConfigMap 조회
-- MetalLB CRD 읽기
+- View Pods, Secrets, and ConfigMaps
+- Read MetalLB CRDs
 
 ---
 
-### 4-4. ClusterRole (컨트롤러)
+### 4-4. ClusterRole (Controller)
 
 ```yaml
 kind: ClusterRole
@@ -448,13 +448,13 @@ rules:
   verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
 ```
 
-#### 권한
+#### Permissions
 
-- 클러스터 전체 서비스/네임스페이스/노드 조회
-- 서비스 상태 업데이트 (LoadBalancer IP 할당)
-- 이벤트 생성
-- Webhook 설정 관리
-- CRD 관리
+- View Services/namespaces/nodes cluster-wide
+- Update Service status (LoadBalancer IP assignment)
+- Create events
+- Manage Webhook configurations
+- Manage CRDs
 
 ---
 
@@ -479,19 +479,19 @@ rules:
   verbs: ["create", "patch"]
 ```
 
-#### 권한
+#### Permissions
 
-- ServiceL2Status 전체 권한
-- 서비스, 엔드포인트, 노드 조회
-- 엔드포인트슬라이스 조회
-- 이벤트 생성
+- Full permissions on ServiceL2Status
+- View Services, Endpoints, and nodes
+- View EndpointSlices
+- Create events
 
 ---
 
 ### 4-6. RoleBinding & ClusterRoleBinding
 
 ```yaml
-# RoleBinding - 컨트롤러
+# RoleBinding - Controller
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -519,7 +519,7 @@ subjects:
   name: speaker
   namespace: metallb-system
 
-# ClusterRoleBinding - 컨트롤러
+# ClusterRoleBinding - Controller
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -550,7 +550,7 @@ subjects:
 
 ## 5. ConfigMap & Secret
 
-### 5-1. ConfigMap - 제외 인터페이스
+### 5-1. ConfigMap - Excluded Interfaces
 
 ```yaml
 apiVersion: v1
@@ -566,14 +566,14 @@ data:
        "^kube-ipvs.*", "^cni.*", "^nodelocaldns.*"]
 ```
 
-#### 역할
+#### Role
 
-- L2 광고에서 제외할 네트워크 인터페이스 패턴 정의
-- 가상 인터페이스, 컨테이너 네트워크 제외
+- Defines patterns of network interfaces to exclude from L2 advertisement
+- Excludes virtual interfaces and container networks
 
 ---
 
-### 5-2. Secret - Webhook 인증서
+### 5-2. Secret - Webhook Certificate
 
 ```yaml
 apiVersion: v1
@@ -583,16 +583,16 @@ metadata:
   namespace: metallb-system
 ```
 
-#### 역할
+#### Role
 
-- Webhook 서버 TLS 인증서 저장
+- Stores the Webhook server TLS certificate
 
 ---
 
 ### 5-3. Secret - Memberlist
 
 ```yaml
-# 컨트롤러 간 통신을 위한 시크릿 (자동 생성)
+# Secret for communication between controllers (auto-generated)
 apiVersion: v1
 kind: Secret
 metadata:
@@ -600,9 +600,9 @@ metadata:
   namespace: metallb-system
 ```
 
-#### 역할
+#### Role
 
-- 컨트롤러 간 클러스터 통신 암호화
+- Encrypts cluster communication between controllers
 
 ---
 
@@ -624,9 +624,9 @@ spec:
     component: controller
 ```
 
-#### 역할
+#### Role
 
-- Webhook 검증 엔드포인트 제공
+- Provides the Webhook validation endpoint
 
 ---
 
@@ -706,16 +706,16 @@ spec:
           secretName: metallb-webhook-cert
 ```
 
-### 컨테이너 설정
+### Container Settings
 
-| 설정 | 값 | 설명 |
+| Setting | Value | Description |
 |------|-----|------|
-| `image` | quay.io/metallb/controller:v0.14.8 | 컨트롤러 이미지 |
-| `--port` | 7472 | 메트릭스 포트 |
-| `--log-level` | info | 로그 레벨 |
-| `--tls-min-version` | VersionTLS12 | 최소 TLS 버전 |
+| `image` | quay.io/metallb/controller:v0.14.8 | Controller image |
+| `--port` | 7472 | Metrics port |
+| `--log-level` | info | Log level |
+| `--tls-min-version` | VersionTLS12 | Minimum TLS version |
 
-### 프로브
+### Probes
 
 ```yaml
 livenessProbe:
@@ -733,34 +733,34 @@ readinessProbe:
   periodSeconds: 10
 ```
 
-### 보안 컨텍스트
+### Security Context
 
 ```yaml
 securityContext:
-  allowPrivilegeEscalation: false    # 권한 상승 불가
+  allowPrivilegeEscalation: false    # No privilege escalation
   capabilities:
-    drop: ["all"]                    # 모든 capability 제거
-  readOnlyRootFilesystem: true       # 읽기 전용 파일시스템
-  runAsNonRoot: true                 # 루트 사용자 불가
-  runAsUser: 65534                   # nobody 사용자
+    drop: ["all"]                    # Drop all capabilities
+  readOnlyRootFilesystem: true       # Read-only filesystem
+  runAsNonRoot: true                 # Must not run as root
+  runAsUser: 65534                   # nobody user
 ```
 
-### 환경 변수
+### Environment Variables
 
 ```yaml
 env:
-- name: METALLB_ML_SECRET_NAME     # Memberlist 시크릿 이름
+- name: METALLB_ML_SECRET_NAME     # Memberlist Secret name
   value: memberlist
-- name: METALLB_DEPLOYMENT         # 디플로이먼트 이름
+- name: METALLB_DEPLOYMENT         # Deployment name
   value: controller
 ```
 
-### 역할
+### Role
 
-- LoadBalancer Service 모니터링
-- IP 주소 할당
-- CRD 관리
-- Webhook 검증
+- Monitors LoadBalancer Services
+- Assigns IP addresses
+- Manages CRDs
+- Validates via Webhook
 
 ---
 
@@ -834,7 +834,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             add:
-            - NET_RAW                    # RAW 소켓 필요 (ARP/BGP)
+            - NET_RAW                    # RAW sockets required (ARP/BGP)
             drop:
             - ALL
           readOnlyRootFilesystem: true
@@ -845,7 +845,7 @@ spec:
         - mountPath: /etc/metallb
           name: metallb-excludel2
           readOnly: true
-      hostNetwork: true                  # 호스트 네트워크 사용
+      hostNetwork: true                  # Use the host network
       serviceAccountName: speaker
       terminationGracePeriodSeconds: 2
       tolerations:
@@ -864,42 +864,42 @@ spec:
         name: metallb-excludel2
 ```
 
-### 중요 설정
+### Important Settings
 
-| 설정 | 값 | 설명 |
+| Setting | Value | Description |
 |------|-----|------|
-| `hostNetwork` | true | 호스트 네트워크 직접 사용 |
-| `terminationGracePeriodSeconds` | 2 | 빠른 종료 (2 초) |
-| `capabilities.add` | NET_RAW | RAW 소켓 권한 (ARP/BGP) |
+| `hostNetwork` | true | Uses the host network directly |
+| `terminationGracePeriodSeconds` | 2 | Fast termination (2 seconds) |
+| `capabilities.add` | NET_RAW | RAW socket permission (ARP/BGP) |
 
-### 환경 변수 (Pod 정보)
+### Environment Variables (Pod Information)
 
 ```yaml
 env:
-- METALLB_NODE_NAME        # 노드 이름
-- METALLB_POD_NAME         # Pod 이름
-- METALLB_HOST             # 호스트 IP
-- METALLB_ML_BIND_ADDR     # Memberlist 바인딩 주소
-- METALLB_ML_LABELS        # Memberlist 라벨
-- METALLB_ML_SECRET_KEY_PATH  # Memberlist 키 경로
+- METALLB_NODE_NAME        # Node name
+- METALLB_POD_NAME         # Pod name
+- METALLB_HOST             # Host IP
+- METALLB_ML_BIND_ADDR     # Memberlist bind address
+- METALLB_ML_LABELS        # Memberlist labels
+- METALLB_ML_SECRET_KEY_PATH  # Memberlist key path
 ```
 
 ### Tolerations
 
 ```yaml
 tolerations:
-- key: node-role.kubernetes.io/master        # 마스터 노드 허용
+- key: node-role.kubernetes.io/master        # Tolerate master nodes
   effect: NoSchedule
-- key: node-role.kubernetes.io/control-plane # 컨트롤러 플레인 허용
+- key: node-role.kubernetes.io/control-plane # Tolerate control plane nodes
   effect: NoSchedule
 ```
 
-### 역할
+### Role
 
-- 각 노드에서 실행 (DaemonSet)
-- L2 모드: ARP 광고
-- BGP 모드: BGP 세션 유지
-- 서비스 상태 업데이트
+- Runs on every node (DaemonSet)
+- L2 mode: ARP advertisement
+- BGP mode: maintains BGP sessions
+- Updates Service status
 
 ---
 
@@ -951,9 +951,9 @@ webhooks:
     resources: ["l2advertisements"]
 ```
 
-### Webhook 검증 대상
+### Webhook Validation Targets
 
-| Webhook | 리소스 | 작업 |
+| Webhook | Resource | Operations |
 |---------|--------|------|
 | bgppeersvalidation | BGPPeer | CREATE, UPDATE |
 | bfdprofilevalidation | BFDProfile | CREATE, DELETE |
@@ -968,26 +968,26 @@ webhooks:
 failurePolicy: Fail
 ```
 
-- Webhook 오류 시 요청 거부
-- 안전한 설정 강제
+- Rejects the request on Webhook errors
+- Enforces safe configuration
 
 ---
 
-## 리소스 관계도
+## Resource Relationship Diagram
 
-MetalLB를 구성하는 주요 컴포넌트와 사용자 정의 리소스(CRD) 간의 관계입니다.
+The relationships between the main components that make up MetalLB and the custom resources (CRDs).
 
 ```mermaid
 graph TD
     NS[Namespace: metallb-system] --> CRD[CRDs: IPAddressPool, L2Advertisement, etc.]
     
     subgraph Control_Plane
-    CTRL[Controller: Deployment] -- "IP 할당 관리" --> CRD
+    CTRL[Controller: Deployment] -- "Manages IP allocation" --> CRD
     end
     
     subgraph Data_Plane
-    SPK[Speaker: DaemonSet] -- "ARP/BGP 광고" --> Net((Physical Network))
-    SPK -- "상태 감시" --> CRD
+    SPK[Speaker: DaemonSet] -- "ARP/BGP advertisement" --> Net((Physical Network))
+    SPK -- "Watches status" --> CRD
     end
     
     subgraph User_Config
@@ -1000,44 +1000,44 @@ graph TD
     CRD -.-> SPK
 ```
 
-| 구성 요소 | 주요 역할 | 비고 |
+| Component | Main Role | Notes |
 |-----------|----------|------|
-| **Controller** | 클러스터 내 Service(LoadBalancer)를 감시하고 IP를 할당/회수함 | Deployment로 실행 |
-| **Speaker** | 할당된 IP를 외부 네트워크에 알림 (ARP 또는 BGP 프로토콜 사용) | 모든 노드에 DaemonSet으로 실행 |
-| **IPAddressPool** | 외부로 노출할 수 있는 가용 IP 범위를 정의하는 설정 리소스 | 사용자 정의 CRD |
-| **L2Advertisement** | 어떤 인터페이스를 통해 L2 방식으로 광고할지 설정 | 사용자 정의 CRD |
+| **Controller** | Watches Services (LoadBalancer) in the cluster and allocates/reclaims IPs | Runs as a Deployment |
+| **Speaker** | Announces allocated IPs to the external network (using the ARP or BGP protocol) | Runs as a DaemonSet on every node |
+| **IPAddressPool** | Configuration resource that defines the range of available IPs that can be exposed externally | Custom CRD |
+| **L2Advertisement** | Configures which interface to use for L2-mode advertisement | Custom CRD |
 
 ---
 
-## 설치 확인
+## Verifying the Installation
 
 ```bash
-# MetalLB 설치
+# Install MetalLB
 kubectl apply -f metallb-native.yaml
 
-# IP Pool 및 광고 설정
+# Configure the IP Pool and advertisement
 kubectl apply -f metallb-ippool.yaml
 kubectl apply -f metallb-l2advertisement.yaml
 
-# Pod 상태 확인
+# Check Pod status
 kubectl get pods -n metallb-system
 # NAME                         READY   STATUS    RESTARTS   AGE
 # controller-xxxxxxxxxx-xxxx   1/1     Running   0          1m
 # speaker-xxxxx                1/1     Running   0          1m
 
-# CRD 확인
+# Check CRDs
 kubectl get crd | grep metallb
 # bgppeers.metallb.io
 # ipaddresspools.metallb.io
 # l2advertisements.metallb.io
 # ...
 
-# IP Pool 확인
+# Check the IP Pool
 kubectl get ipaddresspool -n metallb-system
 # NAME      AUTO ASSIGN   AVOID BUGGY IPS   ADDRESSES
 # ip-pool   true          false             172.31.1.200-172.31.1.250
 
-# L2 광고 확인
+# Check the L2 advertisement
 kubectl get l2advertisement -n metallb-system
 # NAME              IP ADDRESS POOLS   INTERFACES
 # l2-advertisement  ["ip-pool"]        ["eth0"]
@@ -1045,9 +1045,9 @@ kubectl get l2advertisement -n metallb-system
 
 ---
 
-## 요약
+## Summary
 
-| 카테고리 | 리소스 | 개수 |
+| Category | Resources | Count |
 |----------|--------|------|
 | **CRD** | BFDProfile, BGPPeer, BGPAdvertisement, Community, IPAddressPool, L2Advertisement, ServiceL2Status | 7 |
 | **Namespace** | metallb-system | 1 |
@@ -1061,8 +1061,8 @@ kubectl get l2advertisement -n metallb-system
 | **Service** | webhook-service | 1 |
 | **Deployment** | controller | 1 |
 | **DaemonSet** | speaker | 1 |
-| **ValidatingWebhook** | 6 개 검증기 | 1 |
-| **사용자 리소스** | IPAddressPool, L2Advertisement | 2 |
-| **총계** | | **27** |
+| **ValidatingWebhook** | 6 validators | 1 |
+| **User resources** | IPAddressPool, L2Advertisement | 2 |
+| **Total** | | **27** |
 
-**MetalLB 는 베어메탈 Kubernetes 클러스터에 LoadBalancer 기능을 제공하는 네트워킹 컴포넌트입니다.**
+**MetalLB is a networking component that provides LoadBalancer functionality to bare-metal Kubernetes clusters.**

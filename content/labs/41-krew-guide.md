@@ -1,22 +1,22 @@
 ---
-title: "Krew - kubectl plugin 매니저 가이드"
+title: "Krew - kubectl Plugin Manager Guide"
 weight: 410
 slug: "41-krew-guide"
 ---
 
-Krew는 `kubectl` 플러그인을 발견하고, 설치하고, 관리하기 위한 공식 패키지 관리자입니다.
+Krew is the official package manager for discovering, installing, and managing `kubectl` plugins.
 
 ---
 
-## 1. Krew 란?
+## 1. What Is Krew?
 
-Krew는 리눅스의 `apt`, `yum` 또는 macOS의 `brew`와 유사한 역할을 수행하는 **kubectl 전용 플러그인 관리 도구**입니다.
+Krew is a **plugin management tool dedicated to kubectl**, playing a role similar to `apt` or `yum` on Linux or `brew` on macOS.
 
-### 핵심 개념
+### Key Concepts
 
-- **표준화:** 모든 플러그인을 동일한 방식으로 설치하고 업데이트할 수 있습니다.
-- **공식 허브:** 수백 개의 검증된 커뮤니티 플러그인을 제공합니다.
-- **멀티 플랫폼:** Linux, macOS, Windows를 모두 지원합니다.
+- **Standardization:** All plugins can be installed and updated in the same way.
+- **Official hub:** Provides hundreds of vetted community plugins.
+- **Multi-platform:** Supports Linux, macOS, and Windows.
 
 ```mermaid
 graph LR
@@ -27,40 +27,40 @@ graph LR
 
 ---
 
-## 2. Krew 사용의 장점
+## 2. Benefits of Using Krew
 
-| 구분 | 수동 설치 (Manual) | Krew 사용 |
+| Category | Manual Installation | Using Krew |
 |------|--------------------|-----------|
-| **검색** | GitHub 등을 직접 뒤져야 함 | `kubectl krew search`로 즉시 검색 |
-| **설치** | 파일 복사, 권한 부여 수동 작업 | `kubectl krew install <name>` 끝 |
-| **업데이트** | 새 버전 확인 후 다시 설치 | `kubectl krew upgrade`로 일괄 업데이트 |
-| **제거** | 파일 위치 찾아 직접 삭제 | `kubectl krew uninstall <name>` |
+| **Search** | Have to dig through GitHub and similar sites yourself | Instant search with `kubectl krew search` |
+| **Install** | Manually copy files and set permissions | Just `kubectl krew install <name>` |
+| **Update** | Check for a new version and reinstall | Update everything at once with `kubectl krew upgrade` |
+| **Remove** | Find the file location and delete it manually | `kubectl krew uninstall <name>` |
 
 ---
 
-## 3. 추천 kubectl 플러그인 (Top 5)
+## 3. Recommended kubectl Plugins (Top 5)
 
-| 플러그인 이름 | 주요 기능 | 설치 명령어 |
+| Plugin Name | Main Function | Install Command |
 |---------------|-----------|------------|
-| **ns** | 네임스페이스를 쉽고 빠르게 전환 | `kubectl krew install ns` |
-| **ctx** | 여러 클러스터 컨텍스트를 빠르게 전환 | `kubectl krew install ctx` |
-| **oidc-login** | Keycloak 등 OIDC 인증 자동화 | `kubectl krew install oidc-login` |
-| **tree** | 리소스 간의 계층 구조를 시각화 | `kubectl krew install tree` |
-| **who-can** | 특정 동작을 할 수 있는 권한자 분석 | `kubectl krew install who-can` |
+| **ns** | Switch namespaces quickly and easily | `kubectl krew install ns` |
+| **ctx** | Quickly switch between multiple cluster contexts | `kubectl krew install ctx` |
+| **oidc-login** | Automate OIDC authentication with Keycloak and others | `kubectl krew install oidc-login` |
+| **tree** | Visualize the hierarchy between resources | `kubectl krew install tree` |
+| **who-can** | Analyze who is allowed to perform a given action | `kubectl krew install who-can` |
 
 ---
 
-## 4. 핵심 명령어 요약
+## 4. Key Command Summary
 
-- **인덱스 업데이트:** `kubectl krew update`
-- **플러그인 검색:** `kubectl krew search <키워드>`
-- **플러그인 설치:** `kubectl krew install <이름>`
-- **설치된 목록:** `kubectl krew list`
-- **플러그인 업그레이드:** `kubectl krew upgrade`
-- **플러그인 제거:** `kubectl krew uninstall <이름>`
+- **Update index:** `kubectl krew update`
+- **Search plugins:** `kubectl krew search <keyword>`
+- **Install a plugin:** `kubectl krew install <name>`
+- **List installed:** `kubectl krew list`
+- **Upgrade plugins:** `kubectl krew upgrade`
+- **Remove a plugin:** `kubectl krew uninstall <name>`
 
 ---
 
-## 5. 결론
+## 5. Conclusion
 
-Krew를 사용하면 `kubectl`의 기본 기능을 넘어선 강력한 관리 도구들을 클릭 몇 번으로 클러스터 운영 환경에 즉시 통합할 수 있습니다. 숙련된 Kubernetes 운영자라면 필수적으로 사용해야 하는 도구입니다.
+With Krew, you can integrate powerful management tools that go beyond the basic features of `kubectl` into your cluster operations environment in just a few clicks. It is an essential tool for any experienced Kubernetes operator.

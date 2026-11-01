@@ -1,16 +1,16 @@
 ---
-title: "Use Case 5. Kubernetes 아키텍처 속성 과정"
+title: "Use Case 5. Kubernetes Architecture Crash Course"
 weight: 500
 slug: "50-uc-architecture-crash-course"
 ---
 
-> 📎 참고 자료: <https://lnkd.in/gseEj3wD>
+> 📎 Reference: <https://lnkd.in/gseEj3wD>
 
-Kubernetes 클러스터를 구성하는 컴포넌트와 요청이 처리되는 흐름을 한 번에 훑어봅니다. (상세는 03-k8s-components 문서 참고)
+A quick overview of the components that make up a Kubernetes cluster and how requests are processed. (For details, see the 03-k8s-components document.)
 
 ---
 
-## 1. 큰 그림
+## 1. The Big Picture
 
 ```mermaid
 graph TB
@@ -40,29 +40,29 @@ graph TB
 
 ---
 
-## 2. 컴포넌트 역할
+## 2. Component Roles
 
 ### Control Plane
 
-| 컴포넌트 | 역할 |
+| Component | Role |
 |----------|------|
-| **kube-apiserver** | 모든 통신의 중심. 인증·인가·Admission, REST API 제공. etcd 와 통신하는 **유일한** 컴포넌트 |
-| **etcd** | 클러스터 상태를 저장하는 분산 Key-Value 저장소 (Raft 합의) |
-| **kube-scheduler** | 미배정 Pod 를 적절한 노드에 배치 (필터링 → 스코어링) |
-| **kube-controller-manager** | Deployment, ReplicaSet, Node, Job 등 컨트롤러 루프 실행 |
-| **cloud-controller-manager** | 클라우드의 LB, 노드, 라우트 연동 |
+| **kube-apiserver** | The center of all communication. Provides authentication, authorization, Admission, and the REST API. The **only** component that talks to etcd |
+| **etcd** | A distributed key-value store that holds cluster state (Raft consensus) |
+| **kube-scheduler** | Places unassigned Pods on suitable nodes (filtering → scoring) |
+| **kube-controller-manager** | Runs controller loops such as Deployment, ReplicaSet, Node, and Job |
+| **cloud-controller-manager** | Integrates with the cloud's LB, nodes, and routes |
 
 ### Worker Node
 
-| 컴포넌트 | 역할 |
+| Component | Role |
 |----------|------|
-| **kubelet** | 노드 에이전트. PodSpec 대로 컨테이너를 실행·감시, 상태 보고 |
-| **kube-proxy** | Service 의 가상 IP 를 iptables/IPVS 규칙으로 구현 |
-| **Container Runtime** | containerd, CRI-O 등. CRI 를 통해 kubelet 과 연동 |
+| **kubelet** | The node agent. Runs and monitors containers per the PodSpec, and reports status |
+| **kube-proxy** | Implements a Service's virtual IP with iptables/IPVS rules |
+| **Container Runtime** | containerd, CRI-O, etc. Integrates with the kubelet through the CRI |
 
 ---
 
-## 3. `kubectl apply` 한 번에 일어나는 일
+## 3. What Happens in a Single `kubectl apply`
 
 ```mermaid
 sequenceDiagram
@@ -72,22 +72,22 @@ sequenceDiagram
     participant C as Controller Manager
     participant S as Scheduler
     participant K as kubelet
-    U->>A: Deployment 생성
-    A->>E: 저장
-    C->>A: (Watch) ReplicaSet 생성
-    C->>A: (Watch) Pod 생성 (nodeName 없음)
-    S->>A: (Watch) Pod 에 노드 바인딩
-    K->>A: (Watch) 내 노드 Pod 감지
-    K->>K: 컨테이너 런타임으로 컨테이너 시작
-    K->>A: Pod 상태 보고
+    U->>A: Create Deployment
+    A->>E: Store
+    C->>A: (Watch) Create ReplicaSet
+    C->>A: (Watch) Create Pod (no nodeName)
+    S->>A: (Watch) Bind Pod to a node
+    K->>A: (Watch) Detect Pod on my node
+    K->>K: Start container via container runtime
+    K->>A: Report Pod status
 ```
 
-핵심 원리는 **선언적 상태(Desired State) + Watch 기반 컨트롤 루프(Reconcile)** 입니다.
+The core principle is **declarative state (Desired State) + a Watch-based control loop (Reconcile)**.
 
 ---
 
-## 4. 기억할 포인트
+## 4. Points to Remember
 
-- 컴포넌트끼리 직접 통신하지 않고 **API Server 를 통해서만** 상태를 주고받습니다.
-- etcd 장애 = 클러스터 제어 불능 → 백업과 HA 구성이 필수입니다.
-- 애드온(CoreDNS, CNI, Metrics Server 등)은 Pod 형태로 클러스터 위에서 동작합니다.
+- Components do not talk to each other directly; they exchange state **only through the API Server**.
+- etcd failure = loss of cluster control → backups and an HA setup are essential.
+- Add-ons (CoreDNS, CNI, Metrics Server, etc.) run on top of the cluster as Pods.

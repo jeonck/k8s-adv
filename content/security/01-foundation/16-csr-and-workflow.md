@@ -1,87 +1,87 @@
 ---
-title: "CSR (Certificate Signing Request) 과 인증서 요청"
+title: "CSR (Certificate Signing Request) and Certificate Requests"
 weight: 160
 slug: "16-csr-and-workflow"
 ---
 
-인증서 발급을 위한 CSR 생성과 인증서 요청 과정에 대해 알아봅니다.
+Learn about creating a CSR and the certificate request process for issuing a certificate.
 
 ---
 
-## CSR (Certificate Signing Request) 이란?
+## What Is a CSR (Certificate Signing Request)?
 
-### 개념
+### Concept
 
-CSR(Certificate Signing Request)은 인증서 발급을 위해 인증 기관(CA)에 제출하는 요청서입니다. 공개키와 소유자 정보를 포함하며, 비유하자면 여권(인증서)을 발급받기 위해 정부(CA)에 제출하는 신청서와 같습니다.
+A CSR (Certificate Signing Request) is a request form submitted to a Certificate Authority (CA) in order to have a certificate issued. It contains the public key and the owner's information, and it is like the application form you submit to the government (CA) to get a passport (certificate).
 
-### CSR 의 역할
+### Role of a CSR
 
-| 역할 | 설명 | 비고 |
+| Role | Description | Note |
 |------|------|------|
-| **공개키 전달** | CA에게 내 공개키를 안전하게 전달 | 개인키는 포함하지 않음 |
-| **소유자 정보 제공** | 도메인(CN), 조직(O), 국가(C) 등 정보 제공 | 신원 확인의 기초 |
-| **인증서 속성 정의** | 키 용도(Key Usage), SAN(대체 이름) 등 정의 | 인증서의 상세 기능 결정 |
+| **Delivers the public key** | Safely delivers my public key to the CA | Does not include the private key |
+| **Provides owner information** | Provides information such as domain (CN), organization (O), and country (C) | Basis for identity verification |
+| **Defines certificate attributes** | Defines key usage (Key Usage), SAN (alternative names), etc. | Determines the detailed capabilities of the certificate |
 
 ---
 
-## CSR 생성 및 발급 과정
+## CSR Creation and Issuance Process
 
-### 단계별 흐름
+### Step-by-Step Flow
 
 ```mermaid
 sequenceDiagram
-    participant U as 사용자 (User)
-    participant CA as 인증 기관 (CA)
+    participant U as User
+    participant CA as Certificate Authority (CA)
     
-    Note over U: Step 1: 개인키 생성 (private.key)
-    Note over U: Step 2: CSR 생성 (공개키 + 소유자 정보)
-    U->>CA: Step 3: CSR 제출 (인증 요청)
-    Note over CA: Step 4: 정보 검증 및 승인
-    Note over CA: Step 5: CA 개인키로 서명하여 인증서 생성
-    CA->>U: Step 6: 발급된 인증서(certificate.crt) 전달
+    Note over U: Step 1: Generate private key (private.key)
+    Note over U: Step 2: Create CSR (public key + owner information)
+    U->>CA: Step 3: Submit CSR (certification request)
+    Note over CA: Step 4: Verify information and approve
+    Note over CA: Step 5: Sign with the CA private key to create the certificate
+    CA->>U: Step 6: Deliver the issued certificate (certificate.crt)
 ```
 
-### 상세 생성 단계 (OpenSSL 예시)
+### Detailed Creation Steps (OpenSSL Example)
 
-1.  **개인키 생성:** `openssl genrsa -out private.key 2048`
-    - 인증서의 기반이 되는 비밀키를 생성합니다. (가장 중요!)
-2.  **CSR 생성:** `openssl req -new -key private.key -out request.csr -subj "/CN=example.com"`
-    - 생성된 개인키를 바탕으로 공개키를 추출하고 소유자 정보를 결합하여 요청서를 만듭니다.
-3.  **CA 제출:** 생성된 `request.csr` 파일을 CA에 전달하여 발급을 요청합니다.
+1.  **Generate the private key:** `openssl genrsa -out private.key 2048`
+    - Generates the secret key that the certificate is based on. (Most important!)
+2.  **Create the CSR:** `openssl req -new -key private.key -out request.csr -subj "/CN=example.com"`
+    - Extracts the public key from the generated private key and combines it with the owner information to create the request.
+3.  **Submit to the CA:** Send the generated `request.csr` file to the CA to request issuance.
 
 ---
 
-## 주요 CSR 필드 (Subject)
+## Key CSR Fields (Subject)
 
-인증서 신청 시 입력하는 소유자 정보의 주요 필드는 다음과 같습니다.
+The main owner-information fields entered when applying for a certificate are as follows.
 
-| 약어 | 필드명 | 설명 | 예시 |
+| Abbreviation | Field | Description | Example |
 |------|--------|------|------|
-| **CN** | Common Name | 도메인 이름 또는 사용자명 | *.google.com, admin |
-| **O** | Organization | 조직/회사 이름 | Google LLC, Kubernetes |
-| **OU** | Organizational Unit | 부서 이름 | IT, Security |
-| **L** | Locality | 시/군/구 | Mountain View, Seoul |
-| **ST** | State | 도/광역시 | California, Seoul |
-| **C** | Country | 국가 코드 (2자리) | US, KR |
+| **CN** | Common Name | Domain name or user name | *.google.com, admin |
+| **O** | Organization | Organization/company name | Google LLC, Kubernetes |
+| **OU** | Organizational Unit | Department name | IT, Security |
+| **L** | Locality | City/county | Mountain View, Seoul |
+| **ST** | State | Province/metropolitan city | California, Seoul |
+| **C** | Country | Country code (2 letters) | US, KR |
 
 ---
 
-## SAN (Subject Alternative Name) 의 중요성
+## The Importance of SAN (Subject Alternative Name)
 
-현대 브라우저와 Kubernetes는 보안상의 이유로 **CN(Common Name) 대신 SAN 필드를 우선적으로 검증**합니다.
+For security reasons, modern browsers and Kubernetes **validate the SAN field in preference to CN (Common Name)**.
 
-- **CN의 한계:** 하나의 인증서에 하나의 이름만 지정 가능
-- **SAN의 장점:** 하나의 인증서에 여러 개의 도메인이나 IP 주소를 지정 가능
-  - 예: `example.com`, `www.example.com`, `10.96.0.1` 등을 모두 포함
+- **Limitation of CN:** Only one name can be specified per certificate
+- **Advantage of SAN:** Multiple domains or IP addresses can be specified in a single certificate
+  - Example: it can include `example.com`, `www.example.com`, `10.96.0.1`, and so on
 
 ---
 
-## Kubernetes 에서의 CSR
+## CSRs in Kubernetes
 
-Kubernetes 클러스터 내부에서도 인증서 발급이 빈번하게 일어납니다.
+Certificate issuance also happens frequently inside a Kubernetes cluster.
 
-1.  **kubelet 인증서:** 노드가 클러스터에 조인할 때 API Server에 CSR을 보냅니다.
-2.  **사용자 추가:** 새로운 사용자를 만들 때 CSR 리소스를 생성하여 관리자의 승인을 받습니다.
-3.  **Cert-manager:** Let's Encrypt 등을 통해 자동으로 CSR을 생성하고 인증서를 갱신합니다.
+1.  **kubelet certificates:** When a node joins the cluster, it sends a CSR to the API Server.
+2.  **Adding users:** When creating a new user, you create a CSR resource and get the administrator's approval.
+3.  **Cert-manager:** Automatically creates CSRs and renews certificates through Let's Encrypt and similar CAs.
 
-**CSR은 보안 통신을 위한 '신청서'이며, 이 과정을 이해하는 것은 Kubernetes의 보안 설정을 관리하는 데 필수적입니다.**
+**A CSR is the "application form" for secure communication, and understanding this process is essential for managing Kubernetes security settings.**

@@ -4,69 +4,69 @@ weight: 330
 slug: "33-webhook-token-auth-concept"
 ---
 
-Kubernetes API Server의 Webhook Token Authentication 에 대해 알아봅니다.
+Learn about Webhook Token Authentication in the Kubernetes API Server.
 
 ---
 
-## Webhook Token Authentication 이란?
+## What Is Webhook Token Authentication?
 
-Webhook Token Authentication은 API 서버가 토큰 인증을 직접 수행하지 않고, **외부의 웹훅 서버(Webhook Server)에 신원 확인을 위임**하는 방식입니다.
+Webhook Token Authentication is a method in which the API server does not perform token authentication itself, but instead **delegates identity verification to an external webhook server**.
 
-### 핵심 개념
+### Core Concepts
 
-- **확장성:** Kubernetes 기본 기능으로 지원하지 않는 복잡한 인증 로직을 구현할 수 있습니다.
-- **통합:** 사내 LDAP, Active Directory 또는 기존 인증 시스템과 Kubernetes를 손쉽게 통합할 수 있습니다.
-- **위임:** API 서버는 단순히 토큰을 전달하고, 외부 서버의 응답(Success/Fail)에 따라 인증 여부를 결정합니다.
+- **Extensibility:** You can implement complex authentication logic that Kubernetes does not support out of the box.
+- **Integration:** You can easily integrate Kubernetes with an in-house LDAP, Active Directory, or an existing authentication system.
+- **Delegation:** The API server simply forwards the token and decides whether authentication succeeded based on the external server's response (Success/Fail).
 
 ---
 
-## 동작 원리
+## How It Works
 
-API 서버와 외부 웹훅 서버 간의 통신은 `TokenReview`라는 특별한 API 객체를 통해 이루어집니다.
+Communication between the API server and the external webhook server takes place through a special API object called `TokenReview`.
 
 ```mermaid
 sequenceDiagram
-    participant C as 클라이언트 (kubectl/curl)
+    participant C as Client (kubectl/curl)
     participant A as API Server
-    participant W as 외부 Webhook 서버
+    participant W as External Webhook Server
     
-    C->>A: 1. 요청 (Bearer Token 포함)
-    A->>W: 2. TokenReview 요청 (토큰 전송)
-    Note over W: 3. 토큰 검증 및 사용자 정보 추출
-    W->>A: 4. TokenReview 응답 (인증 결과 + 사용자명/그룹)
-    Note over A: 5. 인증 결과 반영 및 RBAC 인가 수행
-    A->>C: 6. 최종 리소스 반환 또는 거부
+    C->>A: 1. Request (with Bearer Token)
+    A->>W: 2. TokenReview request (send token)
+    Note over W: 3. Validate token and extract user information
+    W->>A: 4. TokenReview response (authentication result + username/groups)
+    Note over A: 5. Apply authentication result and perform RBAC authorization
+    A->>C: 6. Return the final resource or deny
 ```
 
 ---
 
-## 설정 방법 요약
+## Configuration Summary
 
-### 1. Webhook 설정 파일 생성
-API 서버가 어떤 웹훅 서버로 데이터를 보낼지 정의하는 설정 파일(`webhook-config.yaml`)이 필요합니다.
+### 1. Create the Webhook Configuration File
+You need a configuration file (`webhook-config.yaml`) that defines which webhook server the API server sends data to.
 
-| 항목 | 설명 | 비고 |
+| Item | Description | Note |
 |------|------|------|
-| **clusters** | 웹훅 서버의 주소(URL) 및 CA 인증서 | HTTPS 권장 |
-| **users** | API 서버가 웹훅 서버에 접속할 때 쓸 인증 정보 | (선택 사항) |
+| **clusters** | Address (URL) and CA certificate of the webhook server | HTTPS recommended |
+| **users** | Credentials the API server uses to connect to the webhook server | (Optional) |
 
-### 2. API Server 옵션 추가
-마스터 노드의 `kube-apiserver` 설정에 웹훅 사용을 명시합니다.
+### 2. Add API Server Options
+Specify the use of the webhook in the `kube-apiserver` configuration on the master node.
 
 ```bash
-# kube-apiserver.yaml 수정 예시
+# Example of editing kube-apiserver.yaml
 - --authentication-token-webhook-config-file=/etc/kubernetes/pki/webhook-config.yaml
 - --authentication-token-webhook-cache-ttl=2m
 ```
 
 ---
 
-## 장단점 요약
+## Pros and Cons Summary
 
-| 장점 | 단점 |
+| Pros | Cons |
 |------|------|
-| - 기존 사내 인증 시스템과 완벽한 통합 가능 | - 외부 웹훅 서버 장애 시 인증이 불가능함 (SPOF) |
-| - 중앙 집중식 사용자 관리 가능 | - 네트워크 지연(Latency)이 발생할 수 있음 |
-| - 복잡한 보안 정책(IP 제한 등) 연동 가능 | - 웹훅 서버를 별도로 구축/관리해야 하는 부담 |
+| - Can be fully integrated with the existing in-house authentication system | - Authentication is impossible if the external webhook server fails (SPOF) |
+| - Centralized user management is possible | - Network latency may occur |
+| - Can be linked with complex security policies (IP restrictions, etc.) | - The burden of building and managing a separate webhook server |
 
-**Webhook 방식은 엔터프라이즈 환경에서 Kubernetes를 기존의 보안 체계와 통합할 때 가장 유연하게 대처할 수 있는 강력한 인증 수단입니다.**
+**The Webhook method is a powerful authentication mechanism that offers the most flexibility when integrating Kubernetes with an existing security framework in an enterprise environment.**

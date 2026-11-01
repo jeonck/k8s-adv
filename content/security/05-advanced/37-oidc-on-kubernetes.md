@@ -1,72 +1,72 @@
 ---
-title: "OpenID Connect (OIDC) 개념"
+title: "OpenID Connect (OIDC) Concepts"
 weight: 370
 slug: "37-oidc-on-kubernetes"
 ---
 
-OpenID Connect(OIDC)는 OAuth 2.0 프로토콜 위에 **신원 확인(Identity)** 레이어를 추가한 현대적인 인증 표준입니다.
+OpenID Connect (OIDC) is a modern authentication standard that adds an **Identity** layer on top of the OAuth 2.0 protocol.
 
 ---
 
-## OpenID Connect 란?
+## What Is OpenID Connect?
 
-OIDC는 "사용자가 누구인지"를 확인하는 인증(Authentication)을 위해 설계되었습니다. OAuth 2.0이 권한 부여에 집중한다면, OIDC는 그 기반 위에서 사용자의 프로필 정보를 안전하게 전달하는 역할을 합니다.
+OIDC was designed for Authentication, which verifies "who the user is". While OAuth 2.0 focuses on authorization, OIDC builds on that foundation to securely deliver the user's profile information.
 
-### OAuth 2.0 vs OpenID Connect 비교
+### OAuth 2.0 vs OpenID Connect
 
-| 구분 | OAuth 2.0 | OpenID Connect (OIDC) |
+| Category | OAuth 2.0 | OpenID Connect (OIDC) |
 |------|-----------|-----------------------|
-| **목적** | 권한 부여 (Authorization) | 신원 인증 (Authentication) |
-| **핵심 질문** | "무엇을 할 수 있는가?" | "누구인가?" |
-| **발급물** | Access Token (데이터 접근용) | **ID Token (사용자 정보 포함)** |
-| **비유** | 특정 방의 출입 카드 | 사진이 부착된 신분증 |
+| **Purpose** | Authorization | Identity authentication (Authentication) |
+| **Core question** | "What can they do?" | "Who are they?" |
+| **Issued artifact** | Access Token (for data access) | **ID Token (contains user information)** |
+| **Analogy** | An access card for a specific room | An ID card with a photo |
 
-> **공식:** OpenID Connect = OAuth 2.0 + Identity Layer
+> **Formula:** OpenID Connect = OAuth 2.0 + Identity Layer
 
 ---
 
-## OIDC의 핵심: ID Token
+## The Core of OIDC: The ID Token
 
-OIDC에서 가장 중요한 요소는 **ID Token**입니다. 이는 JSON Web Token(JWT) 형식을 따르며, 발급자(CA)에 의해 디지털 서명되어 위변조가 불가능합니다.
+The most important element in OIDC is the **ID Token**. It follows the JSON Web Token (JWT) format and is digitally signed by the issuer (CA), so it cannot be forged or tampered with.
 
-### ID Token 내부 구조 (JWT Claims)
+### Inside an ID Token (JWT Claims)
 
-| 클레임 | 의미 | 예시 |
+| Claim | Meaning | Example |
 |--------|------|------|
-| **iss (Issuer)** | 토큰을 발급한 기관 (IdP) | `https://accounts.google.com` |
-| **sub (Subject)** | 사용자의 고유 식별 ID | `1029384756` |
-| **aud (Audience)** | 토큰을 사용할 대상 앱 | `my-k8s-cluster` |
-| **exp (Expiration)** | 토큰 만료 시간 | `1672531200` |
-| **email** | 사용자의 이메일 주소 | `user@example.com` |
+| **iss (Issuer)** | The authority that issued the token (IdP) | `https://accounts.google.com` |
+| **sub (Subject)** | The user's unique identifier | `1029384756` |
+| **aud (Audience)** | The app the token is intended for | `my-k8s-cluster` |
+| **exp (Expiration)** | Token expiration time | `1672531200` |
+| **email** | The user's email address | `user@example.com` |
 
 ---
 
-## OIDC 인증 흐름 (Flow)
+## OIDC Authentication Flow
 
-Kubernetes와 연동할 때 주로 사용되는 인증 흐름입니다.
+This is the authentication flow mainly used when integrating with Kubernetes.
 
 ```mermaid
 sequenceDiagram
-    participant U as 사용자
+    participant U as User
     participant K as kubectl (Client)
     participant I as Identity Provider (Google/Keycloak)
     participant A as API Server
     
-    U->>K: 1. 로그인 요청 (kubectl oidc-login)
-    K->>I: 2. 인증 및 권한 동의 요청
-    U->>I: 3. ID/PW 입력 및 로그인
-    I->>K: 4. ID Token + Access Token 발급
-    K->>A: 5. API 요청 (Header에 ID Token 포함)
-    Note over A: 6. IDP의 공개키로 Token 서명 검증
-    A->>U: 7. 인증 성공 및 리소스 반환
+    U->>K: 1. Login request (kubectl oidc-login)
+    K->>I: 2. Request authentication and consent
+    U->>I: 3. Enter ID/PW and log in
+    I->>K: 4. Issue ID Token + Access Token
+    K->>A: 5. API request (ID Token in the Header)
+    Note over A: 6. Verify the Token signature with the IDP's public key
+    A->>U: 7. Authentication succeeds and resources are returned
 ```
 
 ---
 
-## Kubernetes 가 OIDC 를 선호하는 이유
+## Why Kubernetes Prefers OIDC
 
-1.  **중앙 집중식 관리:** 퇴사자나 부서 이동 시 Kubernetes 설정을 건드리지 않고 IdP(Google, Okta 등)에서만 계정을 비활성화하면 즉시 차단됩니다.
-2.  **보안성:** 인증서 방식과 달리 토큰의 유효 기간이 짧고(보통 1시간), MFA(다중 인증)를 강제할 수 있습니다.
-3.  **사용자 편의성:** 사내에서 이미 사용하는 계정으로 Kubernetes에 로그인할 수 있습니다. (SSO 구현)
+1.  **Centralized management:** When someone leaves the company or changes departments, you only need to deactivate the account in the IdP (Google, Okta, etc.) without touching Kubernetes settings, and access is blocked immediately.
+2.  **Security:** Unlike the certificate approach, tokens have a short lifetime (usually 1 hour), and MFA (multi-factor authentication) can be enforced.
+3.  **User convenience:** Users can log in to Kubernetes with the accounts they already use at the company. (SSO implementation)
 
-**OIDC는 엔터프라이즈 환경에서 Kubernetes 클러스터의 사용자 보안을 가장 현대적이고 안전하게 관리할 수 있는 표준 방식입니다.**
+**OIDC is the standard approach for managing user security of Kubernetes clusters in enterprise environments in the most modern and secure way.**

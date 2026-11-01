@@ -1,83 +1,83 @@
 ---
-title: "Authentication 과 Authorization"
+title: "Authentication and Authorization"
 weight: 190
 slug: "19-k8s-security-overview"
 ---
 
-Kubernetes 보안의 핵심 개념인 인증(Authentication)과 인가(Authorization)에 대해 알아봅니다.
+Learn about authentication and authorization, the core concepts of Kubernetes security.
 
 ---
 
-## 핵심 개념 비교
+## Core Concept Comparison
 
-| 구분 | Authentication (인증) | Authorization (인가) |
+| Category | Authentication | Authorization |
 |------|-----------------------|----------------------|
-| **핵심 질문** | "당신은 누구입니까?" (Who are you?) | "당신은 무엇을 할 수 있습니까?" (What can you do?) |
-| **목적** | 신원 확인 | 권한 부여 및 리소스 접근 제어 |
-| **비유** | 여권 검사, 회사 출입증 | 비자 발급, 특정 층 출입 권한 |
-| **K8s 방식** | 인증서, 토큰, OIDC 등 | RBAC, ABAC, Node 등 |
+| **Key question** | "Who are you?" | "What can you do?" |
+| **Purpose** | Identity verification | Granting permissions and controlling resource access |
+| **Analogy** | Passport check, company access badge | Visa issuance, access rights to a specific floor |
+| **K8s methods** | Certificates, tokens, OIDC, etc. | RBAC, ABAC, Node, etc. |
 
 ---
 
-## 보안 처리 흐름
+## Security Processing Flow
 
-Kubernetes API 서버로 들어오는 모든 요청은 다음의 3단계를 거칩니다.
+Every request that arrives at the Kubernetes API server goes through the following 3 stages.
 
 ```mermaid
 flowchart TD
-    Request[사용자 요청] --> AuthN{1. 인증 Authentication}
-    AuthN -- 성공 --> AuthZ{2. 인가 Authorization}
-    AuthN -- 실패 --> Deny1[401 Unauthorized]
+    Request[User request] --> AuthN{1. Authentication}
+    AuthN -- Success --> AuthZ{2. Authorization}
+    AuthN -- Failure --> Deny1[401 Unauthorized]
     
-    AuthZ -- 성공 --> Admit{3. Admission Control}
-    AuthZ -- 실패 --> Deny2[403 Forbidden]
+    AuthZ -- Success --> Admit{3. Admission Control}
+    AuthZ -- Failure --> Deny2[403 Forbidden]
     
-    Admit -- 승인 --> ETCD[(etcd 저장/수행)]
-    Admit -- 거부 --> Deny3[403 Forbidden]
+    Admit -- Approved --> ETCD[(etcd store/execute)]
+    Admit -- Rejected --> Deny3[403 Forbidden]
 ```
 
 ---
 
-## 1. Authentication (인증)
+## 1. Authentication
 
-요청한 주체가 누구인지 확인하는 과정입니다. Kubernetes는 자체적인 '사용자' 리소스를 가지지 않으며, 외부 인증 시스템이나 인증서를 통해 신원을 확인합니다.
+This is the process of verifying who the requesting principal is. Kubernetes has no 'user' resource of its own; it verifies identity through external authentication systems or certificates.
 
-### 주요 인증 방식
-- **X.509 Client Certs:** 클라이언트 인증서를 통한 인증 (kubeadm 기본 방식)
-- **Static Token File:** 정적 파일을 통한 토큰 인증
-- **Bootstrap Tokens:** 클러스터 조인 시 사용하는 토큰
-- **Service Account Tokens:** Pod 내에서 사용하는 자동 생성 토큰
-- **OIDC (OpenID Connect):** 외부 IDP(Google, Okta 등)와 연동한 인증
+### Main Authentication Methods
+- **X.509 Client Certs:** Authentication via client certificates (kubeadm default)
+- **Static Token File:** Token authentication via a static file
+- **Bootstrap Tokens:** Tokens used when joining a cluster
+- **Service Account Tokens:** Automatically generated tokens used inside Pods
+- **OIDC (OpenID Connect):** Authentication integrated with an external IDP (Google, Okta, etc.)
 
 ---
 
-## 2. Authorization (인가)
+## 2. Authorization
 
-인증된 사용자가 특정 리소스에 대해 특정 작업(Verb)을 수행할 권한이 있는지 확인합니다.
+This checks whether an authenticated user has permission to perform a specific action (Verb) on a specific resource.
 
-### 주요 인가 모드
-- **RBAC (Role-Based Access Control):** 역할 기반 접근 제어 (가장 권장됨)
-- **ABAC (Attribute-Based Access Control):** 속성 기반 접근 제어
-- **Node Authorization:** kubelet의 권한을 제한하는 특수 목적 인가
-- **Webhook:** 외부 서비스에 권한 확인을 요청하는 방식
+### Main Authorization Modes
+- **RBAC (Role-Based Access Control):** Role-based access control (most recommended)
+- **ABAC (Attribute-Based Access Control):** Attribute-based access control
+- **Node Authorization:** Special-purpose authorization that restricts the permissions of the kubelet
+- **Webhook:** A method that asks an external service to check permissions
 
 ---
 
 ## 3. Admission Control
 
-인증과 인가를 통과한 요청이 클러스터의 정책에 맞는지 최종적으로 검사하고 필요시 데이터를 수정(Mutating)하거나 거부(Validating)합니다.
+For requests that have passed authentication and authorization, this performs a final check that they comply with the cluster's policies, and modifies the data (Mutating) or rejects the request (Validating) as needed.
 
-- **Mutating Admission Webhook:** 요청 내용을 수정 (예: 사이드카 주입)
-- **Validating Admission Webhook:** 요청 내용 검증 (예: 리소스 제한 체크)
+- **Mutating Admission Webhook:** Modifies the request content (e.g., sidecar injection)
+- **Validating Admission Webhook:** Validates the request content (e.g., resource limit checks)
 
 ---
 
-## 요약
+## Summary
 
-| 단계 | 역할 | 결과 |
+| Stage | Role | Result |
 |------|------|------|
-| **인증 (AuthN)** | 신원 확인 | User/Group 식별 |
-| **인가 (AuthZ)** | 권한 확인 | Allow/Deny 결정 |
-| **Admission** | 정책 검수 | 요청 수락/수정/거부 |
+| **Authentication (AuthN)** | Identity verification | Identifies User/Group |
+| **Authorization (AuthZ)** | Permission check | Allow/Deny decision |
+| **Admission** | Policy review | Accept/modify/reject the request |
 
-**이 3단계 보안 계층을 통해 Kubernetes 클러스터는 안전하게 보호됩니다.**
+**Through these 3 layers of security, the Kubernetes cluster is safely protected.**

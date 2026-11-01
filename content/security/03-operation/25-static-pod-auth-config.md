@@ -1,41 +1,41 @@
 ---
-title: "Static Pod 와 API Server"
+title: "Static Pods and the API Server"
 weight: 250
 slug: "25-static-pod-auth-config"
 ---
 
-Static Pod의 개념과 API Server와의 관계, 그리고 컨트롤 플레인 컴포넌트 구동 방식에 대해 알아봅니다.
+Learn about the concept of Static Pods, their relationship with the API Server, and how control plane components are started.
 
 ---
 
-## Static Pod 란?
+## What Is a Static Pod?
 
-Static Pod는 API 서버의 개입 없이 **kubelet이 직접 관리하는 특수한 Pod**입니다. 주로 클러스터의 핵심 컴포넌트(API Server, etcd 등)를 구동하는 데 사용됩니다.
+A Static Pod is a special Pod that is **managed directly by the kubelet** without any involvement of the API server. It is mainly used to run the cluster's core components (API Server, etcd, etc.).
 
-### Static Pod vs 일반 Pod 비교
+### Static Pod vs Regular Pod
 
-| 구분 | Static Pod | 일반 Pod |
+| Category | Static Pod | Regular Pod |
 |------|------------|----------|
-| **관리 주체** | kubelet (로컬 노드 데몬) | API Server (Control Plane) |
-| **저장 위치** | 로컬 파일 시스템 (`/etc/kubernetes/manifests/`) | etcd (클러스터 데이터베이스) |
-| **생성 방법** | 특정 디렉토리에 YAML 파일 배치 | `kubectl apply`, Deployment 등 |
-| **삭제 방법** | 로컬 YAML 파일 삭제 | `kubectl delete` 명령 수행 |
-| **주요 용도** | 컨트롤 플레인 컴포넌트 구동 | 일반 애플리케이션 워크로드 |
-| **이름 규칙** | `<Pod이름>-<노드이름>` | 사용자 지정 또는 컨트롤러 부여 |
+| **Managed by** | kubelet (local node daemon) | API Server (Control Plane) |
+| **Storage location** | Local file system (`/etc/kubernetes/manifests/`) | etcd (cluster database) |
+| **How to create** | Place a YAML file in a specific directory | `kubectl apply`, Deployment, etc. |
+| **How to delete** | Delete the local YAML file | Run the `kubectl delete` command |
+| **Main use** | Running control plane components | Regular application workloads |
+| **Naming rule** | `<Pod name>-<node name>` | User-specified or assigned by a controller |
 
 ---
 
-## Static Pod 동작 원리
+## How Static Pods Work
 
-kubelet은 설정된 특정 디렉토리를 실시간으로 감시하며 Pod의 생명주기를 관리합니다.
+The kubelet watches a configured directory in real time and manages the Pod lifecycle.
 
 ```mermaid
 flowchart TD
-    Dir[/etc/kubernetes/manifests/] -- "파일 감시(inotify)" --> Kubelet[kubelet 데몬]
-    Kubelet -- "YAML 파싱" --> Runtime[Container Runtime]
-    Runtime -- "컨테이너 생성" --> Pod[Static Pod 실행]
+    Dir[/etc/kubernetes/manifests/] -- "File watch (inotify)" --> Kubelet[kubelet daemon]
+    Kubelet -- "Parse YAML" --> Runtime[Container Runtime]
+    Runtime -- "Create containers" --> Pod[Static Pod running]
     
-    subgraph ControlPlane[마스터 노드 컴포넌트]
+    subgraph ControlPlane["Master node components"]
     Pod1[kube-apiserver]
     Pod2[kube-controller-manager]
     Pod3[kube-scheduler]
@@ -43,31 +43,31 @@ flowchart TD
     end
 ```
 
-1.  **디렉토리 감시:** kubelet은 `--pod-manifest-path`에 지정된 디렉토리를 감시합니다.
-2.  **자동 생성/갱신:** 해당 디렉토리에 YAML 파일이 추가되면 즉시 Pod를 생성하고, 파일이 수정되면 Pod를 재시작하여 변경사항을 반영합니다.
-3.  **Mirror Pod:** kubelet은 Static Pod의 상태를 API 서버에 보고하기 위해 'Mirror Pod'를 생성하여 `kubectl get pods` 명령으로 상태를 확인할 수 있게 합니다. (단, 삭제는 로컬 파일 삭제로만 가능)
+1.  **Directory watch:** The kubelet watches the directory specified by `--pod-manifest-path`.
+2.  **Automatic creation/update:** When a YAML file is added to that directory, the Pod is created immediately, and when the file is modified, the Pod is restarted to apply the changes.
+3.  **Mirror Pod:** To report the status of a Static Pod to the API server, the kubelet creates a 'Mirror Pod' so that you can check its status with the `kubectl get pods` command. (However, it can only be deleted by deleting the local file.)
 
 ---
 
-## API Server 와의 관계
+## Relationship with the API Server
 
-Kubernetes 클러스터에서 가장 먼저 실행되어야 하는 컴포넌트는 API Server입니다. 하지만 API Server가 있어야 Pod를 띄울 수 있는 '닭과 달걀' 문제가 발생합니다.
+The first component that must run in a Kubernetes cluster is the API Server. But this creates a 'chicken-and-egg' problem, since Pods can only be launched when an API Server exists.
 
-- **해결책:** API Server 자체를 **Static Pod**로 구성합니다.
-- **부팅 순서:** 시스템 시작 시 `kubelet`이 먼저 뜨고 -> 로컬 디렉토리의 `kube-apiserver.yaml`을 읽어 -> API Server 컨테이너를 구동합니다.
+- **Solution:** Configure the API Server itself as a **Static Pod**.
+- **Boot order:** At system startup, the `kubelet` starts first -> reads `kube-apiserver.yaml` from the local directory -> and launches the API Server container.
 
 ---
 
-## 실습: Static Pod 설정 확인
+## Lab: Checking the Static Pod Configuration
 
-마스터 노드에서 kubelet이 어느 디렉토리를 보고 있는지 확인하는 방법입니다.
+This is how to check which directory the kubelet is watching on a master node.
 
 ```bash
-# kubelet 설정에서 staticPodPath 확인
+# Check staticPodPath in the kubelet configuration
 grep staticPodPath /var/lib/kubelet/config.yaml
 
-# 출력 결과 예시
+# Example output
 # staticPodPath: /etc/kubernetes/manifests
 ```
 
-**Static Pod는 클러스터의 '심장'인 컨트롤 플레인을 깨우는 핵심 메커니즘이며, 이를 통해 Kubernetes는 스스로를 구동하는 자가 관리(Self-hosting) 능력을 갖게 됩니다.**
+**Static Pods are the key mechanism for waking up the control plane, the 'heart' of the cluster, and through them Kubernetes gains the ability to manage itself (Self-hosting).**

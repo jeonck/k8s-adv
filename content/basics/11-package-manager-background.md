@@ -1,75 +1,75 @@
 ---
-title: "패키지 관리 도구의 출현 배경"
+title: "Background: Why Package Managers Emerged"
 weight: 111
 slug: "11-package-manager-background"
 ---
 
-Kubernetes Add-On 컴포넌트 구성의 문제점에서부터 Helm과 같은 패키지 관리 도구가 왜 필요하게 되었는지 살펴봅니다.
+Starting from the problems of configuring Kubernetes add-on components, let's see why package management tools like Helm became necessary.
 
 ---
 
-## 1. Add-On 구성의 전통적인 문제점
+## 1. Traditional Problems with Add-On Configuration
 
-### 1) 수동 YAML 관리의 한계
-컴포넌트 설치 시 환경에 맞춰 변경해야 할 부분이 많지만, 이를 매번 수동으로 수정하는 것은 매우 위험합니다.
+### 1) Limits of Manual YAML Management
+Installing a component requires many changes to fit the environment, and editing them by hand every time is very risky.
 
-| 문제 유형 | 상세 내용 |
+| Problem Type | Details |
 |-----------|-----------|
-| **휴먼 에러** | 수동 편집 시 오타나 설정 누락 발생 가능성 높음 |
-| **일관성 부족** | 개발, 테스트, 운영 환경 간의 미세한 설정 차이 발생 |
-| **추적 불가** | 누가 어느 시점에 어떤 설정을 바꿨는지 기록이 남지 않음 |
+| **Human error** | High chance of typos or missing settings during manual edits |
+| **Lack of consistency** | Subtle configuration differences arise between dev, test, and production environments |
+| **No traceability** | There is no record of who changed which setting, and when |
 
-### 2) 버전 관리 및 업그레이드 이력
-새로운 버전으로 업데이트할 때 이전의 커스터마이징 내용을 다시 적용하고 비교하는 과정이 고통스럽습니다.
+### 2) Version Control and Upgrade History
+When updating to a new version, re-applying and comparing earlier customizations is painful.
 
 ```mermaid
 graph LR
-    V1[v1.0 설치] -- "수동 수정" --> C1[커스텀 V1]
-    V2[v2.0 릴리스] -- "업그레이드 시도" --> Problem{수동 비교 및 병합}
-    Problem -- "고통스러운 과정" --> C2[커스텀 V2]
-    C2 -- "장애 발생" --> Rollback[롤백 방법 불명확]
+    V1[v1.0 installed] -- "Manual edits" --> C1[Custom V1]
+    V2[v2.0 released] -- "Upgrade attempt" --> Problem{Manual comparison and merge}
+    Problem -- "Painful process" --> C2[Custom V2]
+    C2 -- "Failure occurs" --> Rollback[Unclear how to roll back]
 ```
 
 ---
 
-## 2. 왜 패키지 관리 도구가 필요한가?
+## 2. Why Do We Need Package Managers?
 
-복잡한 클러스터 운영 요구사항을 만족하기 위해서는 다음과 같은 기능이 필수적입니다.
+To meet the requirements of complex cluster operations, the following capabilities are essential.
 
-### 요구사항 및 해결책
+### Requirements and Solutions
 
-| 요구사항 | 설명 | 패키지 관리자의 해결 방식 |
+| Requirement | Description | How Package Managers Solve It |
 |----------|------|------------------------|
-| **템플릿화** | 설정의 재사용성 확보 | `values.yaml`을 통한 변수 주입 |
-| **버전 관리** | 배포 이력 추적 및 롤백 | 릴리스(Release) 버전 단위 관리 |
-| **지식 패키징** | 전문가의 최적 설정 공유 | 검증된 차트(Chart) 제공 |
-| **의존성 해결** | 여러 컴포넌트 간 연동 자동화 | 서브 차트(Sub-charts) 관리 |
+| **Templating** | Make configuration reusable | Inject variables through `values.yaml` |
+| **Version management** | Track deployment history and roll back | Manage by Release version |
+| **Packaging knowledge** | Share experts' optimal configurations | Provide verified Charts |
+| **Dependency resolution** | Automate integration across multiple components | Manage Sub-charts |
 
 ---
 
-## 3. 대표적인 도구들
+## 3. Representative Tools
 
-현재 Kubernetes 생태계에서는 다음과 같은 도구들이 각자의 영역에서 활용되고 있습니다.
+In the Kubernetes ecosystem today, the following tools are used, each in its own area.
 
-- **Helm:** 가장 널리 쓰이는 표준 패키지 관리자 (템플릿 기반)
-- **Kustomize:** 템플릿 없이 선언적인 YAML 오버레이 방식 (kubectl 내장)
-- **ArgoCD / Flux:** GitOps 모델을 기반으로 패키지 배포 자동화
+- **Helm:** The most widely used standard package manager (template-based)
+- **Kustomize:** A template-free, declarative YAML overlay approach (built into kubectl)
+- **ArgoCD / Flux:** Automate package deployment based on the GitOps model
 
 ---
 
-## 4. 요약
+## 4. Summary
 
 ```mermaid
 graph TD
-    Issue[문제 인식: 수동 관리의 복잡성] --> Solution[해결책: 패키지 관리 도구 도입]
+    Issue[Problem recognized: complexity of manual management] --> Solution[Solution: adopt package management tools]
     
-    subgraph Core_Values[핵심 가치]
-    V1[재사용성]
-    V2[배포 일관성]
-    V3[자동화된 롤백]
+    subgraph Core_Values[Core Values]
+    V1[Reusability]
+    V2[Deployment consistency]
+    V3[Automated rollback]
     end
     
     Solution --> Core_Values
 ```
 
-**Kubernetes 패키지 관리 도구는 단순한 편의를 넘어, 대규모 클러스터를 안전하고 일관되게 운영하기 위한 필수 요소입니다.**
+**Kubernetes package management tools go beyond mere convenience; they are essential for operating large-scale clusters safely and consistently.**

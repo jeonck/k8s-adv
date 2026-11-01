@@ -1,30 +1,30 @@
 ---
-title: "StatefulSet 에서 Headless Service 가 필요한 이유"
+title: "Why a StatefulSet Needs a Headless Service"
 weight: 120
 slug: "12-headless-service"
 ---
 
-StatefulSet을 운영할 때 왜 일반 서비스가 아닌 **Headless Service**가 필수적인지 핵심 이유를 알아봅니다.
+Let's look at the key reasons why a **Headless Service**, rather than a regular Service, is essential when running a StatefulSet.
 
 ---
 
-## 1. Headless Service 란?
+## 1. What Is a Headless Service?
 
-일반적인 서비스와 달리 `clusterIP: None` 설정을 통해 가상 IP를 할당받지 않는 서비스입니다.
+Unlike a regular Service, it is a Service that is not assigned a virtual IP, by setting `clusterIP: None`.
 
-| 특성 | 일반 Service (ClusterIP) | Headless Service |
+| Property | Regular Service (ClusterIP) | Headless Service |
 |------|-------------------------|------------------|
-| **가상 IP (VIP)** | 할당됨 (예: 10.96.0.10) | **없음 (None)** |
-| **로드밸런싱** | kube-proxy가 여러 Pod로 분산 | 없음 (클라이언트가 직접 선택) |
-| **DNS 응답** | 단일 ClusterIP 반환 | **연결된 모든 Pod의 IP 목록 반환** |
-| **주 용도** | 일반적인 트래픽 분산 | 개별 Pod에 직접 접근 (Stateful) |
+| **Virtual IP (VIP)** | Assigned (e.g., 10.96.0.10) | **None** |
+| **Load balancing** | kube-proxy distributes across multiple Pods | None (the client chooses directly) |
+| **DNS response** | Returns a single ClusterIP | **Returns the list of IPs of all backing Pods** |
+| **Main use** | General traffic distribution | Direct access to individual Pods (Stateful) |
 
 ---
 
-## 2. 왜 StatefulSet에 필수인가?
+## 2. Why Is It Essential for a StatefulSet?
 
-### 이유 1: 고유한 DNS 주소(Stable Network ID) 제공
-StatefulSet의 각 Pod는 번호가 붙은 고유한 이름을 가집니다. Headless Service와 결합하면 각 Pod는 고정된 DNS 주소를 갖게 됩니다.
+### Reason 1: Provides a Unique DNS Address (Stable Network ID)
+Each Pod in a StatefulSet has a unique, numbered name. Combined with a Headless Service, each Pod gets a fixed DNS address.
 
 ```mermaid
 graph LR
@@ -40,21 +40,21 @@ graph LR
     end
 ```
 
-- **장점:** `mysql-0`이 재시작되어 IP가 바뀌더라도, DNS 이름(`mysql-0.mysql`)은 그대로 유지되어 다른 Pod들이 중단 없이 통신할 수 있습니다.
+- **Benefit:** Even if `mysql-0` restarts and its IP changes, its DNS name (`mysql-0.mysql`) stays the same, so other Pods can keep communicating without interruption.
 
-### 이유 2: 마스터/슬레이브 역할 구분 및 직접 통신
-일반 서비스는 랜덤하게 트래픽을 보내기 때문에 "쓰기 작업을 위해 마스터(`mysql-0`)에게만 접속"하는 것이 불가능합니다.
+### Reason 2: Distinguishing Master/Slave Roles and Communicating Directly
+A regular Service sends traffic randomly, so it is impossible to "connect only to the master (`mysql-0`) for write operations."
 
-- **Headless 방식:** 클라이언트가 DNS 조회를 통해 마스터 Pod의 주소를 직접 알아내고 그곳으로만 통신할 수 있습니다.
+- **Headless approach:** The client can look up the master Pod's address directly through a DNS query and talk only to it.
 
-### 이유 3: 데이터 복제 토폴로지 구성
-분산 DB(Kafka, MongoDB, MySQL 등)는 노드 간에 서로를 명확히 알고 데이터를 복제해야 합니다.
+### Reason 3: Building the Data Replication Topology
+Distributed databases (Kafka, MongoDB, MySQL, etc.) require nodes to know each other clearly and replicate data between themselves.
 
-- **복제 흐름:** "나는 1번이고, 나의 데이터 부모는 0번이다"라는 정의가 가능해집니다.
+- **Replication flow:** It becomes possible to define "I am number 1, and my data parent is number 0."
 
 ---
 
-## 3. 동작 원리 요약
+## 3. How It Works, in Brief
 
 ```mermaid
 sequenceDiagram
@@ -62,20 +62,20 @@ sequenceDiagram
     participant D as CoreDNS
     participant S as Headless Service
     
-    C->>D: 1. mysql 서비스 주소 뭐야?
-    D->>S: 2. Endpoints 확인
-    S-->>D: 3. Pod A, B, C의 IP 목록 전달
-    D-->>C: 4. [10.1.1.1, 10.1.1.2, 10.1.1.3] 반환
-    C->>C: 5. (선택) 나는 mysql-0(10.1.1.1)로 갈래
-    C->>C: 6. 직접 연결 시도
+    C->>D: 1. What is the address of the mysql service?
+    D->>S: 2. Check Endpoints
+    S-->>D: 3. Return the IP list of Pods A, B, C
+    D-->>C: 4. Return [10.1.1.1, 10.1.1.2, 10.1.1.3]
+    C->>C: 5. (Optional) I'll go to mysql-0 (10.1.1.1)
+    C->>C: 6. Attempt a direct connection
 ```
 
 ---
 
-## 4. 핵심 정리
+## 4. Key Takeaways
 
-1.  **예측 가능성:** Pod 이름과 DNS 주소를 예측할 수 있게 해줍니다.
-2.  **직접 접근:** 로드밸런서라는 장벽 없이 Pod와 1:1로 대화하게 해줍니다.
-3.  **안정성:** Pod가 죽었다 살아나도 동일한 이름으로 찾을 수 있게 해줍니다.
+1.  **Predictability:** Makes Pod names and DNS addresses predictable.
+2.  **Direct access:** Lets you talk 1:1 with a Pod, with no load balancer in between.
+3.  **Stability:** Lets you find a Pod by the same name even after it dies and comes back.
 
-**Headless Service는 StatefulSet이 단순한 컨테이너 묶음을 넘어, '정체성'을 가진 클러스터 시스템으로 동작하게 만드는 핵심 인프라입니다.**
+**A Headless Service is the core infrastructure that lets a StatefulSet operate as a clustered system with 'identity', rather than a mere bundle of containers.**

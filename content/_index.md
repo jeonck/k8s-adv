@@ -1,25 +1,25 @@
 ---
-title: "K8s 심화 과정"
+title: "K8s Advanced Course"
 layout: hextra-home
 ---
 
 {{< hextra/hero-headline >}}
-  Kubernetes 심화 과정 학습 아카이브
+  Kubernetes Advanced Course Learning Archive
 {{< /hextra/hero-headline >}}
 
 {{< hextra/hero-subtitle >}}
-  동작 원리 · 암호학 기반 보안 · Operator 개발까지
+  How it works · Cryptography-based security · Operator development
 {{< /hextra/hero-subtitle >}}
 
-{{< hextra/hero-button text="시작하기" link="intro/00-introduction/" >}}
+{{< hextra/hero-button text="Get Started" link="intro/00-introduction/" >}}
 
 <div class="hx:mt-6"></div>
 
 {{< hextra/feature-grid >}}
-  {{< hextra/feature-card title="기초 이론" subtitle="kubectl, 리소스, StatefulSet, Helm, CRD" link="basics/" >}}
-  {{< hextra/feature-card title="인증 및 보안" subtitle="PKI, TLS, mTLS, Webhook, OIDC, Keycloak" link="security/" >}}
-  {{< hextra/feature-card title="Operator" subtitle="Operator 개발과 CR 관계" link="operator/" >}}
-  {{< hextra/feature-card title="실습 가이드" subtitle="Metric Server, MetalLB, Ingress, Krew" link="labs/" >}}
-  {{< hextra/feature-card title="Use Cases" subtitle="장애 대응과 내부 동작 분석" link="usecases/" >}}
-  {{< hextra/feature-card title="실습 환경" subtitle="환경 구성과 Add-on 설치" link="lab-env/" >}}
+  {{< hextra/feature-card title="Fundamentals" subtitle="kubectl, resources, StatefulSet, Helm, CRD" link="basics/" >}}
+  {{< hextra/feature-card title="Authentication & Security" subtitle="PKI, TLS, mTLS, Webhook, OIDC, Keycloak" link="security/" >}}
+  {{< hextra/feature-card title="Operator" subtitle="Operator development and CR relationships" link="operator/" >}}
+  {{< hextra/feature-card title="Hands-on Labs" subtitle="Metric Server, MetalLB, Ingress, Krew" link="labs/" >}}
+  {{< hextra/feature-card title="Use Cases" subtitle="Incident response and internals analysis" link="usecases/" >}}
+  {{< hextra/feature-card title="Lab Environment" subtitle="Environment setup and add-on installation" link="lab-env/" >}}
 {{< /hextra/feature-grid >}}

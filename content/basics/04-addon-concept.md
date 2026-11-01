@@ -1,99 +1,99 @@
 ---
-title: "K8s Add-on 개념의 중요성"
+title: "Why the Add-on Concept Matters in K8s"
 weight: 40
 slug: "04-addon-concept"
 ---
 
-Kubernetes 는 핵심 컴포넌트와 Add-on 을 명확히 분리하는 철학을 가지고 있습니다.
+Kubernetes has a philosophy of clearly separating core components from Add-ons.
 
-## Add-on 이란?
+## What Is an Add-on?
 
-Add-on 은 Kubernetes 클러스터의 기능을 확장하지만, 코어 엔진에 내장되지 않고 환경에 맞게 선택·교체하는 컴포넌트입니다. (프로덕션에서는 사실상 필수이며, 아래 '관점' 절 참고)
+An Add-on is a component that extends the functionality of a Kubernetes cluster but is not built into the core engine; you choose and swap it to fit your environment. (In production it is effectively mandatory; see the 'Perspective' section below.)
 
-## 주요 Add-on 예시
+## Key Add-on Examples
 
-- **CNI 플러그인:** Calico, Flannel, Weave, Cilium (네트워킹)
-- **CSI 드라이버:** AWS EBS, GCP PD, Ceph, NFS (저장소)
+- **CNI plugins:** Calico, Flannel, Weave, Cilium (networking)
+- **CSI drivers:** AWS EBS, GCP PD, Ceph, NFS (storage)
 - **Ingress Controller:** Nginx, Traefik, HAProxy
-- **모니터링:** Prometheus, Grafana
-- **로그 수집:** Fluentd, Filebeat
+- **Monitoring:** Prometheus, Grafana
+- **Log collection:** Fluentd, Filebeat
 - **DNS:** CoreDNS, kube-dns
 
-## Add-on 개념이 중요한 이유
+## Why the Add-on Concept Matters
 
-### 1. 유연성과 확장성
+### 1. Flexibility and Extensibility
 
-사용자는 자신의 요구사항에 맞는 Add-on 을 선택적으로 설치할 수 있습니다. 예를 들어, 네트워크 플러그인을 Calico 대신 Cilium 으로 교체할 수 있습니다.
+Users can selectively install the Add-ons that fit their requirements. For example, you can replace the network plugin Calico with Cilium.
 
-### 2. 핵심과 부가기능 분리
+### 2. Separation of Core and Auxiliary Features
 
-Kubernetes 핵심 코드는 안정적으로 유지되면서, Add-on 은 독립적으로 발전할 수 있습니다. 이는 업그레이드와 유지보수를 용이하게 합니다.
+The Kubernetes core code stays stable while Add-ons can evolve independently. This makes upgrades and maintenance easier.
 
-### 3. 플러그 가능한 아키텍처
+### 3. Pluggable Architecture
 
-CNI, CSI, CRI 와 같은 표준 인터페이스를 통해 서드파티 벤더가 쉽게 통합할 수 있습니다.
+Standard interfaces such as CNI, CSI, and CRI allow third-party vendors to integrate easily.
 
-### 4. 클라우드 중립성
+### 4. Cloud Neutrality
 
-특정 클라우드 제공자에 종속되지 않고, 다양한 환경에서 동일한 Kubernetes 를 사용할 수 있습니다.
+You can use the same Kubernetes across different environments without being tied to a specific cloud provider.
 
-## 관점: 필수처럼 보이는데 왜 '애드온(Add-on)'이라 부를까?
+## Perspective: If They Look Mandatory, Why Call Them 'Add-ons'?
 
-실제 프로덕션에서 CNI, DNS, 스토리지 같은 기능은 사실상 필수(De facto mandatory)입니다. 그럼에도 '애드온'이라 부르는 이유는 쿠버네티스 코어 엔진의 철학과 설계 사상 때문입니다.
+In real production, features such as CNI, DNS, and storage are de facto mandatory. The reason they are still called 'add-ons' lies in the philosophy and design principles of the Kubernetes core engine.
 
-### 1. 쿠버네티스의 철학: "최소한의 코어와 모듈화(Extensibility)"
+### 1. Kubernetes Philosophy: "Minimal Core and Modularity (Extensibility)"
 
-컨테이너 오케스트레이션의 핵심 뼈대만 제공하고, 나머지는 사용자가 원하는 방식으로 갈아 끼우거나 확장할 수 있게 한다는 것이 개발 철학입니다.
+The development philosophy is to provide only the essential skeleton of container orchestration and let users swap or extend the rest in whatever way they prefer.
 
-- **코어 엔진**: API 서버, 스케줄러, 컨트롤러 매니저, 각 노드의 Kubelet 등은 컨테이너를 띄우고 관리하는 최소한의 순수 엔진입니다.
-- 엔진 입장에서는 네트워킹을 Calico 로 하든 Cilium 으로 하든, 스토리지를 AWS EBS 로 하든 Ceph 로 하든 상관이 없습니다. 특정 기술에 종속되지 않고 독립적으로 동작할 수 있습니다.
+- **Core engine**: The API server, scheduler, controller manager, and the Kubelet on each node are the minimal pure engine that launches and manages containers.
+- From the engine's perspective, it doesn't matter whether networking is Calico or Cilium, or whether storage is AWS EBS or Ceph. It can operate independently without being tied to any particular technology.
 
 ```mermaid
 graph TB
-    subgraph CORE[Core 엔진 - 특정 기술에 비종속]
+    subgraph CORE["Core engine - not tied to specific technologies"]
         API[API Server]
         SCH[Scheduler]
         CM[Controller Manager]
         KL[Kubelet]
     end
-    subgraph ADDON[Add-on - 환경에 맞게 선택/교체]
-        CNI[네트워킹: Calico / Cilium]
-        CSI[스토리지: AWS EBS / Ceph]
-        DNS[DNS: CoreDNS]
-        MON[모니터링: Prometheus]
+    subgraph ADDON["Add-on - choose/swap to fit the environment"]
+        CNI["Networking: Calico / Cilium"]
+        CSI["Storage: AWS EBS / Ceph"]
+        DNS["DNS: CoreDNS"]
+        MON["Monitoring: Prometheus"]
     end
-    CORE -. 표준 인터페이스 CNI / CSI / CRI .-> ADDON
+    CORE -. "Standard interfaces CNI / CSI / CRI" .-> ADDON
 ```
 
-### 2. 환경에 따른 '선택의 자유' (Vendor Agnostic & Flexibility)
+### 2. 'Freedom of Choice' by Environment (Vendor Agnostic & Flexibility)
 
-AWS, GCP, 온프레미스 베어메탈, 사내 가상화 등 인프라 환경은 매우 다양합니다. 특정 네트워킹 방식이나 스토리지 드라이버가 코어에 강제(Built-in)로 박혀 있다면 다음 문제가 생깁니다.
+Infrastructure environments vary widely: AWS, GCP, on-premises bare metal, in-house virtualization, and so on. If a specific networking method or storage driver were forced into the core (built-in), the following problems would arise.
 
-| 문제 | 설명 |
+| Problem | Description |
 |------|------|
-| **유연성 상실** | 환경에 맞지 않는 기능도 무조건 탑재해야 하므로 불필요하게 크고 무거워짐 |
-| **교체 불가능** | 기본 포함된 도구가 마음에 들지 않아도 바꿀 수 없어 아키텍처가 경직됨 |
+| **Loss of flexibility** | Features that don't fit the environment must be included anyway, making the system unnecessarily large and heavy |
+| **Cannot be replaced** | Even if you dislike the bundled tools you cannot change them, making the architecture rigid |
 
-따라서 쿠버네티스는 "뼈대만 줄 테니, 네 환경에 맞는 부품(애드온)을 골라서 조립해 써라"라는 의미로 '애드온'이라는 용어를 사용합니다.
+Therefore, Kubernetes uses the term 'add-on' to mean "we'll give you only the skeleton; pick and assemble the parts (add-ons) that suit your environment."
 
-### 3. 컴포넌트의 라이프사이클 분리 (업데이트와 관리의 독립성)
+### 3. Decoupled Component Lifecycles (Independent Updates and Management)
 
-쿠버네티스 코어 프로젝트와 애드온 프로젝트들은 각각 독립적으로 개발되고 배포(Release)됩니다.
+The Kubernetes core project and the add-on projects are developed and released independently.
 
-- 코어 업그레이드 시 네트워킹 애드온이나 DNS 서버까지 코어 소스코드에 함께 들어 있다면 버전 업그레이드가 매우 복잡하고 위험해집니다.
-- 기능을 별도 컴포넌트(애드온)로 분리하면, 쿠버네티스 버전과 무관하게 네트워킹·모니터링 도구를 독립적으로 업그레이드하거나 패치할 수 있어 유지보수가 수월해집니다.
+- If the networking add-on and even the DNS server were bundled in the core source code, version upgrades during a core upgrade would become very complex and risky.
+- Separating features into distinct components (add-ons) lets you upgrade or patch networking and monitoring tools independently of the Kubernetes version, making maintenance easier.
 
-### 요약
+### Summary
 
-> 프로덕션에서 애드온은 **사실상 필수**입니다. 그러나 '애드온'이라 부르는 것은 기술적 분류의 의미로, 쿠버네티스가 특정 기술 스택(네트워크, 스토리지 등)에 종속되지 않고 **사용자가 원하는 도구를 선택·조합할 수 있는 확장 가능한 구조**임을 나타내기 위해서입니다.
+> In production, add-ons are **effectively mandatory**. However, calling them 'add-ons' is a technical classification, meant to show that Kubernetes is not tied to a specific technology stack (network, storage, etc.) and is an **extensible structure in which users can choose and combine the tools they want**.
 
-## Add-on 예시 설치
+## Example Add-on Installation
 
 ```bash
-# Calico CNI 설치
+# Install the Calico CNI
 kubectl apply -f https://raw.githubusercontent.com/
   projectcalico/calico/v3.31.3/manifests/calico.yaml
 
-# Add-on 확인
+# Verify the Add-on
 kubectl get pods -n kube-system
 ```

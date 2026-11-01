@@ -30,13 +30,13 @@ k8s-adv/
 
 | 언어 | 경로 | 파일 규칙 |
 |------|------|-----------|
-| 한국어 (기본) | `/` | `foo.md` |
-| English | `/en/` | `foo.en.md` |
+| English (기본) | `/` | `foo.md` |
+| 한국어 | `/ko/` | `foo.ko.md` |
 
-- 번역 문서는 원본과 같은 폴더에 `.en.md` 로 둡니다. (`_index.md` → `_index.en.md`)
-- front matter 의 `weight`, `slug` 는 원본과 동일하게 유지하고 `title` 만 번역합니다. 같은 경로의 두 파일이 자동으로 번역본으로 연결되어 상단 언어 전환 버튼으로 이동할 수 있습니다.
-- 메뉴 이름은 `hugo.toml` 의 `[languages.ko]` / `[languages.en]` 아래 `menus.main` 에서 관리합니다.
-- 새 문서를 추가할 때는 `.md` 와 `.en.md` 를 함께 작성하세요. `.en.md` 가 없으면 영어 사이트에는 해당 문서가 표시되지 않습니다.
+- 기본 언어가 영어이므로 접미사 없는 `.md` 가 영어 원문이고, 한국어 번역은 같은 폴더에 `.ko.md` 로 둡니다. (`_index.md` → `_index.ko.md`)
+- front matter 의 `weight`, `slug` 는 두 언어에서 동일하게 유지하고 `title` 만 번역합니다. 같은 경로의 두 파일이 자동으로 번역본으로 연결되어 상단 언어 전환 버튼으로 이동할 수 있습니다.
+- 메뉴 이름은 `hugo.toml` 의 `[languages.en]` / `[languages.ko]` 아래 `menus.main` 에서 관리합니다.
+- 새 문서를 추가할 때는 `.md` 와 `.ko.md` 를 함께 작성하세요. `.ko.md` 가 없으면 한국어 사이트에는 해당 문서가 표시되지 않습니다.
 
 ## 새 문서 추가
 

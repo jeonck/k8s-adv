@@ -1,77 +1,77 @@
 ---
-title: "인증서 정보 확인 (1/2) - Root CA 와 API Server"
+title: "Inspecting Certificate Information (1/2) - Root CA and API Server"
 weight: 260
 slug: "26-inspect-cert-info-1"
 ---
 
-Kubernetes 클러스터의 Root CA 인증서와 API Server에서 사용하는 인증서 파일 정보를 확인합니다.
+Inspect the certificate file information for the Kubernetes cluster's Root CA certificate and the certificate used by the API Server.
 
 ---
 
-## 인증서 확인 개요
+## Certificate Inspection Overview
 
-클러스터 운영 중에 인증서의 유효성이나 신뢰 관계를 확인하는 것은 매우 중요합니다.
+While operating a cluster, it is very important to verify certificate validity and trust relationships.
 
-| 확인 대상 | 파일 경로 | 주요 역할 |
+| Target | File Path | Main Role |
 |-----------|-----------|-----------|
-| **Root CA** | `/etc/kubernetes/pki/ca.crt` | 클러스터 신뢰의 기점 (모든 인증서의 부모) |
-| **API Server** | `/etc/kubernetes/pki/apiserver.crt` | API 서버의 신원을 증명하는 서버 인증서 |
+| **Root CA** | `/etc/kubernetes/pki/ca.crt` | Anchor of cluster trust (parent of all certificates) |
+| **API Server** | `/etc/kubernetes/pki/apiserver.crt` | Server certificate proving the API server's identity |
 
 ---
 
-## 1. Root CA 인증서 정보 확인
+## 1. Inspecting the Root CA Certificate
 
-Root CA 인증서는 자기 자신을 증명하는 **Self-Signed** 구조를 가집니다.
+The Root CA certificate has a **Self-Signed** structure that vouches for itself.
 
-### 상세 정보 확인 명령어
+### Command to View Detailed Information
 ```bash
 openssl x509 -in /etc/kubernetes/pki/ca.crt -text -noout
 ```
 
-### 주요 필드 분석
+### Analysis of Key Fields
 
 ```mermaid
 graph TD
-    CA[Root CA 인증서 정보]
-    CA --> Issuer["Issuer: CN = kubernetes-ca (자기 자신)"]
-    CA --> Subject["Subject: CN = kubernetes-ca (자기 자신)"]
-    CA --> Validity["Validity: 약 10년 (장기 보관용)"]
-    CA --> Usage["Key Usage: Certificate Sign (인증서 서명용)"]
-    CA --> Basic["Basic Constraints: CA:TRUE (인증 기관임)"]
+    CA[Root CA certificate information]
+    CA --> Issuer["Issuer: CN = kubernetes-ca (itself)"]
+    CA --> Subject["Subject: CN = kubernetes-ca (itself)"]
+    CA --> Validity["Validity: about 10 years (for long-term retention)"]
+    CA --> Usage["Key Usage: Certificate Sign (for signing certificates)"]
+    CA --> Basic["Basic Constraints: CA:TRUE (is a certificate authority)"]
 ```
 
 ---
 
-## 2. API Server 인증서 정보 확인
+## 2. Inspecting the API Server Certificate
 
-API Server 인증서는 Root CA에 의해 서명된 **하위 인증서**입니다.
+The API Server certificate is a **subordinate certificate** signed by the Root CA.
 
-### 상세 정보 확인 명령어
+### Command to View Detailed Information
 ```bash
 openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
 ```
 
-### 주요 필드 분석
+### Analysis of Key Fields
 
-| 필드명 | 내용 | 설명 |
+| Field | Content | Description |
 |--------|------|------|
-| **Issuer** | `CN = kubernetes-ca` | Root CA에 의해 발급됨을 증명 |
-| **Subject** | `CN = kube-apiserver` | 인증서의 소유자가 API 서버임을 명시 |
-| **Validity** | 약 1년 | 보안을 위해 Root CA보다 짧은 주기 |
-| **SAN** | `DNS:kubernetes, IP:10.96.0.1...` | 접속 가능한 추가 도메인 및 IP 목록 |
+| **Issuer** | `CN = kubernetes-ca` | Proves it was issued by the Root CA |
+| **Subject** | `CN = kube-apiserver` | States that the certificate owner is the API server |
+| **Validity** | About 1 year | A shorter cycle than the Root CA for security |
+| **SAN** | `DNS:kubernetes, IP:10.96.0.1...` | List of additional domains and IPs that can be used to connect |
 
 ---
 
-## 3. 인증서 간의 신뢰 관계 확인
+## 3. Verifying Trust Relationships Between Certificates
 
-API 서버 인증서가 Root CA에 의해 올바르게 서명되었는지 검증하는 방법입니다.
+This is how to verify that the API server certificate was correctly signed by the Root CA.
 
 ```bash
-# 서명 검증 명령어
+# Signature verification command
 openssl verify -CAfile /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/apiserver.crt
 
-# 출력 결과
+# Output
 # /etc/kubernetes/pki/apiserver.crt: OK
 ```
 
-**인증서 정보를 직접 확인하고 검증하는 능력은 클러스터의 보안 상태를 점검하고 인증 관련 장애를 해결하는 데 필수적입니다.**
+**The ability to inspect and verify certificate information directly is essential for checking a cluster's security posture and resolving authentication-related failures.**

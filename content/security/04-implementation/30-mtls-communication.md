@@ -4,60 +4,60 @@ weight: 300
 slug: "30-mtls-communication"
 ---
 
-Kubernetes 클러스터 내부 통신의 근간이 되는 상호 TLS 인증(mTLS)에 대해 알아봅니다.
+Learn about mutual TLS authentication (mTLS), the foundation of communication inside a Kubernetes cluster.
 
 ---
 
-## mTLS 란?
+## What Is mTLS?
 
-mTLS는 클라이언트와 서버가 **서로의 인증서를 확인하여 양방향으로 신원을 검증**하는 보안 프로토콜입니다. 일반적인 HTTPS(단방향 TLS)가 서버만 인증하는 것과 대조적입니다.
+mTLS is a security protocol in which the client and server **verify each other's certificates to authenticate identity in both directions**. This contrasts with ordinary HTTPS (one-way TLS), where only the server is authenticated.
 
-### 단방향 TLS vs 상호 TLS (mTLS) 비교
+### One-Way TLS vs Mutual TLS (mTLS)
 
-| 구분 | 단방향 TLS (일반 HTTPS) | 상호 TLS (mTLS) |
+| Category | One-way TLS (regular HTTPS) | Mutual TLS (mTLS) |
 |------|-------------------------|-----------------|
-| **인증 주체** | 서버만 자신을 증명함 | 클라이언트와 서버가 모두 증명함 |
-| **인증서 제출** | 서버만 인증서 제출 | 둘 다 각자의 인증서 제출 |
-| **주요 용도** | 일반 웹사이트 접속 | 컴포넌트 간 통신, API 보안 |
-| **보안 수준** | 보통 (아이디/비번 병행) | 매우 높음 (기기/계정 기반) |
+| **Who authenticates** | Only the server proves itself | Both the client and the server prove themselves |
+| **Certificate submission** | Only the server submits a certificate | Both submit their own certificates |
+| **Main use** | Regular website access | Component-to-component communication, API security |
+| **Security level** | Moderate (used together with ID/password) | Very high (device/account based) |
 
 ---
 
-## mTLS 통신 흐름
+## mTLS Communication Flow
 
-mTLS 핸드셰이크는 일반 TLS 과정에 클라이언트 인증서 제출 및 검증 단계가 추가된 형태입니다.
+The mTLS handshake is the regular TLS process with added steps for submitting and verifying the client certificate.
 
 ```mermaid
 sequenceDiagram
-    participant C as 클라이언트 (kubectl/kubelet)
-    participant S as 서버 (API Server)
+    participant C as Client (kubectl/kubelet)
+    participant S as Server (API Server)
     
-    C->>S: 1. ClientHello (버전, 암호화 목록)
-    S->>C: 2. ServerHello + 서버 인증서
-    Note over C: 3. 서버 인증서 검증 (Root CA)
-    S->>C: 4. Certificate Request (클라이언트 인증서 요청)
-    C->>S: 5. 클라이언트 인증서 제출
-    Note over S: 6. 클라이언트 인증서 검증 (Root CA)
-    Note over C,S: 7. 암호화 키 교환 및 mTLS 세션 확립
-    C<->>S: 8. 상호 인증된 상태로 보안 통신
+    C->>S: 1. ClientHello (version, cipher list)
+    S->>C: 2. ServerHello + server certificate
+    Note over C: 3. Verify server certificate (Root CA)
+    S->>C: 4. Certificate Request (request client certificate)
+    C->>S: 5. Submit client certificate
+    Note over S: 6. Verify client certificate (Root CA)
+    Note over C,S: 7. Key exchange and mTLS session established
+    C<->>S: 8. Secure communication in a mutually authenticated state
 ```
 
 ---
 
-## Kubernetes 에서의 mTLS 활용
+## Using mTLS in Kubernetes
 
-Kubernetes는 'Zero Trust' 모델을 지향하며, 클러스터 내의 모든 핵심 통신에 mTLS를 강제합니다.
+Kubernetes follows a "Zero Trust" model and enforces mTLS on all core communication within the cluster.
 
-- **컨트롤 플레인 통신:** `kube-scheduler`, `kube-controller-manager`가 API 서버에 접속할 때 각자의 인증서를 사용하여 mTLS를 수행합니다.
-- **노드 통신:** `kubelet`이 API 서버와 통신하거나, API 서버가 `kubelet`의 로그를 가져올 때 서로의 인증서를 확인합니다.
-- **Service Mesh:** Istio, Linkerd와 같은 서비스 메시 도구들은 마이크로서비스 간의 모든 통신을 mTLS로 자동 암호화합니다.
+- **Control plane communication:** When `kube-scheduler` and `kube-controller-manager` connect to the API server, each performs mTLS using its own certificate.
+- **Node communication:** When the `kubelet` communicates with the API server, or the API server fetches logs from the `kubelet`, they verify each other's certificates.
+- **Service Mesh:** Service mesh tools such as Istio and Linkerd automatically encrypt all communication between microservices with mTLS.
 
 ---
 
-## mTLS 의 주요 장점
+## Key Benefits of mTLS
 
-1.  **신원 도용 방지:** 훔친 아이디나 비밀번호만으로는 접속이 불가능하며, 올바른 개인키와 인증서가 있어야만 합니다.
-2.  **부인 방지:** 모든 통신 주체가 명확히 인증되므로, 어떤 컴포넌트가 어떤 요청을 했는지 확실히 추적할 수 있습니다.
-3.  **중간자 공격(MITM) 차단:** 통신 양 끝단이 서로를 완벽히 식별하므로 중간에서 데이터를 가로채거나 위조하는 것이 불가능합니다.
+1.  **Prevents identity theft:** A stolen ID or password alone is not enough to connect; the correct private key and certificate are required.
+2.  **Non-repudiation:** Every party to the communication is clearly authenticated, so you can reliably trace which component made which request.
+3.  **Blocks man-in-the-middle (MITM) attacks:** Both ends of the connection identify each other completely, so it is impossible to intercept or forge data in between.
 
-**mTLS는 Kubernetes 클러스터의 '보안 성벽' 역할을 하며, 모든 구성 요소가 서로를 믿고 안전하게 대화할 수 있는 환경을 제공합니다.**
+**mTLS acts as the "security wall" of a Kubernetes cluster, providing an environment where all components can trust each other and communicate safely.**

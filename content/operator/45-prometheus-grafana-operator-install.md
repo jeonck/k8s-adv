@@ -1,32 +1,32 @@
 ---
-title: "Prometheus & Grafana Operator 설치 실습"
+title: "Prometheus & Grafana Operator Installation Lab"
 weight: 450
 slug: "45-prometheus-grafana-operator-install"
 ---
 
-Kubernetes 환경에서 Operator 패턴을 활용하여 모니터링 시스템을 구축하고 자동화하는 실습 가이드입니다.
+A lab guide for building and automating a monitoring system in a Kubernetes environment using the Operator pattern.
 
 ---
 
-## 1. 실습 개요 및 아키텍처
+## 1. Lab Overview and Architecture
 
-본 실습에서는 Prometheus와 Grafana를 수동으로 배포하는 대신, Operator를 통해 이들의 생명주기를 관리하는 방법을 배웁니다.
+In this lab, instead of deploying Prometheus and Grafana manually, you will learn how to manage their lifecycle through Operators.
 
-| 구성 요소 | 역할 | 비고 |
+| Component | Role | Notes |
 |-----------|------|------|
-| **Prometheus Operator** | Prometheus 서버, Alertmanager, ServiceMonitor 관리 | 타겟 자동 발견 |
-| **Grafana Operator** | Grafana 인스턴스, DataSource, Dashboard 관리 | 설정 자동화 |
-| **ServiceMonitor** | 어떤 서비스에서 메트릭을 수집할지 정의하는 CRD | 핵심 설정 객체 |
+| **Prometheus Operator** | Manages the Prometheus server, Alertmanager, and ServiceMonitor | Automatic target discovery |
+| **Grafana Operator** | Manages Grafana instances, DataSources, and Dashboards | Configuration automation |
+| **ServiceMonitor** | A CRD that defines which services to collect metrics from | Core configuration object |
 
 ---
 
-## 2. 전체 데이터 흐름
+## 2. Overall Data Flow
 
 ```mermaid
 graph LR
-    App[애플리케이션 Pod] -- "Metrics" --> SM[ServiceMonitor]
-    SM -- "타겟 정보 전달" --> PROM[Prometheus Server]
-    PROM -- "데이터 시각화" --> GRAF[Grafana UI]
+    App[Application Pod] -- "Metrics" --> SM[ServiceMonitor]
+    SM -- "Pass target info" --> PROM[Prometheus Server]
+    PROM -- "Data visualization" --> GRAF[Grafana UI]
     
     subgraph Operators
     PO[Prometheus Operator] -.-> PROM
@@ -36,20 +36,20 @@ graph LR
 
 ---
 
-## 3. 설치 단계 요약
+## 3. Installation Steps Summary
 
-### [1단계] 네임스페이스 생성
+### [Step 1] Create the Namespace
 ```bash
 kubectl create namespace monitoring
 ```
 
-### [2단계] Prometheus Operator 설치 (Helm)
+### [Step 2] Install Prometheus Operator (Helm)
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring
 ```
 
-### [3단계] Grafana Operator 설치 (Helm)
+### [Step 3] Install Grafana Operator (Helm)
 ```bash
 helm repo add grafana-operator https://grafana-operator.github.io/grafana-operator/helm-charts
 helm install grafana-operator grafana-operator/grafana-operator --namespace monitoring
@@ -57,34 +57,34 @@ helm install grafana-operator grafana-operator/grafana-operator --namespace moni
 
 ---
 
-## 4. 핵심 리소스 정의 (CRD)
+## 4. Core Resource Definitions (CRDs)
 
-Operator 설치 후에는 다음과 같은 커스텀 리소스를 통해 설정을 관리합니다.
+After installing the Operators, you manage configuration through the following custom resources.
 
-| 리소스 유형 | 용도 |
+| Resource Type | Purpose |
 |-------------|------|
-| **Prometheus** | 실제 Prometheus 서버 인스턴스를 정의 |
-| **ServiceMonitor** | 메트릭을 수집할 엔드포인트(Service) 지정 |
-| **Grafana** | Grafana 서버 인스턴스 정의 |
-| **GrafanaDatasource** | Grafana에 연결할 데이터 소스(Prometheus 등) 설정 |
-| **GrafanaDashboard** | JSON 또는 Grafana.com ID를 통한 대시보드 배포 |
+| **Prometheus** | Defines the actual Prometheus server instance |
+| **ServiceMonitor** | Specifies the endpoints (Services) to collect metrics from |
+| **Grafana** | Defines the Grafana server instance |
+| **GrafanaDatasource** | Configures the data sources (Prometheus, etc.) to connect to Grafana |
+| **GrafanaDashboard** | Deploys dashboards via JSON or a Grafana.com ID |
 
 ---
 
-## 5. 설치 순서 워크플로우
+## 5. Installation Order Workflow
 
 ```mermaid
 flowchart TD
-    A[1. Namespace monitoring 생성] --> B[2. Prometheus Operator 설치]
-    B --> C[3. Prometheus 인스턴스 생성]
-    C --> D[4. ServiceMonitor 등록]
-    D --> E[5. Grafana Operator 설치]
-    E --> F[6. Grafana 인스턴스 및 DataSource 설정]
-    F --> G[7. Dashboard 프로비저닝]
+    A[1. Create Namespace monitoring] --> B[2. Install Prometheus Operator]
+    B --> C[3. Create Prometheus instance]
+    C --> D[4. Register ServiceMonitor]
+    D --> E[5. Install Grafana Operator]
+    E --> F[6. Configure Grafana instance and DataSource]
+    F --> G[7. Provision Dashboard]
 ```
 
 ---
 
-## 6. 요약
+## 6. Summary
 
-Prometheus와 Grafana Operator를 사용하면 **"모니터링 대상이 추가될 때마다 설정을 직접 수정할 필요 없이"**, 단지 `ServiceMonitor` 리소스를 추가하는 것만으로 메트릭 수집을 자동화할 수 있습니다. 이는 선언적 인프라 관리의 핵심 가치를 보여줍니다.
+With the Prometheus and Grafana Operators, **"without having to modify configuration every time a monitoring target is added"**, you can automate metric collection simply by adding a `ServiceMonitor` resource. This demonstrates the core value of declarative infrastructure management.

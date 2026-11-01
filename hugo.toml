@@ -1,6 +1,6 @@
 baseURL = "/"
 theme = "hextra"
-defaultContentLanguage = "ko"
+defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = false
 
 [markup.goldmark.renderer]
@@ -27,7 +27,7 @@ defaultContentLanguageInSubdir = false
   languageName = "한국어"
   languageCode = "ko"
   locale = "ko"
-  weight = 1
+  weight = 2
   title = "K8s 심화 과정"
 
   [[languages.ko.menus.main]]
@@ -75,7 +75,7 @@ defaultContentLanguageInSubdir = false
   languageName = "English"
   languageCode = "en"
   locale = "en"
-  weight = 2
+  weight = 1
   title = "Kubernetes Advanced Course"
 
   [[languages.en.menus.main]]

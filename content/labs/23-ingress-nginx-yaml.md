@@ -1,27 +1,27 @@
 ---
-title: "Ingress-NGINX YAML 분석"
+title: "Ingress-NGINX YAML Analysis"
 weight: 230
 slug: "23-ingress-nginx-yaml"
 ---
 
-Ingress-NGINX 컨트롤러 설치에 사용되는 YAML 파일을 분석합니다.
+This document analyzes the YAML files used to install the Ingress-NGINX controller.
 
-## 전체 구성
+## Overall Structure
 
 ```
-Ingress-NGINX 구성 리소스:
-1. Namespace                 - 전용 네임스페이스
-2. ServiceAccount (x2)       - Pod 의 신원
-3. Role (x2)                 - 네임스페이스 권한
-4. ClusterRole (x2)          - 클러스터 권한
-5. RoleBinding (x2)          - 네임스페이스 권한 바인딩
-6. ClusterRoleBinding (x2)   - 클러스터 권한 바인딩
-7. ConfigMap                 - 컨트롤러 설정
-8. Service (x2)              - 네트워크 엔드포인트
-9. Deployment                - 컨트롤러 배포
-10. Job (x2)                 - Webhook 인증서 생성/패치
-11. IngressClass             - Ingress 클래스 정의
-12. ValidatingWebhook        - Ingress 검증
+Ingress-NGINX resources:
+1. Namespace                 - Dedicated namespace
+2. ServiceAccount (x2)       - Pod identity
+3. Role (x2)                 - Namespace permissions
+4. ClusterRole (x2)          - Cluster permissions
+5. RoleBinding (x2)          - Namespace permission bindings
+6. ClusterRoleBinding (x2)   - Cluster permission bindings
+7. ConfigMap                 - Controller configuration
+8. Service (x2)              - Network endpoints
+9. Deployment                - Controller deployment
+10. Job (x2)                 - Webhook certificate creation/patching
+11. IngressClass             - Ingress class definition
+12. ValidatingWebhook        - Ingress validation
 ```
 
 ---
@@ -38,23 +38,23 @@ metadata:
   name: ingress-nginx
 ```
 
-### 설명
+### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `name` | ingress-nginx | Ingress-NGINX 전용 네임스페이스 |
-| `labels` | app.kubernetes.io/* | Kubernetes 권장 라벨 표준 |
+| `name` | ingress-nginx | Dedicated namespace for Ingress-NGINX |
+| `labels` | app.kubernetes.io/* | Kubernetes recommended label standard |
 
-### 역할
+### Role
 
-- Ingress-NGINX 관련 리소스 격리
-- 시스템 네임스페이스와 분리
+- Isolates Ingress-NGINX related resources
+- Separates them from system namespaces
 
 ---
 
 ## 2. ServiceAccount (x2)
 
-### 2-1. 컨트롤러용
+### 2-1. For the Controller
 
 ```yaml
 apiVersion: v1
@@ -68,7 +68,7 @@ metadata:
 automountServiceAccountToken: true
 ```
 
-### 2-2. Webhook 인증서 생성용
+### 2-2. For Webhook Certificate Creation
 
 ```yaml
 apiVersion: v1
@@ -88,14 +88,14 @@ automountServiceAccountToken: true
 automountServiceAccountToken: true
 ```
 
-- Pod 에서 ServiceAccount 토큰 자동 마운트
-- Kubernetes API 접근에 필요
+- Automatically mounts the ServiceAccount token into the Pod
+- Required for Kubernetes API access
 
 ---
 
 ## 3. Role (x2)
 
-### 3-1. 컨트롤러용 Role
+### 3-1. Controller Role
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -104,37 +104,37 @@ metadata:
   name: ingress-nginx
   namespace: ingress-nginx
 rules:
-# 네임스페이스 조회
+# Get namespaces
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["get"]
 
-# 기본 리소스 조회
+# Get basic resources
 - apiGroups: [""]
   resources: ["configmaps", "pods", "secrets", "endpoints"]
   verbs: ["get", "list", "watch"]
 
-# 서비스 조회
+# Get services
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get", "list", "watch"]
 
-# Ingress 리소스 관리
+# Manage Ingress resources
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
   verbs: ["get", "list", "watch"]
 
-# Ingress 상태 업데이트
+# Update Ingress status
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses/status"]
   verbs: ["update"]
 
-# IngressClass 조회
+# Get IngressClass
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingressclasses"]
   verbs: ["get", "list", "watch"]
 
-# 리더 선출 (Leader Election)
+# Leader Election
 - apiGroups: ["coordination.k8s.io"]
   resourceNames: ["ingress-nginx-leader"]
   resources: ["leases"]
@@ -143,34 +143,34 @@ rules:
   resources: ["leases"]
   verbs: ["create"]
 
-# 이벤트 생성
+# Create events
 - apiGroups: [""]
   resources: ["events"]
   verbs: ["create", "patch"]
 
-# 엔드포인트슬라이스 조회
+# Get EndpointSlices
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]
   verbs: ["list", "watch", "get"]
 ```
 
-### 권한 요약
+### Permission Summary
 
-| 리소스 | 권한 | 용도 |
+| Resource | Permissions | Purpose |
 |--------|------|------|
-| namespaces | get | 네임스페이스 정보 조회 |
-| configmaps, pods, secrets, endpoints | get, list, watch | 기본 리소스 조회 |
-| services | get, list, watch | 서비스 조회 |
-| ingresses | get, list, watch | Ingress 리소스 모니터링 |
-| ingresses/status | update | Ingress 상태 업데이트 |
-| ingressclasses | get, list, watch | Ingress 클래스 조회 |
-| leases | get, update, create | 리더 선출 (고가용성) |
-| events | create, patch | 이벤트 기록 |
-| endpointslices | list, watch, get | 엔드포인트 조회 |
+| namespaces | get | Get namespace information |
+| configmaps, pods, secrets, endpoints | get, list, watch | Get basic resources |
+| services | get, list, watch | Get services |
+| ingresses | get, list, watch | Monitor Ingress resources |
+| ingresses/status | update | Update Ingress status |
+| ingressclasses | get, list, watch | Get Ingress classes |
+| leases | get, update, create | Leader election (high availability) |
+| events | create, patch | Record events |
+| endpointslices | list, watch, get | Get endpoints |
 
 ---
 
-### 3-2. Webhook 용 Role
+### 3-2. Webhook Role
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -184,15 +184,15 @@ rules:
   verbs: ["get", "create"]
 ```
 
-### 역할
+### Role
 
-- Webhook 인증서 시크릿 생성 및 조회
+- Create and read the webhook certificate Secret
 
 ---
 
 ## 4. ClusterRole (x2)
 
-### 4-1. 컨트롤러용 ClusterRole
+### 4-1. Controller ClusterRole
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -200,62 +200,62 @@ kind: ClusterRole
 metadata:
   name: ingress-nginx
 rules:
-# 클러스터 전체 리소스 조회
+# Get cluster-wide resources
 - apiGroups: [""]
   resources: ["configmaps", "endpoints", "nodes", "pods", "secrets", "namespaces"]
   verbs: ["list", "watch"]
 
-# 노드 조회
+# Get nodes
 - apiGroups: [""]
   resources: ["nodes"]
   verbs: ["get"]
 
-# 서비스 조회
+# Get services
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get", "list", "watch"]
 
-# Ingress 리소스 관리
+# Manage Ingress resources
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
   verbs: ["get", "list", "watch"]
 
-# 이벤트 생성
+# Create events
 - apiGroups: [""]
   resources: ["events"]
   verbs: ["create", "patch"]
 
-# Ingress 상태 업데이트
+# Update Ingress status
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses/status"]
   verbs: ["update"]
 
-# IngressClass 조회
+# Get IngressClass
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingressclasses"]
   verbs: ["get", "list", "watch"]
 
-# 엔드포인트슬라이스 조회
+# Get EndpointSlices
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]
   verbs: ["list", "watch", "get"]
 
-# 리스 조회
+# Get leases
 - apiGroups: ["coordination.k8s.io"]
   resources: ["leases"]
   verbs: ["list", "watch"]
 ```
 
-### ClusterRole vs Role 차이
+### ClusterRole vs Role
 
-| 범위 | Role | ClusterRole |
+| Scope | Role | ClusterRole |
 |------|------|-------------|
-| **적용 범위** | 네임스페이스 내 | 클러스터 전체 |
-| **사용 목적** | 네임스페이스 리소스 | 노드, 네임스페이스 등 클러스터 리소스 |
+| **Scope** | Within a namespace | Cluster-wide |
+| **Purpose** | Namespaced resources | Cluster-level resources such as nodes and namespaces |
 
 ---
 
-### 4-2. Webhook 용 ClusterRole
+### 4-2. Webhook ClusterRole
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -268,9 +268,9 @@ rules:
   verbs: ["get", "update"]
 ```
 
-### 역할
+### Role
 
-- ValidatingWebhookConfiguration 업데이트
+- Update ValidatingWebhookConfiguration
 
 ---
 
@@ -279,7 +279,7 @@ rules:
 ### 5-1. RoleBinding (x2)
 
 ```yaml
-# 컨트롤러용
+# For the controller
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -293,7 +293,7 @@ subjects:
   name: ingress-nginx
   namespace: ingress-nginx
 
-# Webhook 용
+# For the webhook
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -311,7 +311,7 @@ subjects:
 ### 5-2. ClusterRoleBinding (x2)
 
 ```yaml
-# 컨트롤러용
+# For the controller
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -324,7 +324,7 @@ subjects:
   name: ingress-nginx
   namespace: ingress-nginx
 
-# Webhook 용
+# For the webhook
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -352,46 +352,46 @@ data:
   allow-snippet-annotations: "false"
 ```
 
-### 설정 설명
+### Setting Description
 
-| 설정 | 값 | 설명 |
+| Setting | Value | Description |
 |------|-----|------|
-| `allow-snippet-annotations` | "false" | 스니펫 주석 허용 안 함 (보안) |
+| `allow-snippet-annotations` | "false" | Disallow snippet annotations (security) |
 
-### 보안 고려사항
+### Security Considerations
 
 ```yaml
-# CVE-2021-25742 대응
-# allow-snippet-annotations: "true" 일 경우
-# 악의적인 nginx 설정 주입 가능
+# Mitigation for CVE-2021-25742
+# If allow-snippet-annotations: "true",
+# malicious nginx configuration can be injected
 
-# 예시 (악의적 주석):
+# Example (malicious annotation):
 # nginx.ingress.kubernetes.io/configuration-snippet: |
 #   set $secret $http_authorization;
 #   proxy_set_header X-Secret $secret;
 ```
 
-### 기타 주요 설정 옵션
+### Other Key Configuration Options
 
 ```yaml
 data:
-  # SSL/TLS 설정
+  # SSL/TLS settings
   ssl-protocols: "TLSv1.2 TLSv1.3"
   ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:..."
   
-  # 타임아웃 설정
+  # Timeout settings
   proxy-connect-timeout: "10"
   proxy-read-timeout: "60"
   proxy-send-timeout: "60"
   
-  # 리소스 제한
+  # Resource limits
   max-worker-connections: "1024"
   
-  # 로깅 설정
+  # Logging settings
   access-log-path: "/var/log/nginx/access.log"
   error-log-path: "/var/log/nginx/error.log"
   
-  # 기타
+  # Miscellaneous
   use-forwarded-headers: "true"
   compute-full-forwarded-for: "true"
 ```
@@ -400,7 +400,7 @@ data:
 
 ## 7. Service (x2)
 
-### 7-1. 컨트롤러 Service (LoadBalancer)
+### 7-1. Controller Service (LoadBalancer)
 
 ```yaml
 apiVersion: v1
@@ -430,7 +430,7 @@ spec:
     app.kubernetes.io/name: ingress-nginx
 ```
 
-### 중요 설정 설명
+### Key Settings
 
 #### externalTrafficPolicy: Local
 
@@ -438,17 +438,17 @@ spec:
 externalTrafficPolicy: Local
 ```
 
-| 값 | 설명 | 장단점 |
+| Value | Description | Pros and Cons |
 |----|------|--------|
-| `Cluster` | 모든 Pod 로 트래픽 분산 | IP 보존 안됨, 균등 분산 |
-| `Local` | 로컬 Pod 로만 트래픽 | **IP 보존됨**, 불균형 가능 |
+| `Cluster` | Distributes traffic to all Pods | Source IP not preserved, even distribution |
+| `Local` | Routes traffic only to local Pods | **Source IP preserved**, possible imbalance |
 
 ```
-Cluster 모드:
-Client → Node1 → Pod(Node3)  # 소스 IP 변경
+Cluster mode:
+Client → Node1 → Pod(Node3)  # Source IP changed
 
-Local 모드:
-Client → Node1 → Pod(Node1)  # 소스 IP 보존
+Local mode:
+Client → Node1 → Pod(Node1)  # Source IP preserved
 ```
 
 #### ipFamilyPolicy
@@ -459,21 +459,21 @@ ipFamilies:
 ipFamilyPolicy: SingleStack
 ```
 
-| 정책 | 설명 |
+| Policy | Description |
 |------|------|
-| `SingleStack` | 단일 IP 스택 (IPv4 또는 IPv6) |
-| `PreferDualStack` | 듀얼스택 선호 |
-| `RequireDualStack` | 듀얼스택 필수 |
+| `SingleStack` | Single IP stack (IPv4 or IPv6) |
+| `PreferDualStack` | Prefer dual stack |
+| `RequireDualStack` | Require dual stack |
 
 #### appProtocol
 
 ```yaml
-appProtocol: http   # HTTP 프로토콜
-appProtocol: https  # HTTPS 프로토콜
+appProtocol: http   # HTTP protocol
+appProtocol: https  # HTTPS protocol
 ```
 
-- Kubernetes 1.20+ 에서 사용
-- 서비스 메쉬 (Istio 등) 와 호환
+- Used in Kubernetes 1.20+
+- Compatible with service meshes (Istio, etc.)
 
 ---
 
@@ -496,14 +496,14 @@ spec:
     app.kubernetes.io/component: controller
 ```
 
-### 역할
+### Role
 
-- Validating Webhook 엔드포인트 제공
-- 내부 클러스터 통신용
+- Provides the Validating Webhook endpoint
+- For internal cluster communication
 
 ---
 
-## 8. Deployment - 컨트롤러
+## 8. Deployment - Controller
 
 ```yaml
 apiVersion: apps/v1
@@ -600,28 +600,28 @@ spec:
           secretName: ingress-nginx-admission
 ```
 
-### 컨테이너 인수 (args)
+### Container Arguments (args)
 
-| 인수 | 설명 |
+| Argument | Description |
 |------|------|
-| `/nginx-ingress-controller` | 실행 바이너리 |
-| `--publish-service` | LoadBalancer Service 참조 (외부 IP 광고) |
-| `--election-id` | 리더 선출용 ID |
-| `--controller-class` | 컨트롤러 클래스 식별자 |
-| `--ingress-class=nginx` | 기본 Ingress 클래스 |
-| `--configmap` | 설정 ConfigMap 참조 |
-| `--validating-webhook=:8443` | Webhook 포트 |
-| `--validating-webhook-certificate` | Webhook 인증서 경로 |
-| `--validating-webhook-key` | Webhook 키 경로 |
-| `--enable-metrics=false` | 메트릭스 비활성화 |
+| `/nginx-ingress-controller` | Executable binary |
+| `--publish-service` | References the LoadBalancer Service (advertises the external IP) |
+| `--election-id` | ID used for leader election |
+| `--controller-class` | Controller class identifier |
+| `--ingress-class=nginx` | Default Ingress class |
+| `--configmap` | References the configuration ConfigMap |
+| `--validating-webhook=:8443` | Webhook port |
+| `--validating-webhook-certificate` | Webhook certificate path |
+| `--validating-webhook-key` | Webhook key path |
+| `--enable-metrics=false` | Disable metrics |
 
-### 환경 변수
+### Environment Variables
 
 ```yaml
 env:
-- POD_NAME         # Pod 이름 (필드 참조)
-- POD_NAMESPACE    # 네임스페이스 (필드 참조)
-- LD_PRELOAD       # 메모리 할당자 (성능 최적화)
+- POD_NAME         # Pod name (field reference)
+- POD_NAMESPACE    # Namespace (field reference)
+- LD_PRELOAD       # Memory allocator (performance optimization)
 ```
 
 ### Lifecycle Hook
@@ -634,73 +634,73 @@ lifecycle:
       - /wait-shutdown
 ```
 
-- Pod 종료 시 연결 드레이닝 대기
-- 우아한 종료 (Graceful Shutdown)
+- Waits for connection draining on Pod termination
+- Graceful Shutdown
 
-### 프로브
+### Probes
 
 ```yaml
 livenessProbe:
   httpGet:
-    path: /healthz      # 생존 체크
+    path: /healthz      # Liveness check
     port: 10254
-  failureThreshold: 5   # 5 회 실패 시 재시작
+  failureThreshold: 5   # Restart after 5 failures
   periodSeconds: 10
 
 readinessProbe:
   httpGet:
-    path: /healthz      # 준비 상태 체크
+    path: /healthz      # Readiness check
     port: 10254
-  failureThreshold: 3   # 3 회 실패 시 트래픽 제거
+  failureThreshold: 3   # Remove from traffic after 3 failures
 ```
 
-### 보안 컨텍스트
+### Security Context
 
 ```yaml
 securityContext:
-  allowPrivilegeEscalation: false    # 권한 상승 불가
+  allowPrivilegeEscalation: false    # No privilege escalation
   capabilities:
     add:
-    - NET_BIND_SERVICE               # 1024 미만 포트 바인딩 허용
+    - NET_BIND_SERVICE               # Allow binding to ports below 1024
     drop:
-    - ALL                            # 기타 모든 capability 제거
-  runAsNonRoot: true                 # 루트 사용자 불가
-  runAsUser: 101                     # nginx 사용자
+    - ALL                            # Drop all other capabilities
+  runAsNonRoot: true                 # No root user
+  runAsUser: 101                     # nginx user
   seccompProfile:
-    type: RuntimeDefault             # 기본 seccomp 프로파일
+    type: RuntimeDefault             # Default seccomp profile
 ```
 
-### 리소스 요청
+### Resource Requests
 
 ```yaml
 resources:
   requests:
-    cpu: 100m      # 0.1 코어 보장
-    memory: 90Mi   # 90MB 보장
+    cpu: 100m      # Guarantees 0.1 core
+    memory: 90Mi   # Guarantees 90MB
 ```
 
-### 배포 전략
+### Deployment Strategy
 
 ```yaml
 strategy:
   rollingUpdate:
-    maxUnavailable: 1  # 최대 1 개 Pod 만 사용 불가
+    maxUnavailable: 1  # At most 1 Pod unavailable
   type: RollingUpdate
 ```
 
-### 종료 대기 시간
+### Termination Grace Period
 
 ```yaml
-terminationGracePeriodSeconds: 300  # 5 분
+terminationGracePeriodSeconds: 300  # 5 minutes
 ```
 
-- 긴 대기 시간: 기존 연결 처리 완료
+- Long grace period: lets in-flight connections finish
 
 ---
 
-## 9. Job (x2) - Webhook 인증서 생성
+## 9. Job (x2) - Webhook Certificate Creation
 
-### 9-1. 인증서 생성 Job
+### 9-1. Certificate Creation Job
 
 ```yaml
 apiVersion: batch/v1
@@ -735,28 +735,28 @@ spec:
       serviceAccountName: ingress-nginx-admission
 ```
 
-### 역할
+### Role
 
-- Webhook 인증서 자동 생성
-- Self-signed 인증서 생성
+- Automatically generates the webhook certificate
+- Generates a self-signed certificate
 
-### 생성되는 시크릿
+### Generated Secret
 
 ```yaml
-# ingress-nginx-admission 시크릿
+# ingress-nginx-admission Secret
 apiVersion: v1
 kind: Secret
 metadata:
   name: ingress-nginx-admission
 data:
-  ca.crt: <CA 인증서>
-  tls.crt: <서버 인증서>
-  tls.key: <서버 키>
+  ca.crt: <CA certificate>
+  tls.crt: <server certificate>
+  tls.key: <server key>
 ```
 
 ---
 
-### 9-2. Webhook 패치 Job
+### 9-2. Webhook Patch Job
 
 ```yaml
 apiVersion: batch/v1
@@ -781,22 +781,22 @@ spec:
       serviceAccountName: ingress-nginx-admission
 ```
 
-### 역할
+### Role
 
-- ValidatingWebhookConfiguration 업데이트
-- 생성된 인증서로 CA 번들 패치
+- Updates ValidatingWebhookConfiguration
+- Patches the CA bundle with the generated CA certificate
 
-### 패치 내용
+### Patch Content
 
 ```yaml
-# WebhookConfiguration 의 CABundle 업데이트
+# Update the CABundle of the WebhookConfiguration
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: ingress-nginx-admission
 webhooks:
 - clientConfig:
-    caBundle: <생성된 CA 인증서>
+    caBundle: <generated CA certificate>
 ```
 
 ---
@@ -812,22 +812,22 @@ spec:
   controller: k8s.io/ingress-nginx
 ```
 
-### 설명
+### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `name` | nginx | Ingress 클래스 이름 |
-| `controller` | k8s.io/ingress-nginx | 컨트롤러 식별자 |
+| `name` | nginx | Ingress class name |
+| `controller` | k8s.io/ingress-nginx | Controller identifier |
 
-### 역할
+### Role
 
-- Ingress 리소스와 컨트롤러 연결
-- 여러 Ingress 컨트롤러 공존 가능
+- Connects Ingress resources to the controller
+- Multiple Ingress controllers can coexist
 
-### 사용 예시
+### Usage Example
 
 ```yaml
-# Ingress 리소스에서 참조
+# Referenced in the Ingress resource
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -835,7 +835,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
-  ingressClassName: nginx  # ← 이 클래스 사용
+  ingressClassName: nginx  # ← uses this class
   rules:
   - host: myapp.example.com
     http:
@@ -877,27 +877,27 @@ webhooks:
   sideEffects: None
 ```
 
-### 설정 설명
+### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `admissionReviewVersions` | v1 | AdmissionReview 버전 |
-| `failurePolicy` | Fail | 검증 실패 시 요청 거부 |
-| `matchPolicy` | Equivalent | 동등한 리소스도 매칭 |
-| `sideEffects` | None | 사이드 이펙트 없음 |
+| `admissionReviewVersions` | v1 | AdmissionReview version |
+| `failurePolicy` | Fail | Reject the request if validation fails |
+| `matchPolicy` | Equivalent | Also match equivalent resources |
+| `sideEffects` | None | No side effects |
 
-### 검증 항목
+### Validation Items
 
-- Ingress 규칙 유효성 검사
-- 주석 (annotation) 검증
-- 경로 충돌 검사
-- TLS 설정 검증
+- Validates Ingress rule correctness
+- Validates annotations
+- Checks for path conflicts
+- Validates TLS settings
 
 ---
 
-## 리소스 관계도
+## Resource Relationship Diagram
 
-Ingress-NGINX를 구성하는 주요 리소스들과 그 관계입니다.
+The main resources that make up Ingress-NGINX and their relationships.
 
 ```mermaid
 graph TD
@@ -919,40 +919,40 @@ graph TD
     end
 ```
 
-| 구성 요소 | 주요 역할 |
+| Component | Main Role |
 |-----------|----------|
-| **Controller** | Ingress 리소스를 감시하고 NGINX 설정을 자동으로 생성/갱신 |
-| **IngressClass** | 클러스터 내 여러 Ingress 컨트롤러 중 nginx를 지정하기 위한 식별자 |
-| **Admission Webhook** | Ingress 리소스 생성/수정 시 문법적 오류가 없는지 사전 검증 |
-| **RBAC** | 컨트롤러가 클러스터 내 리소스(Ingress, Secret 등)를 읽을 수 있는 권한 부여 |
+| **Controller** | Watches Ingress resources and automatically generates/updates the NGINX configuration |
+| **IngressClass** | An identifier for selecting nginx among the multiple Ingress controllers in the cluster |
+| **Admission Webhook** | Pre-validates that there are no syntax errors when Ingress resources are created/modified |
+| **RBAC** | Grants the controller permission to read cluster resources (Ingress, Secret, etc.) |
 
 ---
 
-## 설치 확인
+## Verify the Installation
 
 ```bash
-# Ingress-NGINX 설치
+# Install Ingress-NGINX
 kubectl apply -f ingress-nginx.yaml
 
-# Pod 상태 확인
+# Check Pod status
 kubectl get pods -n ingress-nginx
 # NAME                                        READY   STATUS    RESTARTS   AGE
 # ingress-nginx-controller-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
 # ingress-nginx-admission-create-xxxxx        0/1     Completed 0          2m
 # ingress-nginx-admission-patch-xxxxx         0/1     Completed 0          2m
 
-# Service 확인
+# Check Service
 kubectl get svc -n ingress-nginx
 # NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)
 # ingress-nginx-controller             LoadBalancer   10.96.xxx.xxx  192.168.x.x   80:3xxxx/TCP,443:3xxxx/TCP
 # ingress-nginx-controller-admission   ClusterIP      10.96.xxx.xxx  <none>        443/TCP
 
-# IngressClass 확인
+# Check IngressClass
 kubectl get ingressclass
 # NAME    CONTROLLER                       AGE
 # nginx   k8s.io/ingress-nginx             2m
 
-# 테스트 Ingress 생성
+# Create a test Ingress
 cat <<EOF | kubectl apply -f -
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -973,7 +973,7 @@ spec:
             port: 80
 EOF
 
-# Ingress 확인
+# Check Ingress
 kubectl get ingress
 # NAME            CLASS   HOSTS             ADDRESS        PORTS   AGE
 # test-ingress    nginx   test.example.com  192.168.x.x    80      1m
@@ -981,9 +981,9 @@ kubectl get ingress
 
 ---
 
-## 요약
+## Summary
 
-| 카테고리 | 리소스 | 개수 |
+| Category | Resource | Count |
 |----------|--------|------|
 | **Namespace** | ingress-nginx | 1 |
 | **ServiceAccount** | controller, admission | 2 |
@@ -991,12 +991,12 @@ kubectl get ingress
 | **ClusterRole** | controller, admission | 2 |
 | **RoleBinding** | controller, admission | 2 |
 | **ClusterRoleBinding** | controller, admission | 2 |
-| **ConfigMap** | controller 설정 | 1 |
+| **ConfigMap** | controller configuration | 1 |
 | **Service** | controller, admission | 2 |
 | **Deployment** | controller | 1 |
 | **Job** | create, patch | 2 |
 | **IngressClass** | nginx | 1 |
 | **ValidatingWebhook** | admission | 1 |
-| **총계** | | **17** |
+| **Total** | | **17** |
 
-**Ingress-NGINX 는 Kubernetes Ingress 리소스를 구현하는 가장 널리 사용되는 컨트롤러입니다.**
+**Ingress-NGINX is the most widely used controller implementing the Kubernetes Ingress resource.**

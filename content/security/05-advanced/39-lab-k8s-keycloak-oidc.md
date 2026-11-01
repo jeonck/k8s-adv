@@ -1,50 +1,50 @@
 ---
-title: "API Server 에 Keycloak OIDC 설정 추가"
+title: "Adding Keycloak OIDC Configuration to the API Server"
 weight: 390
 slug: "39-lab-k8s-keycloak-oidc"
 ---
 
-Kubernetes API 서버를 외부 IAM 솔루션인 Keycloak과 연동하여 **OpenID Connect(OIDC)** 인증을 활성화하는 실습입니다.
+In this lab, you integrate the Kubernetes API server with Keycloak, an external IAM solution, to enable **OpenID Connect (OIDC)** authentication.
 
 ---
 
-## 실습 개요
+## Lab Overview
 
-본 실습에서는 API 서버가 Keycloak에서 발급한 ID Token을 신뢰하고, 이를 통해 사용자를 식별하도록 설정합니다.
+In this lab, you configure the API server to trust ID Tokens issued by Keycloak and to identify users through them.
 
-| 항목 | 상세 정보 | 비고 |
+| Item | Details | Notes |
 |------|-----------|------|
-| **Issuer URL** | `https://keycloak.example.com/auth/realms/edu` | 토큰 발급 기관 주소 |
-| **Client ID** | `kubernetes-cluster` | Keycloak에 등록된 클라이언트 ID |
-| **Username Claim** | `preferred_username` | 토큰 내 사용자 이름 필드 |
-| **Groups Claim** | `groups` | 토큰 내 그룹 정보 필드 |
+| **Issuer URL** | `https://keycloak.example.com/auth/realms/edu` | Address of the token issuer |
+| **Client ID** | `kubernetes-cluster` | Client ID registered in Keycloak |
+| **Username Claim** | `preferred_username` | Field for the user name in the token |
+| **Groups Claim** | `groups` | Field for group information in the token |
 
 ---
 
-## OIDC 연동 아키텍처
+## OIDC Integration Architecture
 
 ```mermaid
 sequenceDiagram
-    participant U as 사용자
+    participant U as User
     participant K as kubectl (oidc-login)
     participant KC as Keycloak IdP
     participant AS as API Server
     
-    U->>K: 1. 로그인 시도
-    K->>KC: 2. 인증 요청
-    KC-->>U: 3. 로그인 화면 (ID/PW 입력)
-    KC->>K: 4. ID Token 발급
-    K->>AS: 5. Token과 함께 요청 전송
-    Note over AS: 6. Issuer URL 접속하여 공개키 획득
-    Note over AS: 7. 공개키로 Token 서명 검증
-    AS-->>U: 8. 최종 승인 및 결과 반환
+    U->>K: 1. Attempt login
+    K->>KC: 2. Authentication request
+    KC-->>U: 3. Login screen (enter ID/PW)
+    KC->>K: 4. Issue ID Token
+    K->>AS: 5. Send request with Token
+    Note over AS: 6. Access the Issuer URL to obtain the public key
+    Note over AS: 7. Verify the Token signature with the public key
+    AS-->>U: 8. Final approval and return result
 ```
 
 ---
 
-## 1단계: API Server OIDC 옵션 추가
+## Step 1: Add OIDC Options to the API Server
 
-마스터 노드의 `kube-apiserver.yaml` 파일에 Keycloak 정보를 등록합니다.
+Register the Keycloak information in the `kube-apiserver.yaml` file on the master node.
 
 ```yaml
 # /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -53,19 +53,19 @@ spec:
   - command:
     - kube-apiserver
     ...
-    # OIDC 설정 추가
+    # Add OIDC settings
     - --oidc-issuer-url=https://keycloak.example.com/auth/realms/edu
     - --oidc-client-id=kubernetes-cluster
     - --oidc-username-claim=preferred_username
     - --oidc-groups-claim=groups
-    - --oidc-ca-file=/etc/kubernetes/pki/keycloak-ca.crt # Keycloak TLS 검증용
+    - --oidc-ca-file=/etc/kubernetes/pki/keycloak-ca.crt # For verifying Keycloak TLS
 ```
 
 ---
 
-## 2단계: RBAC 권한 매핑
+## Step 2: RBAC Permission Mapping
 
-Keycloak 사용자가 인증에 성공해도 권한이 없으면 작업을 수행할 수 없습니다. Keycloak의 그룹명을 기반으로 Kubernetes 권한을 할당합니다.
+Even if a Keycloak user authenticates successfully, they cannot perform any actions without permissions. Assign Kubernetes permissions based on Keycloak group names.
 
 ```yaml
 # keycloak-admin-binding.yaml
@@ -75,7 +75,7 @@ metadata:
   name: oidc-admin-group
 subjects:
 - kind: Group
-  name: "/kubernetes-admins" # Keycloak에서 전달받은 그룹명
+  name: "/kubernetes-admins" # Group name received from Keycloak
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
@@ -85,10 +85,10 @@ roleRef:
 
 ---
 
-## 주의사항
+## Cautions
 
-1.  **시간 동기화:** API 서버와 Keycloak 서버 간의 시간이 맞지 않으면 토큰의 `iat` 또는 `exp` 검증에서 실패할 수 있습니다. (NTP 필수)
-2.  **HTTPS 필수:** OIDC는 보안을 위해 반드시 HTTPS(TLS) 환경에서 동작해야 합니다.
-3.  **Client ID 확인:** Keycloak 설정의 `Client ID`와 API 서버의 `--oidc-client-id` 값이 정확히 일치해야 합니다.
+1.  **Time synchronization:** If the clocks of the API server and the Keycloak server do not match, validation of the token's `iat` or `exp` may fail. (NTP is required)
+2.  **HTTPS required:** For security, OIDC must operate in an HTTPS (TLS) environment.
+3.  **Verify the Client ID:** The `Client ID` in the Keycloak configuration must exactly match the API server's `--oidc-client-id` value.
 
-**Keycloak 연동을 완료하면 클러스터 내부의 개별 인증서 관리 부담에서 벗어나, 기업 차원의 중앙 집중식 계정 관리가 가능해집니다.**
+**Once the Keycloak integration is complete, you are freed from the burden of managing individual certificates inside the cluster and can manage accounts centrally at the enterprise level.**

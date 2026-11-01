@@ -1,30 +1,30 @@
 ---
-title: "Kubernetes 인증서 보관 위치"
+title: "Where Kubernetes Certificates Are Stored"
 weight: 230
 slug: "23-k8s-cert-file-locations"
 ---
 
-Kubernetes 클러스터에서 인증서가 저장되는 위치와 관리 방법을 알아봅니다.
+Learn where certificates are stored in a Kubernetes cluster and how to manage them.
 
 ---
 
-## 인증서 저장 위치 개요
+## Certificate Storage Locations Overview
 
-Kubernetes의 구성 요소들은 역할에 따라 서로 다른 위치에 인증서를 보관합니다.
+Kubernetes components store their certificates in different locations depending on their role.
 
-| 위치 | 경로 | 설명 |
+| Location | Path | Description |
 |------|------|------|
-| **Control Plane** | `/etc/kubernetes/pki/` | 마스터 노드의 핵심 인증서 보관 |
-| **Worker Node** | `/var/lib/kubelet/pki/` | kubelet용 클라이언트 인증서 보관 |
-| **etcd** | `/etc/kubernetes/pki/etcd/` | etcd 데이터베이스 보안을 위한 전용 인증서 |
-| **사용자** | `~/.kube/config` | kubectl 접속을 위한 인증 정보가 포함된 파일 |
-| **Pod** | `/var/run/secrets/kubernetes.io/serviceaccount/` | ServiceAccount 토큰 및 CA 인증서 |
+| **Control Plane** | `/etc/kubernetes/pki/` | Stores the core certificates of the master node |
+| **Worker Node** | `/var/lib/kubelet/pki/` | Stores the client certificates for the kubelet |
+| **etcd** | `/etc/kubernetes/pki/etcd/` | Dedicated certificates for securing the etcd database |
+| **User** | `~/.kube/config` | File containing the credentials for kubectl access |
+| **Pod** | `/var/run/secrets/kubernetes.io/serviceaccount/` | ServiceAccount token and CA certificate |
 
 ---
 
-## 1. 마스터 노드 인증서 상세 (`/etc/kubernetes/pki/`)
+## 1. Master Node Certificates in Detail (`/etc/kubernetes/pki/`)
 
-kubeadm으로 생성된 클러스터의 마스터 노드에는 다음과 같은 인증서 구조가 형성됩니다.
+On the master node of a cluster created with kubeadm, the following certificate structure is formed.
 
 ```mermaid
 graph TD
@@ -40,44 +40,44 @@ graph TD
     ETCD --> ES[server.crt / peer.crt<br/>etcd Server/Peer]
 ```
 
-### 주요 파일의 용도
+### Purpose of the Key Files
 
-| 파일명 | 용도 | 중요도 |
+| File name | Purpose | Importance |
 |--------|------|--------|
-| **ca.crt / ca.key** | 클러스터 전체의 신뢰 기점 (Root CA) | **최상 (절대 유출 금지)** |
-| **apiserver.crt / .key** | API 서버의 서버 인증서 | 상 |
-| **sa.pub / .key** | ServiceAccount 토큰 서명용 키 쌍 | 상 |
-| **etcd/ca.crt / .key** | etcd 클러스터 보안용 별도 CA | 상 |
+| **ca.crt / ca.key** | Trust anchor of the entire cluster (Root CA) | **Highest (never leak)** |
+| **apiserver.crt / .key** | Server certificate of the API server | High |
+| **sa.pub / .key** | Key pair for signing ServiceAccount tokens | High |
+| **etcd/ca.crt / .key** | Separate CA for securing the etcd cluster | High |
 
 ---
 
-## 2. 노드별 kubeconfig 파일 (`/etc/kubernetes/`)
+## 2. Per-Component kubeconfig Files (`/etc/kubernetes/`)
 
-컴포넌트들이 API 서버에 접속하기 위한 설정 파일(kubeconfig)들도 마스터 노드에 저장됩니다. 이 파일들 내부에는 인증서 정보가 Base64로 인코딩되어 포함되어 있습니다.
+The configuration files (kubeconfig) that components use to connect to the API server are also stored on the master node. These files contain certificate information encoded in Base64.
 
-- **admin.conf:** 클러스터 관리자용 (kubectl용)
-- **kubelet.conf:** kubelet이 API 서버에 접속할 때 사용
-- **controller-manager.conf:** controller-manager용
-- **scheduler.conf:** scheduler용
-
----
-
-## 3. 워커 노드 인증서 (`/var/lib/kubelet/pki/`)
-
-워커 노드에서는 kubelet이 API 서버와 안전하게 통신하기 위해 다음 파일들을 관리합니다.
-
-- **kubelet.crt / .key:** kubelet이 API 서버에 자신을 증명할 때 사용하는 인증서
-- **ca.crt:** API 서버의 인증서를 검증하기 위해 사용하는 Root CA 공개키
+- **admin.conf:** For the cluster administrator (for kubectl)
+- **kubelet.conf:** Used when the kubelet connects to the API server
+- **controller-manager.conf:** For the controller-manager
+- **scheduler.conf:** For the scheduler
 
 ---
 
-## 인증서 확인 팁
+## 3. Worker Node Certificates (`/var/lib/kubelet/pki/`)
 
-리눅스 시스템에서 특정 인증서 파일의 내용을 확인하려면 `openssl` 명령어를 사용합니다.
+On worker nodes, the kubelet manages the following files so that it can communicate securely with the API server.
+
+- **kubelet.crt / .key:** The certificate the kubelet uses to prove itself to the API server
+- **ca.crt:** The Root CA public key used to verify the API server's certificate
+
+---
+
+## Tips for Inspecting Certificates
+
+On a Linux system, use the `openssl` command to view the contents of a specific certificate file.
 
 ```bash
-# 인증서의 주체(Subject)와 만료일 확인
+# Check the certificate's Subject and expiration date
 openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout | grep -E "Subject:|Not After"
 ```
 
-**인증서 저장 위치를 정확히 알면 트러블슈팅 시 인증서 만료나 권한 문제를 빠르게 해결할 수 있습니다.**
+**Knowing exactly where certificates are stored lets you quickly resolve certificate expiration and permission issues when troubleshooting.**

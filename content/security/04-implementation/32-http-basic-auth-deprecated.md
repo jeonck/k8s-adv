@@ -4,59 +4,59 @@ weight: 320
 slug: "32-http-basic-auth-deprecated"
 ---
 
-HTTP 기본 인증 (Basic Auth)의 개념과 특징에 대해 알아봅니다.
+Learn about the concept and characteristics of HTTP Basic Authentication (Basic Auth).
 
 ---
 
-## HTTP Basic Authentication 이란?
+## What Is HTTP Basic Authentication?
 
-HTTP 기본 인증은 웹 브라우저나 클라이언트가 서버에 사용자 이름과 비밀번호를 전송하여 자신을 인증하는 가장 단순한 방식입니다.
+HTTP Basic Authentication is the simplest method by which a web browser or client authenticates itself by sending a username and password to a server.
 
-### 핵심 특징
+### Key Characteristics
 
-| 구분 | 내용 | 비고 |
+| Category | Details | Notes |
 |------|------|------|
-| **구성 요소** | 사용자명 (Username) + 비밀번호 (Password) | `:` 문자로 연결 |
-| **인코딩** | Base64 인코딩 | 암호화가 아닌 텍스트 변환임 |
-| **표준** | RFC 7617 | HTTP 표준 프로토콜 |
-| **상태** | **Kubernetes v1.19 이후 제거됨** | 보안상의 이유로 사용 비권장 |
+| **Components** | Username + Password | Joined with the `:` character |
+| **Encoding** | Base64 encoding | A text transformation, not encryption |
+| **Standard** | RFC 7617 | Standard HTTP protocol |
+| **Status** | **Removed after Kubernetes v1.19** | Not recommended for security reasons |
 
 ---
 
-## Basic Auth 동작 원리
+## How Basic Auth Works
 
-HTTP 프로토콜의 Challenge-Response 메커니즘을 사용하여 인증을 수행합니다.
+Authentication is performed using the Challenge-Response mechanism of the HTTP protocol.
 
 ```mermaid
 sequenceDiagram
-    participant C as 클라이언트
-    participant S as 서버
+    participant C as Client
+    participant S as Server
     
-    C->>S: 1. 리소스 요청 (인증 정보 없음)
-    S->>C: 2. 401 Unauthorized (WWW-Authenticate: Basic 헤더 포함)
-    Note over C: 사용자에게 ID/PW 입력창 표시
-    C->>S: 3. 인증 정보 포함 재요청 (Authorization: Basic base64(ID:PW))
-    Note over S: Base64 디코딩 후 신원 확인
-    S->>C: 4. 200 OK (인증 성공 및 리소스 반환)
+    C->>S: 1. Request resource (no credentials)
+    S->>C: 2. 401 Unauthorized (includes WWW-Authenticate: Basic header)
+    Note over C: Show ID/PW input prompt to the user
+    C->>S: 3. Re-request with credentials (Authorization: Basic base64(ID:PW))
+    Note over S: Decode Base64 and verify identity
+    S->>C: 4. 200 OK (authentication succeeded and resource returned)
 ```
 
 ---
 
-## 보안 취약점
+## Security Vulnerabilities
 
-1.  **암호화 부재:** Base64 인코딩은 누구나 쉽게 디코딩할 수 있으므로, 반드시 **HTTPS(TLS)**와 함께 사용해야 합니다. 평문 HTTP 환경에서 사용 시 네트워크 패킷 탈취만으로 비밀번호가 노출됩니다.
-2.  **로그아웃 어려움:** 브라우저가 인증 정보를 메모리에 유지하므로, 브라우저를 완전히 닫기 전까지는 로그아웃이 어렵습니다.
-3.  **관리의 어려움:** 사용자 정보를 서버 측에서 파일이나 DB로 직접 관리해야 하므로 대규모 환경에는 부적합합니다.
+1.  **No encryption:** Base64 encoding can be decoded easily by anyone, so it must be used together with **HTTPS (TLS)**. When used over plain HTTP, the password is exposed simply by capturing network packets.
+2.  **Difficult to log out:** Because the browser keeps the credentials in memory, logging out is difficult until the browser is completely closed.
+3.  **Difficult to manage:** User information has to be managed directly on the server side in files or a DB, which makes it unsuitable for large-scale environments.
 
 ---
 
-## Kubernetes 에서의 대체제
+## Alternatives in Kubernetes
 
-Kubernetes는 더 이상 Basic Auth를 지원하지 않으며, 다음과 같은 더 안전한 방식을 권장합니다.
+Kubernetes no longer supports Basic Auth and recommends the following more secure methods.
 
-- **X.509 Client Certificates:** 인증서 기반의 강력한 인증
-- **Bearer Tokens:** ServiceAccount 또는 정적 토큰 사용
-- **OIDC (OpenID Connect):** Google, Okta 등 외부 IDP 연동
-- **Webhook Token Authentication:** 외부 인증 서비스에 검증 위임
+- **X.509 Client Certificates:** Strong certificate-based authentication
+- **Bearer Tokens:** Use ServiceAccount or static tokens
+- **OIDC (OpenID Connect):** Integration with external IDPs such as Google and Okta
+- **Webhook Token Authentication:** Delegates verification to an external authentication service
 
-**기본 인증은 구조가 단순하여 이해하기 좋으나, 실무 환경(특히 Kubernetes)에서는 보안상의 이유로 더 현대적인 인증 방식을 사용해야 합니다.**
+**Basic authentication is easy to understand because of its simple structure, but in production environments (especially Kubernetes), more modern authentication methods should be used for security reasons.**

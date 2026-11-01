@@ -1,35 +1,35 @@
 ---
-title: "StatefulSet - Pet 적 특성을 가진 K8s 리소스"
+title: "StatefulSet - A K8s Resource with Pet-like Characteristics"
 weight: 90
 slug: "09-statefulset-pet"
 ---
 
-Kubernetes는 기본적으로 **Cattle(가축)** 철학을 따르지만, **StatefulSet**은 예외적으로 **Pet(애완동물)**에 가까운 특성을 가집니다.
+Kubernetes generally follows the **Cattle** philosophy, but **StatefulSet** is an exception, with characteristics closer to a **Pet**.
 
 ---
 
-## StatefulSet이 Pet인 이유
+## Why StatefulSet Is a Pet
 
-StatefulSet은 일반적인 Deployment와 달리 각 Pod가 고유한 정체성을 유지하도록 설계되었습니다.
+Unlike a typical Deployment, a StatefulSet is designed so that each Pod keeps its own unique identity.
 
-### 1. 고유하고 예측 가능한 식별자
+### 1. Unique and Predictable Identifiers
 
-| 구분 | Deployment (Cattle) | StatefulSet (Pet) |
+| Category | Deployment (Cattle) | StatefulSet (Pet) |
 |------|--------------------|-------------------|
-| **이름 규칙** | `web-abc12` (무작위 해시) | `mysql-0`, `mysql-1` (순차적 번호) |
-| **정체성** | 모든 Pod가 동일함 (교체 가능) | 각 Pod가 고유한 역할 보유 가능 |
-| **순서** | 병렬로 한꺼번에 생성/삭제 | 0번부터 순차적으로 생성, 역순으로 삭제 |
+| **Naming** | `web-abc12` (random hash) | `mysql-0`, `mysql-1` (sequential numbers) |
+| **Identity** | All Pods are identical (interchangeable) | Each Pod can have a unique role |
+| **Ordering** | Created/deleted all at once in parallel | Created sequentially from 0, deleted in reverse order |
 
-### 2. 안정적인 네트워크 ID (DNS)
+### 2. Stable Network ID (DNS)
 
-Deployment의 Pod는 삭제 후 재생성되면 이름이 바뀌어 통신 주소가 변경되지만, StatefulSet은 **재생성되어도 동일한 DNS 주소**를 유지합니다.
+When a Deployment's Pod is deleted and recreated, its name changes and so does its communication address. A StatefulSet, however, keeps the **same DNS address even after being recreated**.
 
-- **DNS 주소 형식:** `<Pod이름>.<서비스이름>.<네임스페이스>.svc.cluster.local`
-- **장점:** `mysql-1`이 죽었다 살아나도 다른 Pod들은 여전히 동일한 주소로 `mysql-1`을 찾을 수 있습니다.
+- **DNS address format:** `<Pod name>.<service name>.<namespace>.svc.cluster.local`
+- **Benefit:** Even if `mysql-1` dies and comes back, other Pods can still find `mysql-1` at the same address.
 
-### 3. 영구 저장소의 1:1 매칭
+### 3. 1:1 Matching of Persistent Storage
 
-각 Pod는 자신만의 전용 저장소(Persistent Volume)를 가지며, Pod가 재시작되어도 자신의 데이터를 그대로 유지합니다.
+Each Pod has its own dedicated storage (Persistent Volume), and keeps its data intact even when the Pod restarts.
 
 ```mermaid
 graph TD
@@ -44,37 +44,37 @@ graph TD
 
 ---
 
-## Pet vs Cattle vs StatefulSet 스펙트럼
+## The Pet vs Cattle vs StatefulSet Spectrum
 
-관리 철학의 차이를 시각화하면 다음과 같습니다.
+The difference in management philosophy can be visualized as follows.
 
 ```mermaid
 graph LR
-    Pet[Pure Pet<br/>전통적인 물리 서버] --- SS[StatefulSet<br/>K8s 상태 저장 리소스]
-    SS --- Cattle[Pure Cattle<br/>K8s 무상태 리소스]
+    Pet[Pure Pet<br/>Traditional physical server] --- SS[StatefulSet<br/>K8s stateful resource]
+    SS --- Cattle[Pure Cattle<br/>K8s stateless resource]
 
     subgraph Characteristics
     direction TB
-    C1[수동 관리 / 수리 중심]
-    C2[자동화 / 복구 중심]
-    C3[완전 자동화 / 교체 중심]
+    C1[Manual management / repair-oriented]
+    C2[Automation / recovery-oriented]
+    C3[Full automation / replacement-oriented]
     end
 ```
 
 ---
 
-## 주요 사용 사례
+## Main Use Cases
 
-1.  **데이터베이스 클러스터:** Master/Slave 구조가 명확해야 하는 MySQL, PostgreSQL 등
-2.  **분산 메시지 큐:** 노드 간의 ID가 중요한 Kafka, RabbitMQ 등
-3.  **분산 저장소:** 클러스터 구성 시 고정된 멤버 정보가 필요한 MongoDB, Cassandra 등
+1.  **Database clusters:** MySQL, PostgreSQL, etc., where a clear Master/Slave structure is required
+2.  **Distributed message queues:** Kafka, RabbitMQ, etc., where node IDs matter
+3.  **Distributed storage:** MongoDB, Cassandra, etc., which need fixed membership information when forming a cluster
 
 ---
 
-## 요약: StatefulSet의 핵심 가치
+## Summary: The Core Value of StatefulSet
 
-- **고유성:** 각 Pod는 0, 1, 2... 번호와 함께 고유한 정체성을 가짐
-- **안정성:** 재시작되어도 이름과 네트워크 주소가 변하지 않음
-- **영속성:** 전용 볼륨을 통해 데이터가 보존됨
+- **Uniqueness:** Each Pod has a unique identity, along with its number 0, 1, 2...
+- **Stability:** Its name and network address do not change even after a restart
+- **Persistence:** Data is preserved through its dedicated volume
 
-**StatefulSet은 "관리되는 Pet" 또는 "Cattle의 옷을 입은 Pet"이라 할 수 있으며, Kubernetes 환경에서 복잡한 상태 저장 애플리케이션을 운영할 수 있게 해주는 핵심 도구입니다.**
+**StatefulSet can be called a "managed Pet" or a "Pet in Cattle's clothing," and it is the key tool that makes it possible to run complex stateful applications in a Kubernetes environment.**

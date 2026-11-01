@@ -1,62 +1,62 @@
 ---
-title: "인증서 만료기간 확인 및 ConfigMap 정보"
+title: "Checking Certificate Expiration and ConfigMap Information"
 weight: 280
 slug: "28-cert-expiration-and-renew"
 ---
 
-Kubernetes 클러스터의 인증서 만료기간을 확인하고 `kubeadm-config` ConfigMap 정보를 알아봅니다.
+Check the certificate expiration dates of a Kubernetes cluster and learn about the `kubeadm-config` ConfigMap.
 
 ---
 
-## 인증서 만료기간 확인
+## Checking Certificate Expiration
 
-Kubernetes 클러스터 유지보수에서 가장 중요한 작업 중 하나는 인증서 만료일을 관리하는 것입니다.
+One of the most important tasks in maintaining a Kubernetes cluster is managing certificate expiration dates.
 
-### 만료 확인 명령어
+### Command to Check Expiration
 ```bash
 kubeadm certs check-expiration
 ```
 
-### 출력 필드 상세 설명
+### Output Fields in Detail
 
-| 필드명 | 설명 | 비고 |
+| Field | Description | Note |
 |--------|------|------|
-| **CERTIFICATE** | 확인 대상 인증서 이름 | 총 10여 개의 핵심 인증서 확인 |
-| **EXPIRES** | 인증서가 만료되는 정확한 날짜와 시간 | UTC 기준 |
-| **RESOLUTIONS** | 만료까지 남은 일수 (D-Day) | 30일 이내일 경우 주의 필요 |
-| **AVAILABLE CA** | 해당 인증서를 발급(서명)한 기관 | kubernetes-ca, etcd-ca 등 |
+| **CERTIFICATE** | Name of the certificate being checked | About 10 core certificates are checked in total |
+| **EXPIRES** | Exact date and time the certificate expires | In UTC |
+| **RESOLUTIONS** | Days remaining until expiration (D-Day) | Needs attention if within 30 days |
+| **AVAILABLE CA** | The authority that issued (signed) the certificate | kubernetes-ca, etcd-ca, etc. |
 
 ---
 
-## 주요 인증서별 역할 요약
+## Summary of Roles of Key Certificates
 
-| 인증서 이름 | 주요 역할 | 위치 |
+| Certificate name | Main role | Location |
 |-------------|-----------|------|
-| **admin.conf** | 클러스터 관리자(kubectl) 인증 정보 | `/etc/kubernetes/admin.conf` |
-| **apiserver** | API Server의 서버 신원 증명 | `/etc/kubernetes/pki/apiserver.crt` |
-| **etcd-server** | etcd 데이터베이스 서버 인증 | `/etc/kubernetes/pki/etcd/server.crt` |
-| **scheduler.conf** | 스케줄러가 API 서버에 접속할 때 사용 | `/etc/kubernetes/scheduler.conf` |
+| **admin.conf** | Credentials of the cluster administrator (kubectl) | `/etc/kubernetes/admin.conf` |
+| **apiserver** | Proves the server identity of the API Server | `/etc/kubernetes/pki/apiserver.crt` |
+| **etcd-server** | Authenticates the etcd database server | `/etc/kubernetes/pki/etcd/server.crt` |
+| **scheduler.conf** | Used when the scheduler connects to the API server | `/etc/kubernetes/scheduler.conf` |
 
 ---
 
-## 인증서 갱신 (Renew)
+## Certificate Renewal (Renew)
 
-만료가 임박한 인증서는 `kubeadm` 명령어로 간단히 갱신할 수 있습니다.
+Certificates that are about to expire can be renewed easily with the `kubeadm` command.
 
 ```mermaid
 flowchart LR
-    Check[만료 확인<br/>check-expiration] --> Decision{30일 미만?}
-    Decision -- Yes --> Renew[인증서 갱신<br/>certs renew all]
-    Renew --> Restart[컴포넌트 재시작<br/>Static Pod 자동 재시작]
-    Decision -- No --> Wait[정기 점검 대기]
+    Check[Check expiration<br/>check-expiration] --> Decision{Less than 30 days?}
+    Decision -- Yes --> Renew[Renew certificates<br/>certs renew all]
+    Renew --> Restart[Restart components<br/>Static Pods restart automatically]
+    Decision -- No --> Wait[Wait for next routine check]
 ```
 
-### 갱신 명령어 예시
+### Renewal Command Examples
 ```bash
-# 모든 인증서 일괄 갱신
+# Renew all certificates at once
 kubeadm certs renew all
 
-# 특정 인증서만 갱신 (예: apiserver)
+# Renew only a specific certificate (e.g., apiserver)
 kubeadm certs renew apiserver
 ```
 
@@ -64,11 +64,11 @@ kubeadm certs renew apiserver
 
 ## kubeadm-config ConfigMap
 
-`kubeadm`은 클러스터 초기화 시 사용된 설정 정보를 `kube-system` 네임스페이스의 ConfigMap에 저장해둡니다. 인증서 갱신 시 이 정보를 참조합니다.
+`kubeadm` stores the configuration used when initializing the cluster in a ConfigMap in the `kube-system` namespace. This information is referenced when renewing certificates.
 
 ```bash
-# 설정 정보 확인 명령어
+# Command to view the configuration
 kubectl -n kube-system get cm kubeadm-config -o yaml
 ```
 
-**인증서 만료는 클러스터 전체 중단(Outage)으로 이어질 수 있으므로, `check-expiration` 명령어를 통한 정기적인 점검이 필수적입니다.**
+**Certificate expiration can lead to a complete cluster outage, so regular checks with the `check-expiration` command are essential.**

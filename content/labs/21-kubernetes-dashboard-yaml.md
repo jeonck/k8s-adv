@@ -1,25 +1,25 @@
 ---
-title: "Kubernetes Dashboard YAML 분석"
+title: "Kubernetes Dashboard YAML Analysis"
 weight: 210
 slug: "21-kubernetes-dashboard-yaml"
 ---
 
-Kubernetes Dashboard 설치에 사용되는 YAML 파일을 분석합니다.
+We analyze the YAML file used to install the Kubernetes Dashboard.
 
-## 전체 구성
+## Overall Structure
 
 ```
-Dashboard 구성 리소스:
-1. Namespace                 - 전용 네임스페이스
-2. ServiceAccount            - Pod 의 신원
-3. Service (x2)              - 네트워크 엔드포인트
-4. Secret (x3)               - 인증서 및 CSRF 토큰
-5. ConfigMap                 - 설정 저장
-6. Role                      - 네임스페이스 권한
-7. ClusterRole               - 클러스터 권한
-8. RoleBinding               - 네임스페이스 권한 바인딩
-9. ClusterRoleBinding (x2)   - 클러스터 권한 바인딩
-10. Deployment (x2)          - Pod 배포
+Resources that make up the Dashboard:
+1. Namespace                 - Dedicated namespace
+2. ServiceAccount            - The Pod's identity
+3. Service (x2)              - Network endpoints
+4. Secret (x3)               - Certificates and CSRF token
+5. ConfigMap                 - Configuration storage
+6. Role                      - Namespace permissions
+7. ClusterRole               - Cluster permissions
+8. RoleBinding               - Namespace permission binding
+9. ClusterRoleBinding (x2)   - Cluster permission bindings
+10. Deployment (x2)          - Pod deployment
 ```
 
 ---
@@ -33,16 +33,16 @@ metadata:
   name: kubernetes-dashboard
 ```
 
-### 설명
+### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `name` | kubernetes-dashboard | Dashboard 전용 네임스페이스 |
+| `name` | kubernetes-dashboard | Dedicated namespace for the Dashboard |
 
-### 역할
+### Role
 
-- Dashboard 관련 리소스를 격리
-- 시스템 네임스페이스 (kube-system) 와 분리
+- Isolates Dashboard-related resources
+- Separates them from the system namespace (kube-system)
 
 ---
 
@@ -58,16 +58,16 @@ metadata:
   namespace: kubernetes-dashboard
 ```
 
-### 설명
+### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `name` | kubernetes-dashboard | ServiceAccount 이름 |
-| `namespace` | kubernetes-dashboard | Dashboard 네임스페이스 |
+| `name` | kubernetes-dashboard | ServiceAccount name |
+| `namespace` | kubernetes-dashboard | Dashboard namespace |
 
-### 역할
+### Role
 
-- Dashboard Pod 가 Kubernetes API 와 통신할 때 사용하는 신원
+- The identity the Dashboard Pod uses when communicating with the Kubernetes API
 
 ---
 
@@ -91,26 +91,26 @@ spec:
   type: NodePort
 ```
 
-### 설명
+### Description
 
-| 필드 | 값 | 설명 |
+| Field | Value | Description |
 |------|-----|------|
-| `port` | 443 | 서비스 포트 (HTTPS) |
-| `targetPort` | 8443 | 컨테이너 포트 |
-| `nodePort` | 30000 | 노드에서 노출되는 포트 |
-| `type` | NodePort | 노드 포트를 통한 외부 접근 |
+| `port` | 443 | Service port (HTTPS) |
+| `targetPort` | 8443 | Container port |
+| `nodePort` | 30000 | Port exposed on the node |
+| `type` | NodePort | External access through a node port |
 
-### 접속 URL
+### Access URL
 
 ```
-https://<노드 IP>:30000
+https://<node IP>:30000
 ```
 
 ---
 
 ## 4. Secret (x3)
 
-### 4-1. 인증서 저장소
+### 4-1. Certificate Store
 
 ```yaml
 apiVersion: v1
@@ -123,11 +123,11 @@ metadata:
 type: Opaque
 ```
 
-### 역할
+### Role
 
-- Dashboard HTTPS 인증서 저장
+- Stores the Dashboard HTTPS certificates
 
-### 4-2. CSRF 토큰
+### 4-2. CSRF Token
 
 ```yaml
 apiVersion: v1
@@ -142,11 +142,11 @@ data:
   csrf: ""
 ```
 
-### 역할
+### Role
 
-- Cross-Site Request Forgery 공격 방지 토큰
+- A token that protects against Cross-Site Request Forgery attacks
 
-### 4-3. 키 보관소
+### 4-3. Key Holder
 
 ```yaml
 apiVersion: v1
@@ -159,9 +159,9 @@ metadata:
 type: Opaque
 ```
 
-### 역할
+### Role
 
-- 암호화 키 보관
+- Holds encryption keys
 
 ---
 
@@ -177,10 +177,10 @@ metadata:
   namespace: kubernetes-dashboard
 ```
 
-### 역할
+### Role
 
-- Dashboard 설정 저장
-- 사용자 설정, 클러스터 정보 등
+- Stores Dashboard settings
+- User settings, cluster information, etc.
 
 ---
 
@@ -195,7 +195,7 @@ metadata:
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
 rules:
-  # Dashboard 전용 Secret 관리
+  # Manage the Dashboard's own Secrets
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames: ["kubernetes-dashboard-key-holder", 
@@ -203,13 +203,13 @@ rules:
                     "kubernetes-dashboard-csrf"]
     verbs: ["get", "update", "delete"]
     
-  # 설정 ConfigMap 관리
+  # Manage the settings ConfigMap
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ["kubernetes-dashboard-settings"]
     verbs: ["get", "update"]
     
-  # 메트릭 서비스 프록시
+  # Metrics service proxy
   - apiGroups: [""]
     resources: ["services"]
     resourceNames: ["heapster", "dashboard-metrics-scraper"]
@@ -223,11 +223,11 @@ rules:
     verbs: ["get"]
 ```
 
-### 권한 요약
+### Permission Summary
 
-| 리소스 | 리소스 이름 | 권한 |
+| Resource | Resource Names | Permissions |
 |--------|-------------|------|
-| Secrets | dashboard 관련 3 개 | get, update, delete |
+| Secrets | the 3 dashboard-related ones | get, update, delete |
 | ConfigMaps | settings | get, update |
 | Services | heapster, metrics-scraper | proxy |
 | Services/Proxy | heapster, metrics-scraper | get |
@@ -244,16 +244,16 @@ metadata:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
 rules:
-  # Metrics Server 에서 메트릭 조회
+  # Query metrics from the Metrics Server
   - apiGroups: ["metrics.k8s.io"]
     resources: ["pods", "nodes"]
     verbs: ["get", "list", "watch"]
 ```
 
-### 역할
+### Role
 
-- 클러스터 전체의 메트릭 조회 권한
-- `kubectl top` 과 동일한 메트릭 데이터 접근
+- Permission to query metrics across the entire cluster
+- Access to the same metrics data as `kubectl top`
 
 ---
 
@@ -277,15 +277,15 @@ subjects:
     namespace: kubernetes-dashboard
 ```
 
-### 역할
+### Role
 
-- Role 의 권한을 ServiceAccount 에 바인딩
+- Binds the Role's permissions to the ServiceAccount
 
 ---
 
 ## 9. ClusterRoleBinding (x2)
 
-### 9-1. 메트릭 조회 권한
+### 9-1. Metrics Query Permission
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -302,11 +302,11 @@ subjects:
     namespace: kubernetes-dashboard
 ```
 
-### 역할
+### Role
 
-- ClusterRole 의 메트릭 조회 권한 바인딩
+- Binds the ClusterRole's metrics query permission
 
-### 9-2. 관리자 권한 (중요!)
+### 9-2. Administrator Permission (Important!)
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -325,29 +325,29 @@ subjects:
   namespace: kubernetes-dashboard
 ```
 
-### ⚠️ 주의사항
+### ⚠️ Cautions
 
-| 항목 | 설명 |
+| Item | Description |
 |------|------|
 | `roleRef.name` | cluster-admin |
-| **권한** | **클러스터 전체 관리자 권한** |
-| **위험도** | **높음** |
+| **Permissions** | **Cluster-wide administrator permissions** |
+| **Risk level** | **High** |
 
-**이 ClusterRoleBinding 은 Dashboard 에 cluster-admin 권한을 부여합니다.**
+**This ClusterRoleBinding grants cluster-admin permissions to the Dashboard.**
 
-### 보안 고려사항
+### Security Considerations
 
 ```
-⚠️ 위험 요소:
-1. Dashboard 를 통한 클러스터 완전 제어 가능
-2. Dashboard 가 침해되면 클러스터 전체 침해
-3. 외부 노출 시 심각한 보안 문제
+⚠️ Risks:
+1. The cluster can be fully controlled through the Dashboard
+2. If the Dashboard is compromised, the entire cluster is compromised
+3. Serious security problems if exposed externally
 
-✅ 권장 사항:
-1. NodePort 대신 Ingress 사용
-2. 인증/인가 강화
-3. 네트워크 폴리시 적용
-4. cluster-admin 대신 최소 권한 원칙 적용
+✅ Recommendations:
+1. Use Ingress instead of NodePort
+2. Strengthen authentication/authorization
+3. Apply network policies
+4. Apply the principle of least privilege instead of cluster-admin
 ```
 
 ---
@@ -418,45 +418,45 @@ spec:
           effect: NoSchedule
 ```
 
-### 컨테이너 인수 (args)
+### Container Arguments (args)
 
-| 인수 | 설명 |
+| Argument | Description |
 |------|------|
-| `--auto-generate-certificates` | 자동 인증서 생성 |
-| `--namespace=kubernetes-dashboard` | 대상 네임스페이스 |
-| `--enable-skip-login` | 로그인 건너뛰기 버튼 표시 |
+| `--auto-generate-certificates` | Automatically generate certificates |
+| `--namespace=kubernetes-dashboard` | Target namespace |
+| `--enable-skip-login` | Show the skip-login button |
 
-### 프로브
+### Probes
 
 ```yaml
 livenessProbe:
   httpGet:
     scheme: HTTPS
-    path: /         # 루트 경로
+    path: /         # Root path
     port: 8443
-  initialDelaySeconds: 30  # 30 초 후 첫 확인
-  timeoutSeconds: 30       # 30 초 타임아웃
+  initialDelaySeconds: 30  # First check after 30 seconds
+  timeoutSeconds: 30       # 30-second timeout
 ```
 
-### 보안 컨텍스트
+### Security Context
 
 ```yaml
 securityContext:
-  allowPrivilegeEscalation: false  # 권한 상승 불가
-  readOnlyRootFilesystem: true     # 루트 파일시스템 읽기 전용
+  allowPrivilegeEscalation: false  # Privilege escalation not allowed
+  readOnlyRootFilesystem: true     # Root filesystem is read-only
   runAsUser: 1001                  # UID 1001
   runAsGroup: 2001                 # GID 2001
 ```
 
-### 볼륨
+### Volumes
 
 ```yaml
 volumes:
   - name: kubernetes-dashboard-certs
     secret:
-      secretName: kubernetes-dashboard-certs  # 인증서
+      secretName: kubernetes-dashboard-certs  # Certificates
   - name: tmp-volume
-    emptyDir: {}                              # 임시 디렉토리
+    emptyDir: {}                              # Temporary directory
 ```
 
 ---
@@ -479,9 +479,9 @@ spec:
     k8s-app: dashboard-metrics-scraper
 ```
 
-### 역할
+### Role
 
-- Metrics Scraper 에 대한 내부 서비스 엔드포인트
+- Internal Service endpoint for the Metrics Scraper
 
 ---
 
@@ -529,14 +529,14 @@ spec:
           emptyDir: {}
 ```
 
-### 역할
+### Role
 
-- Metric Server 에서 메트릭 데이터를 가져와 Dashboard 에 제공
-- 메트릭 데이터 캐싱 및 가공
+- Fetches metrics data from the Metrics Server and provides it to the Dashboard
+- Caches and processes metrics data
 
 ---
 
-## Dashboard 관리자 사용자 생성
+## Creating a Dashboard Admin User
 
 ```yaml
 # dashboard-adminuser.yaml
@@ -560,20 +560,20 @@ subjects:
   namespace: kubernetes-dashboard
 ```
 
-### 토큰 발급
+### Issuing a Token
 
 ```bash
-# 토큰 생성
+# Create a token
 kubectl -n kubernetes-dashboard create token admin-user
 
-# 출력된 토큰을 Dashboard 로그인에 사용
+# Use the printed token to log in to the Dashboard
 ```
 
 ---
 
-## 리소스 관계도
+## Resource Relationship Diagram
 
-Kubernetes Dashboard를 구성하는 주요 리소스들의 구조입니다.
+This is the structure of the main resources that make up the Kubernetes Dashboard.
 
 ```mermaid
 graph TD
@@ -600,57 +600,57 @@ graph TD
     DEP2 -- "Collect" --> MS[Metric Server]
 ```
 
-| 구성 요소 | 주요 역할 |
+| Component | Main Role |
 |-----------|----------|
-| **Dashboard UI** | 웹 기반의 클러스터 관리 인터페이스 제공 |
-| **Metrics Scraper** | Metric Server로부터 데이터를 가져와 차트용 데이터 가공 |
-| **ServiceAccount** | 대시보드 프로세스가 API 서버에 접근하기 위한 신분증 |
-| **Secrets** | HTTPS 통신을 위한 인증서 및 보안 토큰(CSRF) 저장 |
+| **Dashboard UI** | Provides a web-based cluster management interface |
+| **Metrics Scraper** | Fetches data from the Metric Server and processes it into chart data |
+| **ServiceAccount** | The ID the dashboard process uses to access the API server |
+| **Secrets** | Store certificates for HTTPS communication and the security token (CSRF) |
 
 ---
 
-## 설치 확인
+## Verifying the Installation
 
 ```bash
-# Dashboard 설치
+# Install the Dashboard
 kubectl apply -f kubernetes-dashboard.yaml
 kubectl apply -f dashboard-adminuser.yaml
 
-# Pod 상태 확인
+# Check Pod status
 kubectl get pods -n kubernetes-dashboard
 # NAME                                  READY   STATUS    RESTARTS   AGE
 # kubernetes-dashboard-xxxxxxxxx-xxxx   1/1     Running   0          1m
 # dashboard-metrics-scraper-xxxx-xxx    1/1     Running   0          1m
 
-# Service 상태 확인
+# Check Service status
 kubectl get svc -n kubernetes-dashboard
 # NAME                        TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
 # kubernetes-dashboard        NodePort   10.96.xxx.xxx  <none>        443:30000/TCP    1m
 # dashboard-metrics-scraper   ClusterIP  10.96.xxx.xxx  <none>        8000/TCP         1m
 
-# 토큰 발급
+# Issue a token
 kubectl -n kubernetes-dashboard create token admin-user
 
-# 접속
-# https://<노드 IP>:30000
+# Access
+# https://<node IP>:30000
 ```
 
 ---
 
-## 요약
+## Summary
 
-| 리소스 | 개수 | 용도 |
+| Resource | Count | Purpose |
 |--------|------|------|
-| Namespace | 1 | 전용 네임스페이스 |
-| ServiceAccount | 1 | Pod 신원 |
-| Service | 2 | 네트워크 엔드포인트 |
-| Secret | 3 | 인증서, CSRF, 키 |
-| ConfigMap | 1 | 설정 저장 |
-| Role | 1 | 네임스페이스 권한 |
-| ClusterRole | 1 | 클러스터 권한 |
-| RoleBinding | 1 | 네임스페이스 바인딩 |
-| ClusterRoleBinding | 2 | 클러스터 바인딩 |
-| Deployment | 2 | Pod 배포 |
-| **총계** | **15** | |
+| Namespace | 1 | Dedicated namespace |
+| ServiceAccount | 1 | Pod identity |
+| Service | 2 | Network endpoints |
+| Secret | 3 | Certificates, CSRF, keys |
+| ConfigMap | 1 | Configuration storage |
+| Role | 1 | Namespace permissions |
+| ClusterRole | 1 | Cluster permissions |
+| RoleBinding | 1 | Namespace binding |
+| ClusterRoleBinding | 2 | Cluster bindings |
+| Deployment | 2 | Pod deployment |
+| **Total** | **15** | |
 
-**Kubernetes Dashboard 는 웹 기반 UI 를 제공하며, cluster-admin 권한 부여 시 보안 주의가 필요합니다.**
+**The Kubernetes Dashboard provides a web-based UI, and you need to be careful about security when granting it cluster-admin permissions.**

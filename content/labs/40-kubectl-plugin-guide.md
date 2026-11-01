@@ -1,31 +1,31 @@
 ---
-title: "kubectl plugin 개발 가이드"
+title: "kubectl Plugin Development Guide"
 weight: 400
 slug: "40-kubectl-plugin-guide"
 ---
 
-kubectl plugin은 kubectl 명령어를 사용자의 입맛에 맞게 확장하는 가장 쉬운 방법입니다.
+A kubectl plugin is the easiest way to extend kubectl commands to suit your own needs.
 
 ---
 
-## kubectl plugin 이란?
+## What Is a kubectl Plugin?
 
-kubectl plugin은 `kubectl`의 하위 명령어로 작동하는 독립적인 실행 파일입니다. 이를 통해 복잡한 명령어를 단순화하거나 클러스터 관리에 필요한 커스텀 도구를 만들 수 있습니다.
+A kubectl plugin is a standalone executable file that works as a subcommand of `kubectl`. With plugins you can simplify complex commands or build custom tools for cluster management.
 
-### 주요 특징
+### Key Characteristics
 
-| 항목 | 내용 | 비고 |
+| Item | Description | Note |
 |------|------|------|
-| **명명 규칙** | `kubectl-<plugin-name>` 형식을 따라야 함 | 필수 |
-| **파일 위치** | 사용자의 `$PATH` 환경 변수에 등록된 경로 | 필수 |
-| **실행 방식** | `kubectl <plugin-name>`으로 호출 | - |
-| **개발 언어** | 실행 가능한 파일이라면 어떤 언어든 가능 (Bash, Go, Python 등) | 유연성 |
+| **Naming convention** | Must follow the `kubectl-<plugin-name>` format | Required |
+| **File location** | A path registered in the user's `$PATH` environment variable | Required |
+| **How it runs** | Invoked as `kubectl <plugin-name>` | - |
+| **Language** | Any language works as long as the file is executable (Bash, Go, Python, etc.) | Flexibility |
 
 ---
 
-## plugin 명령어 규칙
+## Plugin Command Rules
 
-사용자가 터미널에서 입력하는 명령어와 실제 파일명의 관계를 시각화하면 다음과 같습니다.
+The relationship between the command a user types in the terminal and the actual file name looks like this.
 
 ```mermaid
 graph LR
@@ -40,43 +40,43 @@ graph LR
 
 ---
 
-## 1단계: 가장 간단한 plugin 제작 (Bash)
+## Step 1: Building the Simplest Plugin (Bash)
 
-### 1. 스크립트 작성
-인사를 건네는 아주 단순한 플러그인을 만들어 봅니다.
+### 1. Write the script
+Let's create a very simple plugin that says hello.
 
 ```bash
-# /usr/local/bin/kubectl-hello 파일 생성
+# Create the /usr/local/bin/kubectl-hello file
 cat <<'EOF' > /usr/local/bin/kubectl-hello
 #!/bin/bash
 echo "Hello! This is a custom kubectl plugin."
 EOF
 ```
 
-### 2. 권한 부여 및 확인
+### 2. Grant permission and verify
 ```bash
-# 실행 권한 부여
+# Grant execute permission
 chmod +x /usr/local/bin/kubectl-hello
 
-# 설치된 플러그인 목록 확인
+# List installed plugins
 kubectl plugin list
 ```
 
-### 3. 사용
+### 3. Usage
 ```bash
 kubectl hello
-# 출력: Hello! This is a custom kubectl plugin.
+# Output: Hello! This is a custom kubectl plugin.
 ```
 
 ---
 
-## 2단계: 실무형 plugin 예시 (네임스페이스 전환)
+## Step 2: A Practical Plugin Example (Namespace Switching)
 
-실제로 자주 쓰이는 네임스페이스 전환 도구를 Bash로 구현한 예시입니다.
+This is an example that implements, in Bash, a frequently used namespace switching tool.
 
 ```bash
 #!/bin/bash
-# 파일명: kubectl-ns
+# File name: kubectl-ns
 if [ -z "$1" ]; then
   kubectl config view --minify | grep namespace
 else
@@ -87,11 +87,11 @@ fi
 
 ---
 
-## 핵심 요약
+## Key Takeaways
 
-1.  **규칙:** 파일명은 반드시 `kubectl-`로 시작해야 합니다.
-2.  **배포:** 파일을 `$PATH` 경로에 복사하고 `chmod +x`로 실행 권한을 주면 설치가 끝납니다.
-3.  **관리:** `kubectl plugin list` 명령어로 현재 사용 가능한 플러그인들을 한눈에 볼 수 있습니다.
-4.  **추천 도구:** 더 많은 플러그인을 쉽게 관리하려면 플러그인 매니저인 **Krew**를 사용하세요.
+1.  **Rule:** The file name must always start with `kubectl-`.
+2.  **Distribution:** Copy the file into a `$PATH` directory and give it execute permission with `chmod +x`, and the installation is done.
+3.  **Management:** The `kubectl plugin list` command shows all currently available plugins at a glance.
+4.  **Recommended tool:** To manage more plugins easily, use the plugin manager **Krew**.
 
-**플러그인을 활용하면 반복되는 복잡한 kubectl 옵션들을 자신만의 단축 명령어로 만들어 업무 효율을 극대화할 수 있습니다.**
+**With plugins, you can turn repetitive, complex kubectl options into your own shortcut commands and greatly improve your productivity.**

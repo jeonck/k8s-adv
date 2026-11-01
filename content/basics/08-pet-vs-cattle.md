@@ -1,64 +1,64 @@
 ---
-title: "Pet vs Cattle: 클라우드 인프라의 철학"
+title: "Pet vs Cattle: The Philosophy of Cloud Infrastructure"
 weight: 80
 slug: "08-pet-vs-cattle"
 ---
 
-클라우드 네이티브 환경과 Kubernetes의 핵심 설계 사상을 이해하기 위한 **Pet(애완동물)**과 **Cattle(가축)** 비유에 대해 알아봅니다.
+Let's look at the **Pet** and **Cattle** analogy, which helps explain the core design philosophy of cloud-native environments and Kubernetes.
 
 ---
 
-## 1. 핵심 개념 비교
+## 1. Comparing the Core Concepts
 
-이 비유는 서버를 어떻게 대하고 관리하느냐에 대한 철학적 차이를 나타냅니다.
+This analogy expresses a philosophical difference in how you treat and manage servers.
 
-| 구분 | Pet (애완동물) | Cattle (가축) |
+| Category | Pet | Cattle |
 |------|----------------|---------------|
-| **정체성** | 고유한 이름 부여 (예: Zeus, Athena) | 번호 부여 (예: node-01, node-02) |
-| **장애 대응** | 아프면 수리하고 정성껏 복구함 | 아프면 즉시 교체하고 새로 생성함 |
-| **관리 방식** | 수동 설정, 개별 관리 | 자동화된 프로비저닝, 대량 관리 |
-| **의존성** | 서버 하나가 죽으면 서비스 중단 위험 | 하나가 죽어도 다른 개체가 즉시 대체 |
-| **비유 인프라** | 전통적인 물리 서버, Mainframe | **Kubernetes, 클라우드 인스턴스** |
+| **Identity** | Given a unique name (e.g., Zeus, Athena) | Given a number (e.g., node-01, node-02) |
+| **Failure response** | When sick, it is repaired and nursed back carefully | When sick, it is replaced immediately with a newly created one |
+| **Management style** | Manual configuration, managed individually | Automated provisioning, managed in bulk |
+| **Dependency** | If one server dies, the service is at risk of an outage | Even if one dies, another instance takes over immediately |
+| **Typical infrastructure** | Traditional physical servers, Mainframe | **Kubernetes, cloud instances** |
 
 ---
 
-## 2. 관리 철학의 변화
+## 2. The Shift in Management Philosophy
 
 ```mermaid
 graph LR
-    Pet[Pet 시대<br/>유일무이한 서버] -- "철학의 변화" --> Cattle[Cattle 시대<br/>교체 가능한 리소스]
+    Pet[Pet Era<br/>One-of-a-kind servers] -- "Shift in philosophy" --> Cattle[Cattle Era<br/>Replaceable resources]
 
     subgraph Pet_Style
-    P1[수동 패치]
-    P2[고유 IP 고수]
-    P3[장기 생존]
+    P1[Manual patching]
+    P2[Clinging to unique IPs]
+    P3[Long-lived]
     end
 
     subgraph Cattle_Style
-    C1[자동 배포]
-    C2[일시적 IP/이름]
-    C3[언제든 소멸 가능]
+    C1[Automated deployment]
+    C2[Ephemeral IPs/names]
+    C3[Can disappear at any time]
     end
 ```
 
 ---
 
-## 3. Kubernetes 가 Cattle 을 구현하는 방법
+## 3. How Kubernetes Implements Cattle
 
-Kubernetes는 다음과 같은 리소스를 통해 '가축' 방식의 관리를 자동화합니다.
+Kubernetes automates 'cattle'-style management through the following resources.
 
-- **Deployment:** Pod가 죽으면 묻지도 따지지도 않고 새 Pod를 즉시 생성하여 개수를 유지합니다.
-- **Service:** Pod의 IP가 계속 바뀌어도(가축의 교체), 클라이언트는 하나의 고정된 이름으로 서비스에 접근할 수 있게 합니다.
-- **Auto-scaling:** 트래픽이 많아지면 가축의 수를 늘리고, 줄어들면 다시 줄입니다.
+- **Deployment:** When a Pod dies, it creates a new Pod immediately, no questions asked, to maintain the replica count.
+- **Service:** Even as Pod IPs keep changing (the cattle being replaced), clients can reach the service through a single fixed name.
+- **Auto-scaling:** When traffic grows, it increases the number of cattle; when traffic drops, it reduces them again.
 
 ---
 
-## 4. 요약
+## 4. Summary
 
-| 항목 | Pet (애완동물) | Cattle (가축) |
+| Item | Pet | Cattle |
 |------|---------------|---------------|
-| **가치** | 개별 개체가 중요 | 전체 서비스 집합이 중요 |
-| **복구** | "살려내야 한다" | "새로 뽑아야 한다" |
-| **확장성** | 수직 확장 (Scale-up) | 수평 확장 (Scale-out) |
+| **Value** | Each individual matters | The service as a whole matters |
+| **Recovery** | "We have to bring it back to life" | "We have to spin up a new one" |
+| **Scalability** | Vertical scaling (Scale-up) | Horizontal scaling (Scale-out) |
 
-**현대적인 클라우드 운영의 목표는 모든 인프라를 '가축'처럼 다루어, 장애에 유연하고 확장이 자유로운 시스템을 구축하는 것입니다.**
+**The goal of modern cloud operations is to treat all infrastructure like 'cattle', building systems that are resilient to failure and free to scale.**

@@ -1,35 +1,35 @@
 ---
-title: "실습 환경 구성"
+title: "Lab Environment Setup"
 weight: 100
 slug: "10-lab-environment"
 ---
 
-## AWS EC2 인스턴스
+## AWS EC2 Instances
 
-- **사용자:** 루트 사용자 (root)
-- **리전:** 서울 리전 (ap-northeast-2)
+- **User:** Root user (root)
+- **Region:** Seoul region (ap-northeast-2)
 - **VPC:** default VPC
 - **Security Group:** default Security Group
 
-## EC2 인스턴스 스펙
+## EC2 Instance Specs
 
-| 인스턴스명 | vCPU | Memory |
+| Instance name | vCPU | Memory |
 |------------|------|--------|
 | k8s-cp | 2 | 8 GB |
 | k8s-w1 | 2 | 4 GB |
 | k8s-w2 | 2 | 4 GB |
 
-## 액세스 키 발급
+## Issuing an Access Key
 
-"root 사용자" 액세스 키 발급이 필요합니다.
+You need to issue an access key for the "root user".
 
 ---
 
-## 테라폼을 이용한 AWS 리소스 생성
+## Creating AWS Resources with Terraform
 
-### variables.tf 파일 수정
+### Edit the variables.tf File
 
-파일 위치: `<실습홈>/lab-setup`
+File location: `<lab-home>/lab-setup`
 
 ```hcl
 variable "aws_region" {
@@ -44,68 +44,68 @@ variable "secret_key" {
   default = ""
 }
 
-# 기업환경에서 여러 IAM 계정을 이용할 때 본인 ID 입력
-# 개인 AWS 계정을 사용할때는 비워 놓으면 됨
+# When using multiple IAM accounts in a corporate environment, enter your own ID
+# Leave it empty when using a personal AWS account
 variable "identity" {
   default = ""
 }
 ```
 
-### SSH Key-Pair 생성
+### Generate an SSH Key Pair
 
 ```bash
-[<실습홈>/lab-setup]$ ssh-keygen -t rsa -f edukey -N ""
+[<lab-home>/lab-setup]$ ssh-keygen -t rsa -f edukey -N ""
 ```
 
-### EC2 리소스 생성
+### Create the EC2 Resources
 
 ```bash
-[<실습홈>/lab-setup]$ terraform apply --auto-approve
+[<lab-home>/lab-setup]$ terraform apply --auto-approve
 ```
 
-### MobaXterm 을 이용한 SSH 접속
+### SSH Connection with MobaXterm
 
-Private key(`edukey`) 를 이용하여 접속합니다.
+Connect using the private key (`edukey`).
 
 ---
 
-## 실습환경 준비
+## Preparing the Lab Environment
 
-### Cloud-init 완료 확인
+### Verify Cloud-init Completion
 
 ```bash
 [root@k8s-cp ~]# tail -f /var/log/cloud-init-output.log
 Cloud-init v. 24.4-7.el9.0.1 finished at Sat, 21 Feb 2026 04:30:39 +0000. Datasource DataSourceEc2Local. Up 176.70 seconds
 ```
 
-### 실습파일 압축 해제
+### Extract the Lab Files
 
 ```bash
 [root@k8s-cp ~]# tar xf lab.tar
 ```
 
-### Private Key 권한 설정
+### Set Private Key Permissions
 
 ```bash
 [root@k8s-cp ~]# chmod 400 ~/.ssh/id_rsa
 ```
 
-### k8s-w1 SSH 접속 확인
+### Verify SSH Access to k8s-w1
 
 ```bash
 [root@k8s-cp ~]# ssh k8s-w1
-...(생략)...
+...(omitted)...
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 [root@k8s-w1 ~]# exit
 logout
 Connection to k8s-w1 closed.
 ```
 
-### k8s-w2 SSH 접속 확인
+### Verify SSH Access to k8s-w2
 
 ```bash
 [root@k8s-cp ~]# ssh k8s-w2
-...(생략)...
+...(omitted)...
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 [root@k8s-w2 ~]# exit
 logout
@@ -114,9 +114,9 @@ Connection to k8s-w2 closed.
 
 ---
 
-## Worker Node 를 클러스터에 조인
+## Join the Worker Nodes to the Cluster
 
-### 클러스터 노드 정보 확인 및 Calico CNI 구성
+### Check Cluster Node Information and Configure the Calico CNI
 
 ```bash
 [root@k8s-cp ~]# kubectl get no
@@ -128,7 +128,7 @@ k8s-cp   NotReady   control-plane   6m12s v1.34.3
 [root@k8s-cp ~]# kubectl apply -f calico_v3.31.3.yaml
 ```
 
-### 조인 명령어 생성
+### Generate the Join Command
 
 ```bash
 [root@k8s-cp ~]# kubeadm token create --print-join-command
@@ -136,27 +136,27 @@ kubeadm join 172.31.1.10:6443 --token njseik.wna0odfa83txmr2l \
   --discovery-token-ca-cert-hash sha256:ce6b8504ea710f82aeea8bf3acadd82df870544134de6de1339f19a446c03a1f
 ```
 
-### k8s-w1 에서 조인 수행
+### Perform the Join on k8s-w1
 
 ```bash
 [root@k8s-cp ~]# ssh k8s-w1
 [root@k8s-w1 ~]# kubeadm join 172.31.1.10:6443 --token njseik.wna0odfa83txmr2l \
   --discovery-token-ca-cert-hash sha256:ce6b8504ea710f82aeea8bf3acadd82df870544134de6de1339f19a446c03a1f
-...(생략)...
+...(omitted)...
 [root@k8s-w1 ~]# exit
 ```
 
-### k8s-w2 에서 조인 수행
+### Perform the Join on k8s-w2
 
 ```bash
 [root@k8s-cp ~]# ssh k8s-w2
 [root@k8s-w2 ~]# kubeadm join 172.31.1.10:6443 --token njseik.wna0odfa83txmr2l \
   --discovery-token-ca-cert-hash sha256:ce6b8504ea710f82aeea8bf3acadd82df870544134de6de1339f19a446c03a1f
-...(생략)...
+...(omitted)...
 [root@k8s-w2 ~]# exit
 ```
 
-### 클러스터 노드 정보 확인
+### Check Cluster Node Information
 
 ```bash
 [root@k8s-cp ~]# kubectl get no

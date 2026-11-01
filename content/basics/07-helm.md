@@ -1,35 +1,35 @@
 ---
-title: "Helm - Kubernetes 패키지 관리자"
+title: "Helm - The Kubernetes Package Manager"
 weight: 70
 slug: "07-helm"
 ---
 
-Helm은 Kubernetes 애플리케이션을 정의하고, 설치하고, 업그레이드하기 위한 **패키지 관리자**입니다.
+Helm is a **package manager** for defining, installing, and upgrading Kubernetes applications.
 
 ---
 
-## 1. Helm 이란?
+## 1. What Is Helm?
 
-Helm은 복잡한 Kubernetes 리소스들을 하나의 패키지(Chart)로 묶어서 관리할 수 있게 해주는 도구입니다. 리눅스의 `apt`나 `yum`, Node.js의 `npm`과 유사한 역할을 합니다.
+Helm is a tool that lets you bundle complex Kubernetes resources into a single package (Chart) and manage them together. It plays a role similar to `apt` or `yum` on Linux, or `npm` for Node.js.
 
-### 주요 핵심 개념
+### Key Concepts
 
-| 용어 | 설명 | 비고 |
-|------|------|------|
-| **Chart** | Helm의 패키지 단위 | 템플릿, 설정 파일 모음 |
-| **Release** | 클러스터에 설치된 Chart 인스턴스 | 동일 Chart를 여러 번 설치 가능 |
-| **Repository** | Chart들이 저장되어 있는 서버 | Artifact Hub 등 |
-| **Values** | 사용자가 주입하는 동적 설정값 | `values.yaml` |
+| Term | Description | Notes |
+|------|-------------|-------|
+| **Chart** | Helm's packaging unit | A collection of templates and configuration files |
+| **Release** | A Chart instance installed in the cluster | The same Chart can be installed multiple times |
+| **Repository** | A server where Charts are stored | Artifact Hub, etc. |
+| **Values** | Dynamic settings injected by the user | `values.yaml` |
 
 ---
 
-## 2. Helm 동작 아키텍처
+## 2. Helm Architecture
 
-Helm CLI를 통해 원격 저장소에서 차트를 가져와 클러스터에 배포하는 흐름입니다.
+This is the flow in which the Helm CLI fetches a chart from a remote repository and deploys it to the cluster.
 
 ```mermaid
 graph LR
-    User[사용자 / Helm CLI] -- "1. helm install" --> Cluster[Kubernetes Cluster]
+    User[User / Helm CLI] -- "1. helm install" --> Cluster[Kubernetes Cluster]
     Repo[(Chart Repository)] -- "2. Fetch Chart" --> User
     User -- "3. Render Templates" --> Cluster
     Cluster -- "4. Create Objects" --> Release[Release Instance]
@@ -37,42 +37,42 @@ graph LR
 
 ---
 
-## 3. Chart 디렉토리 구조
+## 3. Chart Directory Structure
 
-Helm 차트는 다음과 같은 표준화된 디렉토리 구조를 가집니다.
+A Helm chart has the following standardized directory structure.
 
 ```text
 my-chart/
-├── Chart.yaml          # 차트 정보 (이름, 버전 등)
-├── values.yaml         # 기본 설정값
-├── charts/             # 의존성이 있는 서브 차트들
-├── templates/          # K8s 매니페스트 템플릿
+├── Chart.yaml          # Chart metadata (name, version, etc.)
+├── values.yaml         # Default configuration values
+├── charts/             # Sub-charts for dependencies
+├── templates/          # K8s manifest templates
 │   ├── deployment.yaml
 │   ├── service.yaml
-│   └── _helpers.tpl    # 공통 템플릿 함수
-└── README.md           # 도움말
+│   └── _helpers.tpl    # Common template functions
+└── README.md           # Help documentation
 ```
 
 ---
 
-## 4. 주요 명령어 요약
+## 4. Key Commands Summary
 
-### 설치 및 관리
-- **저장소 등록:** `helm repo add <이름> <URL>`
-- **차트 검색:** `helm search repo <검색어>`
-- **차트 설치:** `helm install <릴리스명> <차트명>`
-- **릴리스 조회:** `helm list`
-- **릴리스 업그레이드:** `helm upgrade <릴리스명> <차트명>`
-- **릴리스 롤백:** `helm rollback <릴리스명> <버전>`
-- **릴리스 삭제:** `helm uninstall <릴리스명>`
+### Install and Manage
+- **Add a repository:** `helm repo add <name> <URL>`
+- **Search for charts:** `helm search repo <keyword>`
+- **Install a chart:** `helm install <release-name> <chart-name>`
+- **List releases:** `helm list`
+- **Upgrade a release:** `helm upgrade <release-name> <chart-name>`
+- **Roll back a release:** `helm rollback <release-name> <revision>`
+- **Delete a release:** `helm uninstall <release-name>`
 
 ---
 
-## 5. Helm 사용의 이점
+## 5. Benefits of Using Helm
 
-1.  **템플릿화:** YAML 파일에 변수(`{{ .Values.name }}`)를 사용하여 환경(Dev/Prod)별로 다른 설정을 쉽게 적용할 수 있습니다.
-2.  **버전 관리:** 배포 단위로 버전이 관리되어 장애 발생 시 즉각적인 **롤백**이 가능합니다.
-3.  **의존성 해결:** 복잡한 앱에 필요한 여러 오픈소스(DB, Redis 등)를 서브 차트로 간단히 통합할 수 있습니다.
-4.  **표준화:** 사내 배포 규격을 차트 형태로 공유하여 팀 간 배포 일관성을 유지할 수 있습니다.
+1.  **Templating:** By using variables (`{{ .Values.name }}`) in YAML files, you can easily apply different settings per environment (Dev/Prod).
+2.  **Version management:** Versions are tracked per deployment, so an immediate **rollback** is possible when a failure occurs.
+3.  **Dependency resolution:** You can easily integrate the open-source components a complex app needs (DB, Redis, etc.) as sub-charts.
+4.  **Standardization:** By sharing internal deployment standards in the form of charts, you can keep deployments consistent across teams.
 
-**Helm은 현대적인 Kubernetes 운영에서 CI/CD 파이프라인의 핵심 도구로 자리 잡고 있습니다.**
+**Helm has become a core tool in the CI/CD pipelines of modern Kubernetes operations.**

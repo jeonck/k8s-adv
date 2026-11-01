@@ -1,29 +1,29 @@
 ---
-title: "Use Case 7. pod.yaml 파일 구조 분석"
+title: "Use Case 7. Analyzing the pod.yaml File Structure"
 weight: 520
 slug: "52-uc-pod-yaml-structure"
 ---
 
-> 📎 참고 자료: <https://lnkd.in/gVRYM78g>
+> 📎 Reference: <https://lnkd.in/gVRYM78g>
 
-모든 Kubernetes 매니페스트의 기본이 되는 Pod 정의를 필드별로 나누어 살펴봅니다.
+We break down the Pod definition, the foundation of every Kubernetes manifest, field by field.
 
 ---
 
-## 1. 4개의 최상위 필드
+## 1. The Four Top-Level Fields
 
-| 필드 | 설명 |
+| Field | Description |
 |------|------|
-| `apiVersion` | 사용할 API 그룹/버전 (Pod 는 `v1`) |
-| `kind` | 오브젝트 종류 (`Pod`) |
-| `metadata` | 이름, 네임스페이스, 레이블, 어노테이션 |
-| `spec` | 원하는 상태(Desired State). **가장 중요한 영역** |
+| `apiVersion` | The API group/version to use (`v1` for a Pod) |
+| `kind` | The object type (`Pod`) |
+| `metadata` | Name, namespace, labels, annotations |
+| `spec` | The Desired State. **The most important area** |
 
-> `status` 는 클러스터가 채우는 필드이므로 직접 작성하지 않습니다.
+> `status` is filled in by the cluster, so you do not write it yourself.
 
 ---
 
-## 2. 전체 예제
+## 2. Full Example
 
 ```yaml
 apiVersion: v1
@@ -80,7 +80,7 @@ spec:
 
 ---
 
-## 3. 구조 한눈에 보기
+## 3. The Structure at a Glance
 
 ```mermaid
 graph TD
@@ -93,7 +93,7 @@ graph TD
     S --> IC[initContainers]
     S --> C[containers]
     S --> V[volumes]
-    S --> SC[스케줄링: nodeSelector, affinity, tolerations]
+    S --> SC[Scheduling: nodeSelector, affinity, tolerations]
     S --> POL[restartPolicy / serviceAccountName / securityContext]
     C --> C1[image / command / args]
     C --> C2[ports / env]
@@ -104,27 +104,27 @@ graph TD
 
 ---
 
-## 4. 주요 필드 해설
+## 4. Key Fields Explained
 
-| 필드 | 포인트 |
+| Field | Key Point |
 |------|--------|
-| `labels` | Service·Deployment 의 selector 가 Pod 를 찾는 기준 |
-| `initContainers` | 메인 컨테이너 전에 **순차** 실행되며, 모두 성공해야 시작 |
-| `resources.requests` | 스케줄링 기준값 / `limits` 는 실행 중 상한 (QoS 클래스 결정) |
-| `readinessProbe` | 실패 시 Service 엔드포인트에서 제외 |
-| `livenessProbe` | 실패 시 컨테이너 재시작 |
-| `restartPolicy` | `Always`(기본) / `OnFailure` / `Never` |
-| `volumes` + `volumeMounts` | 볼륨 선언은 Pod 레벨, 마운트는 컨테이너 레벨 |
+| `labels` | The criteria Service and Deployment selectors use to find Pods |
+| `initContainers` | Run **sequentially** before the main containers, and all must succeed before they start |
+| `resources.requests` | The baseline value for scheduling / `limits` is the upper bound while running (determines the QoS class) |
+| `readinessProbe` | On failure, the Pod is removed from the Service endpoints |
+| `livenessProbe` | On failure, the container is restarted |
+| `restartPolicy` | `Always` (default) / `OnFailure` / `Never` |
+| `volumes` + `volumeMounts` | Volumes are declared at the Pod level, mounts at the container level |
 
 ---
 
-## 5. 실무 팁
+## 5. Practical Tips
 
 ```bash
-kubectl run web-pod --image=nginx --dry-run=client -o yaml > pod.yaml   # 템플릿 생성
-kubectl explain pod.spec.containers.resources                          # 필드 문서 확인
-kubectl apply -f pod.yaml --dry-run=server                              # 서버 측 검증
+kubectl run web-pod --image=nginx --dry-run=client -o yaml > pod.yaml   # Generate a template
+kubectl explain pod.spec.containers.resources                          # Check field documentation
+kubectl apply -f pod.yaml --dry-run=server                              # Server-side validation
 ```
 
-- 실제 운영에서는 Pod 를 직접 만들기보다 **Deployment / StatefulSet** 의 `template` 안에 같은 구조로 정의합니다.
-- 필드 위치를 헷갈리면 `kubectl explain` 이 가장 정확한 레퍼런스입니다.
+- In real operations, rather than creating Pods directly, you define the same structure inside the `template` of a **Deployment / StatefulSet**.
+- If you get confused about where a field goes, `kubectl explain` is the most accurate reference.
