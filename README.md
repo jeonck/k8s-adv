@@ -9,6 +9,13 @@ hugo server        # http://localhost:1313
 hugo --minify      # public/ 에 정적 사이트 생성
 ```
 
+## 배포 / 커스텀 도메인
+
+- 배포: `main` 에 push 하면 GitHub Actions(`.github/workflows/hugo.yml`)가 빌드하여 GitHub Pages 로 배포합니다.
+- 주소: <https://k8s-adv.metacog.co.kr/> (영어 기본, 한국어 `/ko/`)
+- 도메인 설정: `static/CNAME`, `hugo.toml` 의 `baseURL`, 워크플로의 `--baseURL` 이 같은 도메인을 가리킵니다. 도메인을 바꿀 때는 세 곳과 GitHub 저장소 **Settings → Pages → Custom domain** 을 함께 수정하세요.
+- DNS: `k8s-adv.metacog.co.kr` 의 CNAME 레코드가 `<계정명>.github.io` 를 가리켜야 합니다.
+
 ## 디렉토리 구조
 
 ```
