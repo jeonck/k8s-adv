@@ -19,7 +19,7 @@ Going beyond simple usage, this course covers the essential topics for becoming 
 | **Stage 5** | **Certificates in Practice** | Checking API server certificate expiration, renewing certificates with kubeadm, managing authentication files | 23-k8s-cert-file-locations, 28-cert-expiration-and-renew |
 | **Stage 6** | **Extension & Operator** | CustomResourceDefinition (CRD) design, developing Operators and the reconcile loop | 42-crd-guide, 43-operator-development, 44-operator-and-cr-relationship |
 | **Stage 7** | **Hands-on Add-on Labs** | Ingress, MetalLB LoadBalancer, NFS Provisioner, Prometheus/Grafana | 22-metallb-yaml, 23-ingress-nginx-yaml, 45-prometheus-grafana-operator-install |
-| **Stage 8** | **Use Cases (Operations/Troubleshooting)** | ResourceQuota, Pod deletion process, Node NotReady, ImagePullBackOff, architecture, DaemonSet failures, pod.yaml structure | 46-uc-resource-quota ~ 52-uc-pod-yaml-structure |
+| **Stage 8** | **Use Cases (Operations/Troubleshooting)** | ResourceQuota, Pod deletion process, Node NotReady, Node DiskPressure, CreateContainerError, CreateContainerConfigError, ImagePullBackOff, RunContainerError, OOMKilled, architecture, DaemonSet failures, pod.yaml structure | 46-uc-resource-quota ~ 57-uc-oomkilled |
 
 ---
 

@@ -87,3 +87,5 @@ kubectl get nodes -w
 ```
 
 > 복구가 불가능하면 `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data` 후 노드를 교체하세요.
+
+> 🔗 **관련 문서:** Node 상태가 `Ready=False` 가 아니라 `DiskPressure` 라면 Use Case 8 (Node Disk Pressure) 을 참고하세요.

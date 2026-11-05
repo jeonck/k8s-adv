@@ -161,3 +161,5 @@ crictl pull --platform linux/arm64 registry.example.com/team/app:1.0.0   # 노�
 - 태그는 불변 버전 또는 digest(`@sha256:...`)를 사용
 - `imagePullPolicy` 의미 확인: `IfNotPresent` / `Always` / `Never`
 - 사설 레지스트리 secret 은 네임스페이스마다 필요 (ServiceAccount 에 `imagePullSecrets` 연결 가능)
+
+> 🔗 **관련 문서:** 이미지를 받은 뒤에도 컨테이너 시작 단계에서 실패할 수 있습니다. Use Case 9 (CreateContainerError), Use Case 10 (CreateContainerConfigError), Use Case 11 (RunContainerError) 를 참고하세요.

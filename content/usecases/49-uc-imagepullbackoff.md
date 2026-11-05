@@ -161,3 +161,5 @@ crictl pull --platform linux/arm64 registry.example.com/team/app:1.0.0   # Repro
 - Use immutable version tags or a digest (`@sha256:...`)
 - Understand how `imagePullPolicy` works: `IfNotPresent` / `Always` / `Never`
 - The registry Secret must exist in every Namespace that pulls from the private registry (you can attach `imagePullSecrets` to a ServiceAccount)
+
+> 🔗 **Related:** After the image is pulled, container start-up can still fail. See Use Case 9 (CreateContainerError), Use Case 10 (CreateContainerConfigError), and Use Case 11 (RunContainerError).

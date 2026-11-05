@@ -87,3 +87,5 @@ kubectl get nodes -w
 ```
 
 > If the Node cannot be recovered, run `kubectl drain <node> --ignore-daemonsets --delete-emptydir-data` and then replace the Node.
+
+> 🔗 **Related:** If the Node condition is `DiskPressure` rather than `Ready=False`, see Use Case 8 (Node Disk Pressure).
